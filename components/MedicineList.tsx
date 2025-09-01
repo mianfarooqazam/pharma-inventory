@@ -19,7 +19,7 @@ import { AddMedicineDialog } from './AddMedicineDialog';
 import { EditMedicineDialog } from './EditMedicineDialog';
 
 export function MedicineList() {
-  const { medicines, deleteMedicine, getMedicineStock } = useInventory();
+  const { medicines, deleteMedicine, batches } = useInventory();
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingMedicine, setEditingMedicine] = useState<string | null>(null);
@@ -30,15 +30,7 @@ export function MedicineList() {
     medicine.manufacturer.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getStockStatus = (medicine: any) => {
-    const actualStock = getMedicineStock(medicine.id);
-    if (actualStock <= medicine.minStockLevel) {
-      return { label: 'Low Stock', variant: 'destructive' as const };
-    } else if (actualStock <= medicine.minStockLevel * 1.5) {
-      return { label: 'Medium', variant: 'secondary' as const };
-    }
-    return { label: 'In Stock', variant: 'default' as const };
-  };
+
 
   return (
     <div className="space-y-6">
@@ -75,44 +67,45 @@ export function MedicineList() {
           {/* Medicine Table */}
           <div className="border rounded-lg">
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Medicine</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Manufacturer</TableHead>
-                  <TableHead>Strength</TableHead>
-                  <TableHead>Stock Status</TableHead>
-                  <TableHead>Current Stock</TableHead>
-                  <TableHead>Expected Price</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+                             <TableHeader>
+                 <TableRow>
+                   <TableHead>Sr No</TableHead>
+                   <TableHead>Medicine</TableHead>
+                   <TableHead>Category</TableHead>
+                   <TableHead>Manufacturer</TableHead>
+                   <TableHead>Strength</TableHead>
+                   <TableHead>Batch Number</TableHead>
+                   <TableHead>Purchase Price</TableHead>
+                   <TableHead>Expected Sell Price</TableHead>
+                   <TableHead>Actions</TableHead>
+                 </TableRow>
+               </TableHeader>
               <TableBody>
-                {filteredMedicines.map((medicine) => {
-                  const stockStatus = getStockStatus(medicine);
-                  const actualStock = getMedicineStock(medicine.id);
-                  
-                  return (
-                    <TableRow key={medicine.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{medicine.name}</p>
-                          <p className="text-sm text-gray-500">{medicine.unit}</p>
-                        </div>
-                      </TableCell>
+                                 {filteredMedicines.map((medicine, index) => {
+                   const medicineBatches = batches.filter(batch => batch.medicineId === medicine.id);
+                   const latestBatch = medicineBatches.length > 0 ? medicineBatches[0] : null;
+                   
+                   return (
+                     <TableRow key={medicine.id}>
+                       <TableCell className="text-center font-medium">
+                         {index + 1}
+                       </TableCell>
+                       <TableCell>
+                         <div>
+                           <p className="font-medium">{medicine.name}</p>
+                           <p className="text-sm text-gray-500">{medicine.unit}</p>
+                         </div>
+                       </TableCell>
                       <TableCell>{medicine.category}</TableCell>
                       <TableCell>{medicine.manufacturer}</TableCell>
                       <TableCell>{medicine.strength}</TableCell>
                       <TableCell>
-                        <Badge variant={stockStatus.variant}>
-                          {stockStatus.label}
-                        </Badge>
+                        {latestBatch ? latestBatch.batchNumber : 'N/A'}
                       </TableCell>
-                      <TableCell>
-                        <span className="font-medium">{actualStock}</span>
-                        <span className="text-gray-500 text-sm"> / {medicine.minStockLevel} min</span>
-                      </TableCell>
-                      <TableCell>PKR {medicine.price.toFixed(2)}</TableCell>
+                                             <TableCell>
+                         {latestBatch ? `PKR ${latestBatch.costPrice.toFixed(2)}` : 'N/A'}
+                       </TableCell>
+                       <TableCell>PKR {medicine.price.toFixed(2)}</TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
                           <Button
