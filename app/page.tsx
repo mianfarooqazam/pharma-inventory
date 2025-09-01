@@ -41,15 +41,8 @@ function AppContent() {
       <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
       
       
-      <main className="container mx-auto px-4 py-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Medicine Inventory Management
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Welcome back, {user?.name} ({user?.role})
-          </p>
-        </div>
+      <main className="container mx-auto px-4 py-6 pt-24">
+      
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsContent value="dashboard">
