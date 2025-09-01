@@ -82,14 +82,7 @@ export function LoginForm() {
             </Button>
           </form>
 
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm font-medium text-gray-700 mb-2">Demo Accounts:</p>
-            <div className="space-y-1 text-xs text-gray-600">
-              <p><strong>Admin:</strong> admin@pharmacy.com / password123</p>
-              <p><strong>Pharmacist:</strong> pharmacist@pharmacy.com / password123</p>
-              <p><strong>Auditor:</strong> auditor@pharmacy.com / password123</p>
-            </div>
-          </div>
+
         </CardContent>
       </Card>
     </div>

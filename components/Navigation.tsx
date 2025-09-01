@@ -58,9 +58,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
     { id: "dashboard", label: "Dashboard", icon: BarChart3 },
     { id: "medicines", label: "Medicines", icon: Package },
     { id: "stock", label: "Stock Operations", icon: Activity },
-    ...(user?.role === "Admin"
-      ? [{ id: "users", label: "User Management", icon: Users }]
-      : []),
+    { id: "users", label: "User Management", icon: Users },
   ];
 
   return (

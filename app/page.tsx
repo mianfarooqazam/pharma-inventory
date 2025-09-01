@@ -57,11 +57,9 @@ function AppContent() {
             <StockOperations />
           </TabsContent>
           
-          {user?.role === 'Admin' && (
-            <TabsContent value="users">
-              <UserManagement />
-            </TabsContent>
-          )}
+          <TabsContent value="users">
+            <UserManagement />
+          </TabsContent>
         </Tabs>
       </main>
     </div>
