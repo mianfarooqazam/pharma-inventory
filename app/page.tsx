@@ -20,7 +20,7 @@ import {
 import { Dashboard } from '@/components/Dashboard';
 import { MedicineList } from '@/components/MedicineList';
 import { StockOperations } from '@/components/StockOperations';
-import { UserManagement } from '@/components/UserManagement';
+import { RevenueProfit } from '@/components/RevenueProfit';
 import { Navigation } from '@/components/Navigation';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { InventoryProvider } from '@/contexts/InventoryContext';
@@ -58,7 +58,7 @@ function AppContent() {
           </TabsContent>
           
           <TabsContent value="users">
-            <UserManagement />
+            <RevenueProfit />
           </TabsContent>
         </Tabs>
       </main>
