@@ -10,7 +10,7 @@ import { SaleForm } from './SaleForm';
 import { ReturnForm } from './ReturnForm';
 import { TransactionHistory } from './TransactionHistory';
 
-export function StockOperations() {
+export function PurchaseAndSell() {
   const [activeOperation, setActiveOperation] = useState('purchase');
 
   return (
@@ -19,25 +19,37 @@ export function StockOperations() {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Activity className="h-5 w-5" />
-            <span>Stock Operations</span>
+            <span>Purchase & Sell</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs value={activeOperation} onValueChange={setActiveOperation}>
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="purchase" className="flex items-center space-x-2">
+              <TabsTrigger 
+                value="purchase" 
+                className="flex items-center space-x-2 data-[state=active]:bg-black data-[state=active]:text-white"
+              >
                 <Package className="h-4 w-4" />
                 <span>Purchase</span>
               </TabsTrigger>
-              <TabsTrigger value="sale" className="flex items-center space-x-2">
+              <TabsTrigger 
+                value="sale" 
+                className="flex items-center space-x-2 data-[state=active]:bg-black data-[state=active]:text-white"
+              >
                 <ShoppingCart className="h-4 w-4" />
                 <span>Sale</span>
               </TabsTrigger>
-              <TabsTrigger value="return" className="flex items-center space-x-2">
+              <TabsTrigger 
+                value="return" 
+                className="flex items-center space-x-2 data-[state=active]:bg-black data-[state=active]:text-white"
+              >
                 <RotateCcw className="h-4 w-4" />
                 <span>Return</span>
               </TabsTrigger>
-              <TabsTrigger value="history" className="flex items-center space-x-2">
+              <TabsTrigger 
+                value="history" 
+                className="flex items-center space-x-2 data-[state=active]:bg-black data-[state=active]:text-white"
+              >
                 <History className="h-4 w-4" />
                 <span>History</span>
               </TabsTrigger>

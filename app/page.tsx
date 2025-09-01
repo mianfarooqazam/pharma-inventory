@@ -20,7 +20,7 @@ import {
 import { Dashboard } from '@/components/Dashboard';
 import { MedicineList } from '@/components/MedicineList';
 import { Inventory } from '@/components/Inventory';
-import { StockOperations } from '@/components/StockOperations';
+import { PurchaseAndSell } from '@/components/PurchaseAndSell';
 import { RestockingForm } from '@/components/RestockingForm';
 import { RevenueProfit } from '@/components/RevenueProfit';
 import { Navigation } from '@/components/Navigation';
@@ -59,8 +59,8 @@ function AppContent() {
             <Inventory />
           </TabsContent>
           
-          <TabsContent value="stock">
-            <StockOperations />
+          <TabsContent value="purchase-and-sell">
+            <PurchaseAndSell />
           </TabsContent>
           
           <TabsContent value="restocking">
