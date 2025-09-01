@@ -23,6 +23,37 @@ export function Dashboard() {
     getExpiringBatches 
   } = useInventory();
 
+  // Helper functions for card styling
+  const getGradientClass = (title: string) => {
+    switch (title) {
+      case 'Total Medicines':
+        return 'bg-blue-600';
+      case 'Total Stock':
+        return 'bg-green-600';
+      case 'Stock Value':
+        return 'bg-purple-600';
+      case 'Monthly Profit':
+        return 'bg-emerald-600';
+      default:
+        return 'bg-gray-600';
+    }
+  };
+
+  const getIconBgClass = (title: string) => {
+    switch (title) {
+      case 'Total Medicines':
+        return 'bg-blue-100';
+      case 'Total Stock':
+        return 'bg-green-100';
+      case 'Stock Value':
+        return 'bg-purple-100';
+      case 'Monthly Profit':
+        return 'bg-emerald-100';
+      default:
+        return 'bg-gray-100';
+    }
+  };
+
   const lowStockMedicines = getLowStockMedicines();
   const expiringBatches = getExpiringBatches(30);
   
@@ -75,18 +106,25 @@ export function Dashboard() {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title} className="hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
+            <Card key={stat.title} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden relative">
+              {/* Background Color */}
+              <div className={`absolute inset-0 ${getGradientClass(stat.title)} opacity-20 transition-all duration-300`} />
+              
+              {/* Icon Background */}
+              <div className={`absolute top-4 right-4 p-3 rounded-full ${getIconBgClass(stat.title)} opacity-30 transition-all duration-300`}>
+                <Icon className={`h-6 w-6 ${stat.color}`} />
+              </div>
+              
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                <CardTitle className="text-sm font-medium text-gray-700">
                   {stat.title}
                 </CardTitle>
-                <Icon className={`h-5 w-5 ${stat.color}`} />
               </CardHeader>
-              <CardContent>
-                <div className={`text-2xl font-bold ${stat.color}`}>
+              <CardContent className="relative z-10">
+                <div className={`text-3xl font-bold ${stat.color} mb-2`}>
                   {stat.value}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-600 font-medium">
                   {stat.description}
                 </p>
               </CardContent>
