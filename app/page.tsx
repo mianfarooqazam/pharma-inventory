@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Dashboard } from '@/components/Dashboard';
 import { MedicineList } from '@/components/MedicineList';
+import { Inventory } from '@/components/Inventory';
 import { StockOperations } from '@/components/StockOperations';
 import { RevenueProfit } from '@/components/RevenueProfit';
 import { Navigation } from '@/components/Navigation';
@@ -51,6 +52,10 @@ function AppContent() {
           
           <TabsContent value="medicines">
             <MedicineList />
+          </TabsContent>
+          
+          <TabsContent value="inventory">
+            <Inventory />
           </TabsContent>
           
           <TabsContent value="stock">
