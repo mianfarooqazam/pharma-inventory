@@ -15,6 +15,7 @@ export function SaleForm() {
   const { addNotification } = useNotifications();
   const [formData, setFormData] = useState({
     medicineId: '',
+    batchId: '',
     quantity: '',
     actualSellingPrice: '',
     notes: '',
@@ -23,12 +24,16 @@ export function SaleForm() {
   const selectedMedicine = medicines.find(m => m.id === formData.medicineId);
   const availableStock = selectedMedicine ? getMedicineStock(selectedMedicine.id) : 0;
 
-  // Get the oldest batch for FIFO logic
-  const getOldestBatch = (medicineId: string) => {
+  // Get available batches for the selected medicine, sorted by expiry date (earliest first)
+  const getAvailableBatches = (medicineId: string) => {
     return batches
       .filter(b => b.medicineId === medicineId && b.quantity > 0)
-      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())[0];
+      .sort((a, b) => a.expiryDate.getTime() - b.expiryDate.getTime());
   };
+
+  const availableBatches = getAvailableBatches(formData.medicineId);
+  const selectedBatch = batches.find(b => b.id === formData.batchId);
+  const batchStock = selectedBatch ? selectedBatch.quantity : 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,22 +41,21 @@ export function SaleForm() {
     if (!selectedMedicine) return;
     
     const quantity = parseInt(formData.quantity);
-    const oldestBatch = getOldestBatch(formData.medicineId);
     
-    if (!oldestBatch) {
+    if (!formData.batchId) {
       addNotification({
         type: 'error',
         title: 'Sale Failed',
-        message: 'No available batches for this medicine',
+        message: 'Please select a batch to sell from',
       });
       return;
     }
 
-    if (quantity > availableStock) {
+    if (quantity > batchStock) {
       addNotification({
         type: 'error',
         title: 'Insufficient Stock',
-        message: `Only ${availableStock} units available`,
+        message: `Only ${batchStock} units available in selected batch`,
       });
       return;
     }
@@ -59,7 +63,7 @@ export function SaleForm() {
     // Record sale transaction with actual selling price
     addTransaction({
       medicineId: formData.medicineId,
-      batchId: oldestBatch.id,
+      batchId: formData.batchId,
       type: 'sale',
       quantity: quantity,
       unitPrice: parseFloat(formData.actualSellingPrice),
@@ -77,6 +81,7 @@ export function SaleForm() {
     // Reset form
     setFormData({
       medicineId: '',
+      batchId: '',
       quantity: '',
       actualSellingPrice: '',
       notes: '',
@@ -117,6 +122,35 @@ export function SaleForm() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="batch">Batch/Expiry *</Label>
+              <Select value={formData.batchId} onValueChange={(value) => handleInputChange('batchId', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select batch" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableBatches.map((batch) => (
+                    <SelectItem key={batch.id} value={batch.id}>
+                      <div className="flex items-center justify-between w-full">
+                        <span>Batch: {batch.batchNumber}</span>
+                        <span className="text-sm text-gray-500">
+                          Expires: {batch.expiryDate.toLocaleDateString()}
+                        </span>
+                        <Badge variant="outline" className="ml-2">
+                          {batch.quantity} units
+                        </Badge>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {availableBatches.length === 0 && selectedMedicine && (
+                <p className="text-sm text-red-500">
+                  No available batches for this medicine
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="quantity">Quantity *</Label>
               <Input
                 id="quantity"
@@ -124,12 +158,12 @@ export function SaleForm() {
                 value={formData.quantity}
                 onChange={(e) => handleInputChange('quantity', e.target.value)}
                 placeholder="Enter quantity"
-                max={availableStock}
+                max={batchStock}
                 required
               />
-              {selectedMedicine && (
+              {selectedBatch && (
                 <p className="text-sm text-gray-500">
-                  Available: {availableStock} units
+                  Available in selected batch: {batchStock} units
                 </p>
               )}
             </div>
@@ -205,7 +239,7 @@ export function SaleForm() {
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button type="submit" disabled={!formData.medicineId || !formData.quantity || !formData.actualSellingPrice}>
+            <Button type="submit" disabled={!formData.medicineId || !formData.batchId || !formData.quantity || !formData.actualSellingPrice}>
               Record Sale
             </Button>
           </div>

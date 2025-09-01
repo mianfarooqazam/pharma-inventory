@@ -44,7 +44,7 @@ interface InventoryContextType {
   medicines: Medicine[];
   batches: Batch[];
   transactions: StockTransaction[];
-  addMedicine: (medicine: Omit<Medicine, 'id' | 'createdAt'>) => void;
+  addMedicine: (medicine: Omit<Medicine, 'id' | 'createdAt'>) => Medicine;
   updateMedicine: (id: string, medicine: Partial<Medicine>) => void;
   deleteMedicine: (id: string) => void;
   addBatch: (batch: Omit<Batch, 'id' | 'createdAt'>) => void;
@@ -146,6 +146,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
       createdAt: new Date(),
     };
     setMedicines(prev => [...prev, newMedicine]);
+    return newMedicine; // Return the newly created medicine
   };
 
   const updateMedicine = (id: string, updates: Partial<Medicine>) => {
