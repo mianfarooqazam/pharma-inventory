@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useInventory } from '@/contexts/InventoryContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 
@@ -12,19 +13,18 @@ export function PurchaseForm() {
   const { medicines, addMedicine, addBatch, addTransaction } = useInventory();
   const { addNotification } = useNotifications();
   const [formData, setFormData] = useState({
-    medicineName: '',
+    name: '',
     category: '',
     manufacturer: '',
     strength: '',
-    unit: '',
+    unit: 'Tablet',
+    description: '',
     minStockLevel: '',
+    currentStock: '',
     price: '',
     batchNumber: '',
-    quantity: '',
-    costPrice: '',
-    sellingPrice: '',
+    purchasePrice: '',
     expiryDate: '',
-    notes: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -32,13 +32,14 @@ export function PurchaseForm() {
     
     // Add new medicine first
     const newMedicine = {
-      name: formData.medicineName,
+      name: formData.name,
       category: formData.category,
       manufacturer: formData.manufacturer,
       strength: formData.strength,
       unit: formData.unit,
+      description: formData.description,
       minStockLevel: parseInt(formData.minStockLevel),
-      currentStock: 0,
+      currentStock: parseInt(formData.currentStock) || 0,
       price: parseFloat(formData.price),
     };
     
@@ -50,44 +51,31 @@ export function PurchaseForm() {
       medicineId: addedMedicine.id,
       batchNumber: formData.batchNumber,
       expiryDate: new Date(formData.expiryDate),
-      quantity: parseInt(formData.quantity),
-      costPrice: parseFloat(formData.costPrice),
-      sellingPrice: parseFloat(formData.sellingPrice),
-    });
-
-    // Record purchase transaction
-    addTransaction({
-      medicineId: addedMedicine.id,
-      batchId: '', // This would be the actual batch ID in a real app
-      type: 'purchase',
-      quantity: parseInt(formData.quantity),
-      unitPrice: parseFloat(formData.costPrice),
-      totalAmount: parseInt(formData.quantity) * parseFloat(formData.costPrice),
-      notes: formData.notes,
-      createdBy: 'current-user', // This would be the actual user ID
+      quantity: parseInt(formData.currentStock) || 0,
+      costPrice: parseFloat(formData.purchasePrice),
+      sellingPrice: parseFloat(formData.price),
     });
 
     addNotification({
       type: 'success',
       title: 'New Medicine Added',
-      message: `Successfully added ${formData.medicineName} with ${formData.quantity} units`,
+      message: `Successfully added ${formData.name} with ${formData.currentStock || 0} units`,
     });
 
     // Reset form
     setFormData({
-      medicineName: '',
+      name: '',
       category: '',
       manufacturer: '',
       strength: '',
-      unit: '',
+      unit: 'Tablet',
+      description: '',
       minStockLevel: '',
+      currentStock: '',
       price: '',
       batchNumber: '',
-      quantity: '',
-      costPrice: '',
-      sellingPrice: '',
+      purchasePrice: '',
       expiryDate: '',
-      notes: '',
     });
   };
 
@@ -105,11 +93,11 @@ export function PurchaseForm() {
           {/* Medicine Information */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="medicineName">Medicine Name *</Label>
+              <Label htmlFor="name">Medicine Name *</Label>
               <Input
-                id="medicineName"
-                value={formData.medicineName}
-                onChange={(e) => handleInputChange('medicineName', e.target.value)}
+                id="name"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder="Enter medicine name"
                 required
               />
@@ -150,13 +138,18 @@ export function PurchaseForm() {
 
             <div className="space-y-2">
               <Label htmlFor="unit">Unit *</Label>
-              <Input
-                id="unit"
-                value={formData.unit}
-                onChange={(e) => handleInputChange('unit', e.target.value)}
-                placeholder="Enter unit"
-                required
-              />
+              <Select value={formData.unit} onValueChange={(value) => handleInputChange('unit', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Spray'].map((unit) => (
+                    <SelectItem key={unit} value={unit}>
+                      {unit}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -183,6 +176,17 @@ export function PurchaseForm() {
                 required
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="currentStock">Initial Stock</Label>
+              <Input
+                id="currentStock"
+                type="number"
+                value={formData.currentStock}
+                onChange={(e) => handleInputChange('currentStock', e.target.value)}
+                placeholder="0"
+              />
+            </div>
           </div>
 
           {/* Batch Information */}
@@ -199,12 +203,12 @@ export function PurchaseForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quantity">Quantity *</Label>
+              <Label htmlFor="currentStock">Quantity *</Label>
               <Input
-                id="quantity"
+                id="currentStock"
                 type="number"
-                value={formData.quantity}
-                onChange={(e) => handleInputChange('quantity', e.target.value)}
+                value={formData.currentStock}
+                onChange={(e) => handleInputChange('currentStock', e.target.value)}
                 placeholder="Enter quantity"
                 required
               />
@@ -222,39 +226,27 @@ export function PurchaseForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="costPrice">Cost Price (PKR) *</Label>
+              <Label htmlFor="purchasePrice">Purchase Price (PKR) *</Label>
               <Input
-                id="costPrice"
+                id="purchasePrice"
                 type="number"
                 step="0.01"
-                value={formData.costPrice}
-                onChange={(e) => handleInputChange('costPrice', e.target.value)}
+                value={formData.purchasePrice}
+                onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
                 placeholder="0.00"
                 required
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="sellingPrice">Expected Selling Price (PKR) *</Label>
-              <Input
-                id="sellingPrice"
-                type="number"
-                step="0.01"
-                value={formData.sellingPrice}
-                onChange={(e) => handleInputChange('sellingPrice', e.target.value)}
-                placeholder="0.00"
-                required
-              />
-            </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="description">Description</Label>
             <Input
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => handleInputChange('notes', e.target.value)}
-              placeholder="Optional notes"
+              id="description"
+              value={formData.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+              placeholder="Optional description"
             />
           </div>
 
