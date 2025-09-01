@@ -16,7 +16,7 @@ import { Search, Package, Activity } from 'lucide-react';
 import { useInventory } from '@/contexts/InventoryContext';
 
 export function Inventory() {
-  const { medicines, getMedicineStock } = useInventory();
+  const { medicines, getMedicineStock, batches } = useInventory();
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredMedicines = medicines.filter(medicine =>
@@ -107,23 +107,30 @@ export function Inventory() {
           <div className="border rounded-lg">
             <Table>
               <TableHeader>
-                                 <TableRow>
-                   <TableHead>Medicine</TableHead>
-                   <TableHead>Category</TableHead>
-                   <TableHead>Manufacturer</TableHead>
-                   <TableHead>Strength</TableHead>
-                   <TableHead>Current Stock</TableHead>
-                   <TableHead>Min Stock Level</TableHead>
-                   <TableHead>Stock Status</TableHead>
-                 </TableRow>
+                <TableRow>
+                  <TableHead>Sr No</TableHead>
+                  <TableHead>Medicine</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Manufacturer</TableHead>
+                  <TableHead>Strength</TableHead>
+                  <TableHead>Batch Number</TableHead>
+                  <TableHead>Current Stock</TableHead>
+                  <TableHead>Min Stock Level</TableHead>
+                  <TableHead>Stock Status</TableHead>
+                </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredMedicines.map((medicine) => {
+                {filteredMedicines.map((medicine, index) => {
                   const stockStatus = getStockStatus(medicine);
                   const actualStock = getMedicineStock(medicine.id);
+                  const medicineBatches = batches.filter(batch => batch.medicineId === medicine.id);
+                  const latestBatch = medicineBatches.length > 0 ? medicineBatches[0] : null;
                   
                   return (
                     <TableRow key={medicine.id}>
+                      <TableCell className="text-center font-medium">
+                        {index + 1}
+                      </TableCell>
                       <TableCell>
                         <div>
                           <p className="font-medium">{medicine.name}</p>
@@ -135,6 +142,9 @@ export function Inventory() {
                       </TableCell>
                       <TableCell>{medicine.manufacturer}</TableCell>
                       <TableCell>{medicine.strength}</TableCell>
+                      <TableCell>
+                        {latestBatch ? latestBatch.batchNumber : 'N/A'}
+                      </TableCell>
                       <TableCell>
                         <span className={`font-medium ${
                           actualStock <= medicine.minStockLevel ? 'text-red-600' : 
