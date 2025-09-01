@@ -5,20 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useInventory } from '@/contexts/InventoryContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 
-export function PurchaseForm() {
-  const { medicines, addMedicine, addBatch, addTransaction } = useInventory();
+export function RestockingForm() {
+  const { medicines, addBatch, addTransaction } = useInventory();
   const { addNotification } = useNotifications();
   const [formData, setFormData] = useState({
-    medicineName: '',
-    category: '',
-    manufacturer: '',
-    strength: '',
-    unit: '',
-    minStockLevel: '',
-    price: '',
+    medicineId: '',
     batchNumber: '',
     quantity: '',
     costPrice: '',
@@ -30,24 +25,12 @@ export function PurchaseForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Add new medicine first
-    const newMedicine = {
-      name: formData.medicineName,
-      category: formData.category,
-      manufacturer: formData.manufacturer,
-      strength: formData.strength,
-      unit: formData.unit,
-      minStockLevel: parseInt(formData.minStockLevel),
-      currentStock: 0,
-      price: parseFloat(formData.price),
-    };
-    
-    // Add the new medicine and get its ID
-    const addedMedicine = addMedicine(newMedicine);
-    
-    // Add new batch for the new medicine
+    const medicine = medicines.find(m => m.id === formData.medicineId);
+    if (!medicine) return;
+
+    // Add new batch
     addBatch({
-      medicineId: addedMedicine.id,
+      medicineId: formData.medicineId,
       batchNumber: formData.batchNumber,
       expiryDate: new Date(formData.expiryDate),
       quantity: parseInt(formData.quantity),
@@ -57,7 +40,7 @@ export function PurchaseForm() {
 
     // Record purchase transaction
     addTransaction({
-      medicineId: addedMedicine.id,
+      medicineId: formData.medicineId,
       batchId: '', // This would be the actual batch ID in a real app
       type: 'purchase',
       quantity: parseInt(formData.quantity),
@@ -69,19 +52,13 @@ export function PurchaseForm() {
 
     addNotification({
       type: 'success',
-      title: 'New Medicine Added',
-      message: `Successfully added ${formData.medicineName} with ${formData.quantity} units`,
+      title: 'Restock Recorded',
+      message: `Successfully restocked ${formData.quantity} units of ${medicine.name}`,
     });
 
     // Reset form
     setFormData({
-      medicineName: '',
-      category: '',
-      manufacturer: '',
-      strength: '',
-      unit: '',
-      minStockLevel: '',
-      price: '',
+      medicineId: '',
       batchNumber: '',
       quantity: '',
       costPrice: '',
@@ -95,94 +72,53 @@ export function PurchaseForm() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const selectedMedicine = medicines.find(m => m.id === formData.medicineId);
+  const currentStock = selectedMedicine ? selectedMedicine.currentStock : 0;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Add New Medicine</CardTitle>
+        <CardTitle>Restock Existing Medicine</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Medicine Information */}
+          {/* Medicine Selection */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="medicineName">Medicine Name *</Label>
-              <Input
-                id="medicineName"
-                value={formData.medicineName}
-                onChange={(e) => handleInputChange('medicineName', e.target.value)}
-                placeholder="Enter medicine name"
-                required
-              />
+              <Label htmlFor="medicine">Medicine *</Label>
+              <Select value={formData.medicineId} onValueChange={(value) => handleInputChange('medicineId', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a medicine to restock" />
+                </SelectTrigger>
+                <SelectContent>
+                  {medicines.map((medicine) => (
+                    <SelectItem key={medicine.id} value={medicine.id}>
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-medium">{medicine.name}</span>
+                        <span className="text-sm text-gray-500 ml-2">{medicine.strength}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="category">Category *</Label>
-              <Input
-                id="category"
-                value={formData.category}
-                onChange={(e) => handleInputChange('category', e.target.value)}
-                placeholder="Enter category"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="manufacturer">Manufacturer *</Label>
-              <Input
-                id="manufacturer"
-                value={formData.manufacturer}
-                onChange={(e) => handleInputChange('manufacturer', e.target.value)}
-                placeholder="Enter manufacturer"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="strength">Strength *</Label>
-              <Input
-                id="strength"
-                value={formData.strength}
-                onChange={(e) => handleInputChange('strength', e.target.value)}
-                placeholder="Enter strength"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="unit">Unit *</Label>
-              <Input
-                id="unit"
-                value={formData.unit}
-                onChange={(e) => handleInputChange('unit', e.target.value)}
-                placeholder="Enter unit"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="minStockLevel">Min Stock Level *</Label>
-              <Input
-                id="minStockLevel"
-                type="number"
-                value={formData.minStockLevel}
-                onChange={(e) => handleInputChange('minStockLevel', e.target.value)}
-                placeholder="Enter min stock level"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="price">Expected Selling Price (PKR) *</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) => handleInputChange('price', e.target.value)}
-                placeholder="0.00"
-                required
-              />
-            </div>
+            {selectedMedicine && (
+              <div className="space-y-2">
+                <Label>Current Stock</Label>
+                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-semibold text-gray-800">
+                      {currentStock.toLocaleString()}
+                    </span>
+                    <span className="text-sm text-gray-500">{selectedMedicine.unit}</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Min level: {selectedMedicine.minStockLevel}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Batch Information */}
@@ -259,7 +195,7 @@ export function PurchaseForm() {
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button type="submit">Add New Medicine</Button>
+            <Button type="submit">Record Restock</Button>
           </div>
         </form>
       </CardContent>
