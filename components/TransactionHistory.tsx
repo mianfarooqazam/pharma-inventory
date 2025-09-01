@@ -94,14 +94,14 @@ export function TransactionHistory() {
                         {getTransactionBadge(transaction.type)}
                       </TableCell>
                       <TableCell>{transaction.quantity}</TableCell>
-                      <TableCell>${transaction.unitPrice.toFixed(2)}</TableCell>
+                      <TableCell>PKR {transaction.unitPrice.toFixed(2)}</TableCell>
                       <TableCell>
                         <span className={
                           transaction.type === 'sale' ? 'text-green-600 font-medium' :
                           transaction.type === 'purchase' ? 'text-blue-600 font-medium' :
                           'text-red-600 font-medium'
                         }>
-                          ${transaction.totalAmount.toFixed(2)}
+                          PKR {transaction.totalAmount.toFixed(2)}
                         </span>
                       </TableCell>
                       <TableCell>

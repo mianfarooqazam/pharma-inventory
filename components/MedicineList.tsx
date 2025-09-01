@@ -112,7 +112,7 @@ export function MedicineList() {
                         <span className="font-medium">{actualStock}</span>
                         <span className="text-gray-500 text-sm"> / {medicine.minStockLevel} min</span>
                       </TableCell>
-                      <TableCell>${medicine.price.toFixed(2)}</TableCell>
+                      <TableCell>PKR {medicine.price.toFixed(2)}</TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
                           <Button

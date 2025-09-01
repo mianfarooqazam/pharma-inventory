@@ -164,7 +164,7 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="price">Unit Price ($) *</Label>
+              <Label htmlFor="price">Unit Price (PKR) *</Label>
               <Input
                 id="price"
                 type="number"

@@ -140,13 +140,13 @@ export function SaleForm() {
                 <div>
                   <span className="text-gray-600">Unit Price:</span>
                   <span className="ml-2 font-medium">
-                    ${selectedMedicine.price.toFixed(2)}
+                    PKR {selectedMedicine.price.toFixed(2)}
                   </span>
                 </div>
                 <div>
                   <span className="text-gray-600">Total Amount:</span>
                   <span className="ml-2 font-medium">
-                    ${(parseInt(formData.quantity || '0') * selectedMedicine.price).toFixed(2)}
+                    PKR {(parseInt(formData.quantity || '0') * selectedMedicine.price).toFixed(2)}
                   </span>
                 </div>
               </div>

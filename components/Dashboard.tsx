@@ -85,14 +85,14 @@ export function Dashboard() {
     },
     {
       title: 'Stock Value',
-      value: `$${totalValue.toFixed(2)}`,
+              value: `PKR ${totalValue.toFixed(2)}`,
       icon: DollarSign,
       description: 'Total inventory value',
       color: 'text-purple-600',
     },
     {
       title: 'Monthly Profit',
-      value: `$${profit.toFixed(2)}`,
+              value: `PKR ${profit.toFixed(2)}`,
       icon: TrendingUp,
       description: 'This month',
       color: profit >= 0 ? 'text-green-600' : 'text-red-600',
@@ -234,7 +234,7 @@ export function Dashboard() {
                       variant={transaction.type === 'sale' ? 'default' : 'secondary'}
                       className="text-xs"
                     >
-                      ${transaction.totalAmount.toFixed(2)}
+                      PKR {transaction.totalAmount.toFixed(2)}
                     </Badge>
                   </div>
                 );
