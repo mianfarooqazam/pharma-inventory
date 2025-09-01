@@ -38,42 +38,97 @@ export function Inventory() {
   const totalStock = medicines.reduce((sum, med) => sum + getMedicineStock(med.id), 0);
   const lowStockCount = medicines.filter(med => getMedicineStock(med.id) <= med.minStockLevel).length;
 
+  // Helper functions for card styling
+  const getGradientClass = (title: string) => {
+    switch (title) {
+      case 'Total Medicines':
+        return 'bg-blue-600';
+      case 'Total Stock':
+        return 'bg-green-600';
+      case 'Low Stock Items':
+        return 'bg-orange-600';
+      default:
+        return 'bg-gray-600';
+    }
+  };
+
+  const getIconBgClass = (title: string) => {
+    switch (title) {
+      case 'Total Medicines':
+        return 'bg-blue-100';
+      case 'Total Stock':
+        return 'bg-green-100';
+      case 'Low Stock Items':
+        return 'bg-orange-100';
+      default:
+        return 'bg-gray-100';
+    }
+  };
+
+  const getIconColor = (title: string) => {
+    switch (title) {
+      case 'Total Medicines':
+        return 'text-blue-600';
+      case 'Total Stock':
+        return 'text-green-600';
+      case 'Low Stock Items':
+        return 'text-orange-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Medicines</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{medicines.length}</div>
-            <p className="text-xs text-muted-foreground">Active medicines</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Stock</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalStock.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Units in inventory</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Low Stock Items</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{lowStockCount}</div>
-            <p className="text-xs text-muted-foreground">Need attention</p>
-          </CardContent>
-        </Card>
+        {[
+          {
+            title: 'Total Medicines',
+            value: medicines.length.toString(),
+            icon: Package,
+            description: 'Active medicines',
+          },
+          {
+            title: 'Total Stock',
+            value: totalStock.toLocaleString(),
+            icon: Activity,
+            description: 'Units in inventory',
+          },
+          {
+            title: 'Low Stock Items',
+            value: lowStockCount.toString(),
+            icon: Package,
+            description: 'Need attention',
+          },
+        ].map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={stat.title} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden relative">
+              {/* Background Color */}
+              <div className={`absolute inset-0 ${getGradientClass(stat.title)} opacity-20 transition-all duration-300`} />
+              
+              {/* Icon Background */}
+              <div className={`absolute top-4 right-4 p-3 rounded-full ${getIconBgClass(stat.title)} opacity-30 transition-all duration-300`}>
+                <Icon className={`h-6 w-6 ${getIconColor(stat.title)}`} />
+              </div>
+              
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                <CardTitle className="text-sm font-medium text-gray-700">
+                  {stat.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className={`text-3xl font-bold ${getIconColor(stat.title)} mb-2`}>
+                  {stat.value}
+                </div>
+                <p className="text-xs text-gray-600 font-medium">
+                  {stat.description}
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Main Inventory Table */}
