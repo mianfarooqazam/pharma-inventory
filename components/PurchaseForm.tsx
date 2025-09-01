@@ -144,7 +144,7 @@ export function PurchaseForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="sellingPrice">Selling Price (PKR) *</Label>
+              <Label htmlFor="sellingPrice">Expected Selling Price (PKR) *</Label>
               <Input
                 id="sellingPrice"
                 type="number"

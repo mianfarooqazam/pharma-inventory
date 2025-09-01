@@ -16,6 +16,7 @@ export function SaleForm() {
   const [formData, setFormData] = useState({
     medicineId: '',
     quantity: '',
+    actualSellingPrice: '',
     notes: '',
   });
 
@@ -55,14 +56,14 @@ export function SaleForm() {
       return;
     }
 
-    // Record sale transaction
+    // Record sale transaction with actual selling price
     addTransaction({
       medicineId: formData.medicineId,
       batchId: oldestBatch.id,
       type: 'sale',
       quantity: quantity,
-      unitPrice: oldestBatch.sellingPrice,
-      totalAmount: quantity * oldestBatch.sellingPrice,
+      unitPrice: parseFloat(formData.actualSellingPrice),
+      totalAmount: quantity * parseFloat(formData.actualSellingPrice),
       notes: formData.notes,
       createdBy: 'current-user',
     });
@@ -77,6 +78,7 @@ export function SaleForm() {
     setFormData({
       medicineId: '',
       quantity: '',
+      actualSellingPrice: '',
       notes: '',
     });
   };
@@ -131,6 +133,19 @@ export function SaleForm() {
                 </p>
               )}
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="actualSellingPrice">Actual Selling Price (PKR) *</Label>
+              <Input
+                id="actualSellingPrice"
+                type="number"
+                step="0.01"
+                value={formData.actualSellingPrice}
+                onChange={(e) => handleInputChange('actualSellingPrice', e.target.value)}
+                placeholder="0.00"
+                required
+              />
+            </div>
           </div>
 
           {selectedMedicine && (
@@ -138,15 +153,41 @@ export function SaleForm() {
               <h4 className="font-medium text-blue-900 mb-2">Sale Information</h4>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-600">Unit Price:</span>
+                  <span className="text-gray-600">Expected Price:</span>
                   <span className="ml-2 font-medium">
                     PKR {selectedMedicine.price.toFixed(2)}
                   </span>
                 </div>
                 <div>
+                  <span className="text-gray-600">Actual Price:</span>
+                  <span className="ml-2 font-medium">
+                    PKR {formData.actualSellingPrice ? parseFloat(formData.actualSellingPrice).toFixed(2) : '0.00'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Price Difference:</span>
+                  <span className={`ml-2 font-medium ${
+                    formData.actualSellingPrice && selectedMedicine.price 
+                      ? parseFloat(formData.actualSellingPrice) > selectedMedicine.price 
+                        ? 'text-green-600' 
+                        : parseFloat(formData.actualSellingPrice) < selectedMedicine.price 
+                          ? 'text-red-600' 
+                          : 'text-gray-600'
+                      : 'text-gray-600'
+                  }`}>
+                    {formData.actualSellingPrice && selectedMedicine.price 
+                      ? `PKR ${(parseFloat(formData.actualSellingPrice) - selectedMedicine.price).toFixed(2)}`
+                      : 'PKR 0.00'
+                    }
+                  </span>
+                </div>
+                <div>
                   <span className="text-gray-600">Total Amount:</span>
                   <span className="ml-2 font-medium">
-                    PKR {(parseInt(formData.quantity || '0') * selectedMedicine.price).toFixed(2)}
+                    PKR {formData.actualSellingPrice && formData.quantity 
+                      ? (parseInt(formData.quantity) * parseFloat(formData.actualSellingPrice)).toFixed(2)
+                      : '0.00'
+                    }
                   </span>
                 </div>
               </div>
@@ -164,7 +205,7 @@ export function SaleForm() {
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button type="submit" disabled={!formData.medicineId || !formData.quantity}>
+            <Button type="submit" disabled={!formData.medicineId || !formData.quantity || !formData.actualSellingPrice}>
               Record Sale
             </Button>
           </div>

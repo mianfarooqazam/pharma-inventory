@@ -83,7 +83,7 @@ export function MedicineList() {
                   <TableHead>Strength</TableHead>
                   <TableHead>Stock Status</TableHead>
                   <TableHead>Current Stock</TableHead>
-                  <TableHead>Price</TableHead>
+                  <TableHead>Expected Price</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>

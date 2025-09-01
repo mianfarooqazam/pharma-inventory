@@ -68,7 +68,7 @@ export function TransactionHistory() {
                 <TableHead>Medicine</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Quantity</TableHead>
-                <TableHead>Unit Price</TableHead>
+                <TableHead>Actual Price</TableHead>
                 <TableHead>Total Amount</TableHead>
                 <TableHead>Notes</TableHead>
               </TableRow>
