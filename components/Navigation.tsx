@@ -1,19 +1,30 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  BarChart3, 
-  Package, 
-  Activity, 
-  Users, 
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  BarChart3,
+  Package,
+  Activity,
+  Users,
   Bell,
   LogOut,
-  Menu
-} from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNotifications } from '@/contexts/NotificationContext';
-import { useState } from 'react';
+  Menu,
+  User,
+  AlertTriangle,
+  Calendar,
+  Info,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNotifications } from "@/contexts/NotificationContext";
+import { useState } from "react";
 
 interface NavigationProps {
   activeTab: string;
@@ -22,14 +33,34 @@ interface NavigationProps {
 
 export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
   const { user, logout } = useAuth();
-  const { unreadCount } = useNotifications();
+  const { unreadCount, notifications, markAsRead, markAllAsRead } =
+    useNotifications();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case "low-stock":
+        return <AlertTriangle className="h-4 w-4 text-orange-500" />;
+      case "expiry":
+        return <Calendar className="h-4 w-4 text-red-500" />;
+      case "success":
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case "warning":
+        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+      case "error":
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
+      default:
+        return <Info className="h-4 w-4 text-blue-500" />;
+    }
+  };
+
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-    { id: 'medicines', label: 'Medicines', icon: Package },
-    { id: 'stock', label: 'Stock Operations', icon: Activity },
-    ...(user?.role === 'Admin' ? [{ id: 'users', label: 'User Management', icon: Users }] : []),
+    { id: "dashboard", label: "Dashboard", icon: BarChart3 },
+    { id: "medicines", label: "Medicines", icon: Package },
+    { id: "stock", label: "Stock Operations", icon: Activity },
+    ...(user?.role === "Admin"
+      ? [{ id: "users", label: "User Management", icon: Users }]
+      : []),
   ];
 
   return (
@@ -49,7 +80,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
               return (
                 <Button
                   key={item.id}
-                  variant={activeTab === item.id ? 'default' : 'ghost'}
+                  variant={activeTab === item.id ? "default" : "ghost"}
                   onClick={() => setActiveTab(item.id)}
                   className="flex items-center space-x-2"
                 >
@@ -62,33 +93,117 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
 
           {/* Right side actions */}
           <div className="flex items-center space-x-3">
+            {/* User Icon */}
+            <div className="flex items-center space-x-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <div className="p-2 rounded-full bg-blue-100 cursor-pointer hover:bg-blue-200 transition-colors">
+                    <User className="h-5 w-5 text-blue-600" />
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-48" align="end">
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-full bg-blue-100">
+                        <User className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {user?.name}
+                        </p>
+                        <p className="text-xs text-gray-500">{user?.role}</p>
+                      </div>
+                    </div>
+                    <div className="border-t pt-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={logout}
+                        className="w-full justify-start flex items-center space-x-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <LogOut className="h-5 w-5" />
+                        <span>Logout</span>
+                      </Button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+
             {/* Notifications */}
             <div className="relative">
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="h-5 w-5" />
-                {unreadCount > 0 && (
-                  <Badge 
-                    variant="destructive" 
-                    className="absolute -top-1 -right-1 h-5 w-5 text-xs flex items-center justify-center"
-                  >
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </Badge>
-                )}
-              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="sm" className="relative p-2">
+                    <Bell className="h-5 w-5" />
+                    {unreadCount > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="absolute -top-1 -right-1 h-5 w-5 text-xs flex items-center justify-center"
+                      >
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80" align="end">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Notifications</h4>
+                      {unreadCount > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={markAllAsRead}
+                        >
+                          Mark all read
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="space-y-2 max-h-80 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <p className="text-sm text-gray-500 text-center py-4">
+                          No notifications
+                        </p>
+                      ) : (
+                        notifications.map((notification: any) => (
+                          <div
+                            key={notification.id}
+                            className={`p-3 rounded-lg border ${
+                              notification.isRead
+                                ? "bg-gray-50"
+                                : "bg-blue-50 border-blue-200"
+                            }`}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start space-x-2 flex-1">
+                                {getNotificationIcon(notification.type)}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {notification.title}
+                                  </p>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    {notification.message}
+                                  </p>
+                                  <p className="text-xs text-gray-500 mt-2">
+                                    {new Date(
+                                      notification.createdAt
+                                    ).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
 
-            {/* User info */}
-            <div className="hidden md:flex items-center space-x-2">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                <p className="text-xs text-gray-500">{user?.role}</p>
-              </div>
-            </div>
 
-            {/* Logout */}
-            <Button variant="ghost" size="sm" onClick={logout}>
-              <LogOut className="h-4 w-4" />
-            </Button>
 
             {/* Mobile menu button */}
             <Button
@@ -105,13 +220,56 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t bg-white py-4">
+            {/* Mobile User Info - Clickable */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg mb-4 cursor-pointer hover:bg-gray-100 transition-colors">
+                  <div className="p-2 rounded-full bg-blue-100">
+                    <User className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {user?.name}
+                    </p>
+                    <p className="text-xs text-gray-500">{user?.role}</p>
+                  </div>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-48" align="end">
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 rounded-full bg-blue-100">
+                      <User className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {user?.name}
+                      </p>
+                      <p className="text-xs text-gray-500">{user?.role}</p>
+                    </div>
+                  </div>
+                  <div className="border-t pt-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={logout}
+                      className="w-full justify-start flex items-center space-x-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      <span>Logout</span>
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+
             <div className="space-y-2">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <Button
                     key={item.id}
-                    variant={activeTab === item.id ? 'default' : 'ghost'}
+                    variant={activeTab === item.id ? "default" : "ghost"}
                     onClick={() => {
                       setActiveTab(item.id);
                       setIsMobileMenuOpen(false);
@@ -123,6 +281,8 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
                   </Button>
                 );
               })}
+
+
             </div>
           </div>
         )}

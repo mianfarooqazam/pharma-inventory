@@ -26,7 +26,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { InventoryProvider } from '@/contexts/InventoryContext';
 import { LoginForm } from '@/components/LoginForm';
 import { NotificationProvider } from '@/contexts/NotificationContext';
-import { NotificationCenter } from '@/components/NotificationCenter';
+
 
 function AppContent() {
   const { user, isAuthenticated } = useAuth();
@@ -39,7 +39,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
-      <NotificationCenter />
+      
       
       <main className="container mx-auto px-4 py-6">
         <div className="mb-6">
