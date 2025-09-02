@@ -28,8 +28,8 @@ export function RestockingForm() {
     const medicine = medicines.find(m => m.id === formData.medicineId);
     if (!medicine) return;
 
-    // Add new batch
-    addBatch({
+    // Add new batch and get the batch ID
+    const newBatch = addBatch({
       medicineId: formData.medicineId,
       batchNumber: formData.batchNumber,
       expiryDate: new Date(formData.expiryDate),
@@ -41,7 +41,7 @@ export function RestockingForm() {
     // Record purchase transaction
     addTransaction({
       medicineId: formData.medicineId,
-      batchId: '', // This would be the actual batch ID in a real app
+      batchId: newBatch.id, // Use the actual batch ID from the newly created batch
       type: 'purchase',
       quantity: parseInt(formData.quantity),
       unitPrice: parseFloat(formData.costPrice),

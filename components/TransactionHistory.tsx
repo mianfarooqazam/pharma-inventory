@@ -13,11 +13,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Search, Calendar } from 'lucide-react';
-import { useInventory } from '@/contexts/InventoryContext';
+import { useInventory, type Batch } from '@/contexts/InventoryContext';
 import { formatDate } from '@/lib/utils';
 
 export function TransactionHistory() {
-  const { transactions, medicines } = useInventory();
+  const { transactions, medicines, batches } = useInventory();
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredTransactions = transactions.filter(transaction => {
@@ -29,9 +29,9 @@ export function TransactionHistory() {
   const getTransactionBadge = (type: string) => {
     switch (type) {
       case 'purchase':
-        return <Badge variant="default">Purchase</Badge>;
+        return <Badge className="bg-blue-600 text-white hover:bg-blue-700">Purchase</Badge>;
       case 'sale':
-        return <Badge variant="secondary">Sale</Badge>;
+        return <Badge className="bg-green-600 text-white hover:bg-green-700">Sale</Badge>;
       case 'return':
         return <Badge variant="destructive">Return</Badge>;
       default:
@@ -67,6 +67,7 @@ export function TransactionHistory() {
                 <TableHead>Date</TableHead>
                 <TableHead>Medicine</TableHead>
                 <TableHead>Type</TableHead>
+                <TableHead>Batch/Expiry</TableHead>
                 <TableHead>Quantity</TableHead>
                 <TableHead>Actual Price</TableHead>
                 <TableHead>Total Amount</TableHead>
@@ -78,6 +79,8 @@ export function TransactionHistory() {
                 .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
                 .map((transaction) => {
                   const medicine = medicines.find(m => m.id === transaction.medicineId);
+                  
+                  const batch = batches.find(b => b.id === transaction.batchId);
                   
                   return (
                     <TableRow key={transaction.id}>
@@ -92,6 +95,17 @@ export function TransactionHistory() {
                       </TableCell>
                       <TableCell>
                         {getTransactionBadge(transaction.type)}
+                      </TableCell>
+                      <TableCell>
+                        {batch ? (
+                          <div className="text-sm">
+                            <span className="font-medium">Batch: {batch.batchNumber}</span>
+                            <br />
+                            <span className="text-gray-500">Expires: {formatDate(batch.expiryDate)}</span>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
                       </TableCell>
                       <TableCell>{transaction.quantity}</TableCell>
                       <TableCell>PKR {transaction.unitPrice.toFixed(2)}</TableCell>

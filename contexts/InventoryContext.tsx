@@ -47,7 +47,7 @@ interface InventoryContextType {
   addMedicine: (medicine: Omit<Medicine, 'id' | 'createdAt'>) => Medicine;
   updateMedicine: (id: string, medicine: Partial<Medicine>) => void;
   deleteMedicine: (id: string) => void;
-  addBatch: (batch: Omit<Batch, 'id' | 'createdAt'>) => void;
+  addBatch: (batch: Omit<Batch, 'id' | 'createdAt'>) => Batch;
   addTransaction: (transaction: Omit<StockTransaction, 'id' | 'createdAt'>) => void;
   getLowStockMedicines: () => Medicine[];
   getExpiringBatches: (days?: number) => (Batch & { medicineName: string })[];
@@ -166,12 +166,23 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
       id: Date.now().toString(),
       createdAt: new Date(),
     };
-    setBatches(prev => [...prev, newBatch]);
-    
-    // Update medicine current stock
-    updateMedicine(batch.medicineId, {
-      currentStock: getMedicineStock(batch.medicineId) + batch.quantity
+    setBatches(prev => {
+      const updatedBatches = [...prev, newBatch];
+      
+      // Calculate new stock after adding the batch
+      const newStock = updatedBatches
+        .filter(b => b.medicineId === batch.medicineId)
+        .reduce((total, b) => total + b.quantity, 0);
+      
+      // Update medicine current stock
+      updateMedicine(batch.medicineId, {
+        currentStock: newStock
+      });
+      
+      return updatedBatches;
     });
+    
+    return newBatch;
   };
 
   const addTransaction = (transaction: Omit<StockTransaction, 'id' | 'createdAt'>) => {
@@ -184,26 +195,26 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
 
     // Update batch quantities based on transaction type
     if (transaction.type === 'sale') {
-      // Implement FIFO logic - use oldest batches first
-      const medicineBatches = batches
-        .filter(b => b.medicineId === transaction.medicineId && b.quantity > 0)
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-
-      let remainingQuantity = transaction.quantity;
-      
-      setBatches(prev => prev.map(batch => {
-        if (batch.medicineId === transaction.medicineId && remainingQuantity > 0) {
-          const usedQuantity = Math.min(remainingQuantity, batch.quantity);
-          remainingQuantity -= usedQuantity;
-          return { ...batch, quantity: batch.quantity - usedQuantity };
-        }
-        return batch;
-      }));
-
-      // Update medicine current stock
-      const currentStock = getMedicineStock(transaction.medicineId);
-      updateMedicine(transaction.medicineId, {
-        currentStock: currentStock - transaction.quantity
+      // Update the specific batch that was sold from
+      setBatches(prev => {
+        const updatedBatches = prev.map(batch => {
+          if (batch.id === transaction.batchId) {
+            return { ...batch, quantity: batch.quantity - transaction.quantity };
+          }
+          return batch;
+        });
+        
+        // Calculate new stock after batch updates
+        const newStock = updatedBatches
+          .filter(batch => batch.medicineId === transaction.medicineId)
+          .reduce((total, batch) => total + batch.quantity, 0);
+        
+        // Update medicine current stock
+        updateMedicine(transaction.medicineId, {
+          currentStock: newStock
+        });
+        
+        return updatedBatches;
       });
     }
   };
