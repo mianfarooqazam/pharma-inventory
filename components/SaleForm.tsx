@@ -123,7 +123,7 @@ export function SaleForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="batch">Batch/Expiry *</Label>
+              <Label htmlFor="batch">Batch / Expiry *</Label>
               <Select value={formData.batchId} onValueChange={(value) => handleInputChange('batchId', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select batch" />
@@ -131,12 +131,12 @@ export function SaleForm() {
                 <SelectContent>
                   {availableBatches.map((batch) => (
                     <SelectItem key={batch.id} value={batch.id}>
-                      <div className="flex items-center justify-between w-full">
-                        <span>Batch: {batch.batchNumber}</span>
-                        <span className="text-sm text-gray-500">
+                      <div className="flex items-center justify-between w-full space-x-4">
+                        <span className="font-medium">Batch: {batch.batchNumber}</span>
+                        <span className="text-sm text-blue-600 flex-shrink-0">
                           Expires: {formatDate(batch.expiryDate)}
                         </span>
-                        <Badge variant="outline" className="ml-2">
+                        <Badge variant="outline" className="flex-shrink-0">
                           {batch.quantity} units
                         </Badge>
                       </div>

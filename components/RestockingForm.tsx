@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useInventory } from '@/contexts/InventoryContext';
+import { useInventory, type Batch } from '@/contexts/InventoryContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 
 export function RestockingForm() {
-  const { medicines, addBatch, addTransaction } = useInventory();
+  const { medicines, batches, addBatch, addTransaction } = useInventory();
   const { addNotification } = useNotifications();
   const [formData, setFormData] = useState({
     medicineId: '',
@@ -72,8 +72,27 @@ export function RestockingForm() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleMedicineSelect = (medicineId: string) => {
+    const medicine = medicines.find(m => m.id === medicineId);
+    if (medicine) {
+      // Auto-fill medicine details
+      setFormData(prev => ({
+        ...prev,
+        medicineId,
+        costPrice: medicine.price.toString(),
+        sellingPrice: (medicine.price * 1.2).toFixed(2), // 20% markup
+      }));
+    }
+  };
+
   const selectedMedicine = medicines.find(m => m.id === formData.medicineId);
   const currentStock = selectedMedicine ? selectedMedicine.currentStock : 0;
+  
+  // Get existing batches for the selected medicine
+  const existingBatches = selectedMedicine 
+    ? batches.filter(batch => batch.medicineId === formData.medicineId && batch.quantity > 0)
+        .sort((a, b) => a.expiryDate.getTime() - b.expiryDate.getTime())
+    : [];
 
   return (
     <Card>
@@ -86,7 +105,7 @@ export function RestockingForm() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="medicine">Medicine *</Label>
-              <Select value={formData.medicineId} onValueChange={(value) => handleInputChange('medicineId', value)}>
+              <Select value={formData.medicineId} onValueChange={handleMedicineSelect}>
                 <SelectTrigger>
                   <SelectValue placeholder="Choose a medicine to restock" />
                 </SelectTrigger>
@@ -119,7 +138,29 @@ export function RestockingForm() {
                 </div>
               </div>
             )}
+            
+            {/* Existing Batches */}
+            {existingBatches.length > 0 && (
+              <div className="col-span-2 space-y-2">
+                <Label>Existing Batches</Label>
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="space-y-2">
+                    {existingBatches.map((batch) => (
+                      <div key={batch.id} className="flex justify-between items-center text-sm">
+                        <span className="font-medium">Batch {batch.batchNumber}</span>
+                        <span className="text-gray-600">
+                          {batch.quantity} units → Expires: {new Date(batch.expiryDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Break Line */}
+          <div className="border-t border-gray-200 my-6"></div>
 
           {/* Batch Information */}
           <div className="grid grid-cols-2 gap-4">

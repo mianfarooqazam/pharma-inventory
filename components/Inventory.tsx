@@ -25,7 +25,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { useInventory } from "@/contexts/InventoryContext";
+import { useInventory, type Batch } from "@/contexts/InventoryContext";
 import { formatDate } from "@/lib/utils";
 
 export function Inventory() {
@@ -48,18 +48,15 @@ export function Inventory() {
     return { label: "In Stock", variant: "default" as const };
   };
 
-  const getStockBreakdown = (medicineId: string) => {
+  const getStockBreakdown = (medicineId: string): Batch[] => {
     const medicineBatches = batches.filter(
       (batch) => batch.medicineId === medicineId
     );
-    const breakdown: { [key: string]: number } = {};
-
-    medicineBatches.forEach((batch) => {
-      const expiryDate = formatDate(batch.expiryDate);
-      breakdown[expiryDate] = (breakdown[expiryDate] || 0) + batch.quantity;
-    });
-
-    return breakdown;
+    
+    // Return batches directly instead of aggregating by expiry date
+    return medicineBatches
+      .filter(batch => batch.quantity > 0)
+      .sort((a, b) => a.expiryDate.getTime() - b.expiryDate.getTime());
   };
 
   const toggleRow = (medicineId: string) => {
@@ -282,8 +279,6 @@ export function Inventory() {
                             className={`font-medium ${
                               actualStock <= medicine.minStockLevel
                                 ? "text-red-600"
-                                : actualStock <= medicine.minStockLevel * 1.5
-                                ? "text-orange-600"
                                 : "text-green-600"
                             }`}
                           >
@@ -312,18 +307,16 @@ export function Inventory() {
                           >
                             <div className="p-4 bg-gray-50">
                               <div>
-                                {Object.entries(stockBreakdown).map(
-                                  ([expiryDate, quantity]) => (
-                                    <div
-                                      key={expiryDate}
-                                      className="flex items-center space-x-4"
-                                    >
-                                      <span className="text-sm text-blue-600">
-                                        {quantity} units → Expires: {expiryDate}
-                                      </span>
-                                    </div>
-                                  )
-                                )}
+                                                                 {stockBreakdown.map((batch) => (
+                                   <div
+                                     key={batch.id}
+                                     className="flex items-center space-x-4"
+                                   >
+                                     <span className="text-sm text-blue-600">
+                                       {batch.quantity} units → Expires: {formatDate(batch.expiryDate)}
+                                     </span>
+                                   </div>
+                                 ))}
                               </div>
                             </div>
                           </TableCell>
