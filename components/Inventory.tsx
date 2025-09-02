@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -12,12 +12,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Package, Activity } from 'lucide-react';
+import { Search, Package, Activity, ChevronDown, ChevronUp } from 'lucide-react';
 import { useInventory } from '@/contexts/InventoryContext';
+
 
 export function Inventory() {
   const { medicines, getMedicineStock, batches } = useInventory();
   const [searchTerm, setSearchTerm] = useState('');
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   const filteredMedicines = medicines.filter(medicine =>
     medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -33,6 +35,28 @@ export function Inventory() {
       return { label: 'Medium', variant: 'secondary' as const };
     }
     return { label: 'In Stock', variant: 'default' as const };
+  };
+
+  const getStockBreakdown = (medicineId: string) => {
+    const medicineBatches = batches.filter(batch => batch.medicineId === medicineId);
+    const breakdown: { [key: string]: number } = {};
+    
+    medicineBatches.forEach(batch => {
+      const expiryDate = new Date(batch.expiryDate).toLocaleDateString();
+      breakdown[expiryDate] = (breakdown[expiryDate] || 0) + batch.quantity;
+    });
+    
+    return breakdown;
+  };
+
+  const toggleRow = (medicineId: string) => {
+    const newExpandedRows = new Set(expandedRows);
+    if (newExpandedRows.has(medicineId)) {
+      newExpandedRows.delete(medicineId);
+    } else {
+      newExpandedRows.add(medicineId);
+    }
+    setExpandedRows(newExpandedRows);
   };
 
   const totalStock = medicines.reduce((sum, med) => sum + getMedicineStock(med.id), 0);
@@ -161,66 +185,98 @@ export function Inventory() {
           {/* Inventory Table */}
           <div className="border rounded-lg">
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Sr No</TableHead>
-                  <TableHead>Medicine</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Manufacturer</TableHead>
-                  <TableHead>Strength</TableHead>
-                  <TableHead>Batch Number</TableHead>
-                  <TableHead>Current Stock</TableHead>
-                  <TableHead>Min Stock Level</TableHead>
-                  <TableHead>Stock Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredMedicines.map((medicine, index) => {
-                  const stockStatus = getStockStatus(medicine);
-                  const actualStock = getMedicineStock(medicine.id);
-                  const medicineBatches = batches.filter(batch => batch.medicineId === medicine.id);
-                  const latestBatch = medicineBatches.length > 0 ? medicineBatches[0] : null;
-                  
-                  return (
-                    <TableRow key={medicine.id}>
-                      <TableCell className="text-center font-medium">
-                        {index + 1}
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{medicine.name}</p>
-                          <p className="text-sm text-gray-500">{medicine.unit}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{medicine.category}</Badge>
-                      </TableCell>
-                      <TableCell>{medicine.manufacturer}</TableCell>
-                      <TableCell>{medicine.strength}</TableCell>
-                      <TableCell>
-                        {latestBatch ? latestBatch.batchNumber : 'N/A'}
-                      </TableCell>
-                      <TableCell>
-                        <span className={`font-medium ${
-                          actualStock <= medicine.minStockLevel ? 'text-red-600' : 
-                          actualStock <= medicine.minStockLevel * 1.5 ? 'text-orange-600' : 
-                          'text-green-600'
-                        }`}>
-                          {actualStock.toLocaleString()}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-gray-600">{medicine.minStockLevel}</span>
-                      </TableCell>
-                                             <TableCell>
-                         <Badge variant={stockStatus.variant}>
-                           {stockStatus.label}
-                         </Badge>
-                       </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
+                             <TableHeader>
+                 <TableRow>
+                   <TableHead></TableHead>
+                   <TableHead>Sr No</TableHead>
+                   <TableHead>Medicine</TableHead>
+                   <TableHead>Category</TableHead>
+                   <TableHead>Manufacturer</TableHead>
+                   <TableHead>Strength</TableHead>
+                   <TableHead>Expiry Date</TableHead>
+                   <TableHead>Current Stock</TableHead>
+                   <TableHead>Min Stock Level</TableHead>
+                   <TableHead>Stock Status</TableHead>
+                 </TableRow>
+               </TableHeader>
+                              <TableBody>
+                  {filteredMedicines.map((medicine, index) => {
+                    const stockStatus = getStockStatus(medicine);
+                    const actualStock = getMedicineStock(medicine.id);
+                    const medicineBatches = batches.filter(batch => batch.medicineId === medicine.id);
+                    const latestBatch = medicineBatches.length > 0 ? medicineBatches[0] : null;
+                    const stockBreakdown = getStockBreakdown(medicine.id);
+                    const isExpanded = expandedRows.has(medicine.id);
+                    
+                    return (
+                      <React.Fragment key={medicine.id}>
+                        <TableRow>
+                          <TableCell>
+                            <button
+                              onClick={() => toggleRow(medicine.id)}
+                              className="p-1 hover:bg-gray-100 rounded transition-colors"
+                            >
+                              {isExpanded ? (
+                                <ChevronUp className="h-4 w-4" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4" />
+                              )}
+                            </button>
+                          </TableCell>
+                          <TableCell className="text-center font-medium">
+                            {index + 1}
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{medicine.name}</p>
+                              <p className="text-sm text-gray-500">{medicine.unit}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>{medicine.category}</TableCell>
+                          <TableCell>{medicine.manufacturer}</TableCell>
+                          <TableCell>{medicine.strength}</TableCell>
+                          <TableCell>
+                            {latestBatch ? new Date(latestBatch.expiryDate).toLocaleDateString() : 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            <span className={`font-medium ${
+                              actualStock <= medicine.minStockLevel ? 'text-red-600' : 
+                              actualStock <= medicine.minStockLevel * 1.5 ? 'text-orange-600' : 
+                              'text-green-600'
+                            }`}>
+                              {actualStock.toLocaleString()}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-gray-600">{medicine.minStockLevel}</span>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={stockStatus.variant}>
+                              {stockStatus.label}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                        {isExpanded && (
+                          <TableRow>
+                            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={10}>
+                              <div className="p-4 bg-gray-50">
+                                <h4 className="font-medium text-lg mb-3">Stock Breakdown for {medicine.name}</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                  {Object.entries(stockBreakdown).map(([expiryDate, quantity]) => (
+                                    <div key={expiryDate} className="flex justify-between items-center p-3 bg-white rounded-lg border">
+                                      <span className="text-sm font-medium">{expiryDate}</span>
+                                      <Badge variant="outline">{quantity} units</Badge>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </TableBody>
             </Table>
           </div>
 
