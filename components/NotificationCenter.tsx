@@ -19,7 +19,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { useNotifications } from '@/contexts/NotificationContext';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 export function NotificationCenter() {
   const { 
@@ -99,7 +99,7 @@ export function NotificationCenter() {
                             {notification.message}
                           </p>
                           <p className="text-xs text-gray-500 mt-2">
-                            {format(notification.createdAt, 'MMM dd, HH:mm')}
+                            {formatDate(notification.createdAt)}
                           </p>
                         </div>
                       </div>

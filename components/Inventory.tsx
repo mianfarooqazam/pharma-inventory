@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/table';
 import { Search, Package, Activity, ChevronDown, ChevronUp } from 'lucide-react';
 import { useInventory } from '@/contexts/InventoryContext';
+import { formatDate } from '@/lib/utils';
 
 
 export function Inventory() {
@@ -42,7 +43,7 @@ export function Inventory() {
     const breakdown: { [key: string]: number } = {};
     
     medicineBatches.forEach(batch => {
-      const expiryDate = new Date(batch.expiryDate).toLocaleDateString();
+      const expiryDate = formatDate(batch.expiryDate);
       breakdown[expiryDate] = (breakdown[expiryDate] || 0) + batch.quantity;
     });
     
@@ -236,7 +237,7 @@ export function Inventory() {
                           <TableCell>{medicine.manufacturer}</TableCell>
                           <TableCell>{medicine.strength}</TableCell>
                           <TableCell>
-                            {latestBatch ? new Date(latestBatch.expiryDate).toLocaleDateString() : 'N/A'}
+                            {latestBatch ? formatDate(latestBatch.expiryDate) : 'N/A'}
                           </TableCell>
                           <TableCell>
                             <span className={`font-medium ${

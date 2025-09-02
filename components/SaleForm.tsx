@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useInventory } from '@/contexts/InventoryContext';
 import { useNotifications } from '@/contexts/NotificationContext';
+import { formatDate } from '@/lib/utils';
 
 export function SaleForm() {
   const { medicines, batches, addTransaction, getMedicineStock } = useInventory();
@@ -133,7 +134,7 @@ export function SaleForm() {
                       <div className="flex items-center justify-between w-full">
                         <span>Batch: {batch.batchNumber}</span>
                         <span className="text-sm text-gray-500">
-                          Expires: {batch.expiryDate.toLocaleDateString()}
+                          Expires: {formatDate(batch.expiryDate)}
                         </span>
                         <Badge variant="outline" className="ml-2">
                           {batch.quantity} units

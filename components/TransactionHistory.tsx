@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/table';
 import { Search, Calendar } from 'lucide-react';
 import { useInventory } from '@/contexts/InventoryContext';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 export function TransactionHistory() {
   const { transactions, medicines } = useInventory();
@@ -82,7 +82,7 @@ export function TransactionHistory() {
                   return (
                     <TableRow key={transaction.id}>
                       <TableCell>
-                        {format(transaction.createdAt, 'MMM dd, yyyy HH:mm')}
+                        {formatDate(transaction.createdAt)}
                       </TableCell>
                       <TableCell>
                         <div>

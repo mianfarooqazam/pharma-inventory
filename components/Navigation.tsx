@@ -27,6 +27,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { useState } from "react";
+import { formatDate } from "@/lib/utils";
 
 interface NavigationProps {
   activeTab: string;
@@ -189,9 +190,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
                                     {notification.message}
                                   </p>
                                   <p className="text-xs text-gray-500 mt-2">
-                                    {new Date(
-                                      notification.createdAt
-                                    ).toLocaleDateString()}
+                                    {formatDate(notification.createdAt)}
                                   </p>
                                 </div>
                               </div>
