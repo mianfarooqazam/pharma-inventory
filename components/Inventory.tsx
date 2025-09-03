@@ -255,16 +255,18 @@ export function Inventory() {
                         <TableCell>{medicine.strength}</TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-2">
-                            <button
-                              onClick={() => toggleRow(medicine.id)}
-                              className="p-1 hover:bg-gray-100 rounded transition-colors"
-                            >
-                              {isExpanded ? (
-                                <ChevronUp className="h-4 w-4" />
-                              ) : (
-                                <ChevronDown className="h-4 w-4" />
-                              )}
-                            </button>
+                            {stockBreakdown.length > 1 && (
+                              <button
+                                onClick={() => toggleRow(medicine.id)}
+                                className="p-1 hover:bg-gray-100 rounded transition-colors"
+                              >
+                                {isExpanded ? (
+                                  <ChevronUp className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDown className="h-4 w-4" />
+                                )}
+                              </button>
+                            )}
                             <span>
                               {latestBatch
                                 ? formatDate(latestBatch.expiryDate)
