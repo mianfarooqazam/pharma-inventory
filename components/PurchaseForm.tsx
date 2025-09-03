@@ -210,17 +210,7 @@ export function PurchaseForm() {
             {/* Stock & Batch Information */}
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="minStockLevel">Minimum Stock Level</Label>
-                  <Input
-                    id="minStockLevel"
-                    type="number"
-                    value={formData.minStockLevel}
-                    onChange={(e) => handleInputChange('minStockLevel', e.target.value)}
-                    placeholder="Enter minimum stock"
-                    required
-                  />
-                </div>
+               
 
                 <div className="space-y-2">
                   <Label htmlFor="currentStock">Initial Stock</Label>
@@ -230,6 +220,18 @@ export function PurchaseForm() {
                     value={formData.currentStock}
                     onChange={(e) => handleInputChange('currentStock', e.target.value)}
                     placeholder="0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="minStockLevel">Minimum Stock Level</Label>
+                  <Input
+                    id="minStockLevel"
+                    type="number"
+                    value={formData.minStockLevel}
+                    onChange={(e) => handleInputChange('minStockLevel', e.target.value)}
+                    placeholder="100"
+                    required
                   />
                 </div>
 
