@@ -21,7 +21,7 @@ import { Dashboard } from '@/components/Dashboard';
 import { MedicineList } from '@/components/MedicineList';
 import { Inventory } from '@/components/Inventory';
 import { PurchaseAndSell } from '@/components/PurchaseAndSell';
-import { RestockingForm } from '@/components/RestockingForm';
+
 import { RevenueProfit } from '@/components/RevenueProfit';
 import { Navigation } from '@/components/Navigation';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
@@ -63,9 +63,7 @@ function AppContent() {
             <PurchaseAndSell />
           </TabsContent>
           
-          <TabsContent value="restocking">
-            <RestockingForm />
-          </TabsContent>
+
           
           <TabsContent value="users">
             <RevenueProfit />
