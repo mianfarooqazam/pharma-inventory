@@ -94,6 +94,7 @@ export function QuickActions({ onNavigate, onSearchResults }: QuickActionsProps)
             variant="outline" 
             className="flex items-center space-x-2 h-12 opacity-50 cursor-not-allowed"
             disabled
+            title="Barcode scanning is currently disabled"
           >
             <QrCode className="h-4 w-4" />
             <span className="text-sm">Scan Barcode</span>

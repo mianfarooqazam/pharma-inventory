@@ -8,11 +8,13 @@ import {
   TrendingUp, 
   DollarSign,
   Calendar,
-  Activity
+  Activity,
+  Search
 } from 'lucide-react';
 import { useInventory } from '@/contexts/InventoryContext';
 import { StockChart } from './StockChart';
 import { QuickActions } from './QuickActions';
+import { useState } from 'react';
 
 interface DashboardProps {
   onNavigate?: (tab: string) => void;
@@ -26,6 +28,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     getLowStockMedicines, 
     getExpiringBatches 
   } = useInventory();
+  const [searchResults, setSearchResults] = useState<any[]>([]);
 
   // Helper functions for card styling
   const getGradientClass = (title: string) => {
@@ -211,8 +214,46 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         </Card>
 
         {/* Quick Actions */}
-        <QuickActions onNavigate={onNavigate} />
+        <QuickActions onNavigate={onNavigate} onSearchResults={setSearchResults} />
       </div>
+
+      {/* Search Results */}
+      {searchResults.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Search className="h-5 w-5 text-blue-500" />
+              <span>Search Results</span>
+            </CardTitle>
+            <CardDescription>
+              Found {searchResults.length} medicine(s) matching your search
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {searchResults.map((medicine) => (
+                <div key={medicine.id} className="border bg-gray-100 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold text-sm">{medicine.name}</h4>
+                    <p className="font-semibold text-xs  bg-blue-50 px-2 py-1 rounded">{medicine.manufacturer}</p>
+                  </div>
+                  <p className="text-xs text-gray-600">{medicine.category}</p>
+                  <div className="mt-3 space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-medium text-gray-600">Current Stock:</span>
+                      <span className="text-xs font-medium">{medicine.currentStock} {medicine.unit}s</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-medium text-gray-600">Selling Price:</span>
+                      <span className="text-xs text-green-600 font-semibold">PKR {medicine.price.toFixed(2)}/unit</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
