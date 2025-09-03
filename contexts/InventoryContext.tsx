@@ -216,6 +216,28 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
         
         return updatedBatches;
       });
+    } else if (transaction.type === 'return') {
+      // Restore stock for returns
+      setBatches(prev => {
+        const updatedBatches = prev.map(batch => {
+          if (batch.id === transaction.batchId) {
+            return { ...batch, quantity: batch.quantity + transaction.quantity };
+          }
+          return batch;
+        });
+        
+        // Calculate new stock after batch updates
+        const newStock = updatedBatches
+          .filter(batch => batch.medicineId === transaction.medicineId)
+          .reduce((total, batch) => total + batch.quantity, 0);
+        
+        // Update medicine current stock
+        updateMedicine(transaction.medicineId, {
+          currentStock: newStock
+        });
+        
+        return updatedBatches;
+      });
     }
   };
 

@@ -101,7 +101,7 @@ export function SaleForm() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="medicine">Medicine</Label>
+                <Label htmlFor="medicine">Medicine Name</Label>
                 <Select value={formData.medicineId} onValueChange={(value) => handleInputChange('medicineId', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select medicine" />
