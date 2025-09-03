@@ -48,7 +48,7 @@ function AppContent() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsContent value="dashboard">
-            <Dashboard />
+            <Dashboard onNavigate={setActiveTab} />
           </TabsContent>
           
           <TabsContent value="medicines">

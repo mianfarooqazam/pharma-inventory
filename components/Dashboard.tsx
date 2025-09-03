@@ -14,7 +14,11 @@ import { useInventory } from '@/contexts/InventoryContext';
 import { StockChart } from './StockChart';
 import { QuickActions } from './QuickActions';
 
-export function Dashboard() {
+interface DashboardProps {
+  onNavigate?: (tab: string) => void;
+}
+
+export function Dashboard({ onNavigate }: DashboardProps) {
   const { 
     medicines, 
     batches, 
@@ -207,7 +211,7 @@ export function Dashboard() {
         </Card>
 
         {/* Quick Actions */}
-        <QuickActions />
+        <QuickActions onNavigate={onNavigate} />
       </div>
 
       {/* Charts */}
