@@ -234,7 +234,7 @@ export function AddMedicineDialog({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="purchasePrice">Purchase Price (PKR)</Label>
+                <Label htmlFor="purchasePrice">Purchase Price per Unit (PKR)</Label>
                 <Input
                   id="purchasePrice"
                   type="number"
@@ -249,7 +249,7 @@ export function AddMedicineDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="price">Expected Selling Price (PKR)</Label>
+                <Label htmlFor="price">Expected Selling Price per Unit (PKR)</Label>
                 <Input
                   id="price"
                   type="number"
@@ -267,7 +267,7 @@ export function AddMedicineDialog({
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="currentStock">Initial Stock</Label>
+                <Label htmlFor="currentStock">Initial Quantity</Label>
                 <Input
                   id="currentStock"
                   type="number"
