@@ -78,55 +78,77 @@ export function RevenueProfit() {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₨{summaryData.totalRevenue.toLocaleString()}</div>
-            <div className="flex items-center space-x-1 text-xs text-green-600">
-              {getGrowthIcon(summaryData.revenueGrowth)}
-              <span>{summaryData.revenueGrowth}</span>
-            </div>
-          </CardContent>
-        </Card>
+        {[
+          {
+            title: "Total Revenue",
+            value: `₨ ${summaryData.totalRevenue.toLocaleString()}`,
+            icon: DollarSign,
+            description: summaryData.revenueGrowth,
+            color: "text-green-600",
+            gradient: "bg-green-600",
+            growth: summaryData.revenueGrowth
+          },
+          {
+            title: "Total Cost",
+            value: `₨ ${summaryData.totalCost.toLocaleString()}`,
+            icon: BarChart3,
+            description: "Cost of goods sold",
+            color: "text-orange-600",
+            gradient: "bg-orange-600"
+          },
+          {
+            title: "Total Profit",
+            value: `₨ ${summaryData.totalProfit.toLocaleString()}`,
+            icon: TrendingUp,
+            description: summaryData.profitGrowth,
+            color: "text-blue-600",
+            gradient: "bg-blue-600",
+            growth: summaryData.profitGrowth
+          },
+          {
+            title: "Profit Margin",
+            value: summaryData.profitMargin,
+            icon: BarChart3,
+            description: "Net profit margin",
+            color: "text-purple-600",
+            gradient: "bg-purple-600"
+          }
+        ].map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <Card
+              key={stat.title}
+              className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden relative"
+            >
+              {/* Background Color */}
+              <div
+                className={`absolute inset-0 ${stat.gradient} opacity-10 transition-all duration-300`}
+              />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Cost</CardTitle>
-            <BarChart3 className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₨{summaryData.totalCost.toLocaleString()}</div>
-            <p className="text-xs text-gray-500">Cost of goods sold</p>
-          </CardContent>
-        </Card>
+              {/* Icon Background */}
+              <div
+                className="absolute top-4 right-4 p-3 rounded-full bg-white transition-all duration-300"
+              >
+                <Icon className={`h-6 w-6 ${stat.color}`} />
+              </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Profit</CardTitle>
-            <TrendingUp className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₨{summaryData.totalProfit.toLocaleString()}</div>
-            <div className="flex items-center space-x-1 text-xs text-blue-600">
-              {getGrowthIcon(summaryData.profitGrowth)}
-              <span>{summaryData.profitGrowth}</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Profit Margin</CardTitle>
-            <BarChart3 className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summaryData.profitMargin}</div>
-            <p className="text-xs text-gray-500">Net profit margin</p>
-          </CardContent>
-        </Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                <CardTitle className="text-base font-bold text-gray-700">
+                  {stat.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className={`text-3xl font-bold ${stat.color} mb-2`}>
+                  {stat.value}
+                </div>
+                <div className="flex items-center space-x-1 text-xs text-gray-600 font-medium">
+                  {stat.growth && getGrowthIcon(stat.growth)}
+                  <span>{stat.description}</span>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Controls */}

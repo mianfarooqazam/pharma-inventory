@@ -92,13 +92,13 @@ export function Inventory() {
   const getIconBgClass = (title: string) => {
     switch (title) {
       case "Total Medicines":
-        return "bg-blue-100";
+        return "bg-white";
       case "Total Stock":
-        return "bg-green-100";
+        return "bg-white";
       case "Low Stock Items":
-        return "bg-orange-100";
+        return "bg-white";
       default:
-        return "bg-gray-100";
+        return "bg-white";
     }
   };
 
@@ -149,20 +149,20 @@ export function Inventory() {
               <div
                 className={`absolute inset-0 ${getGradientClass(
                   stat.title
-                )} opacity-20 transition-all duration-300`}
+                )} opacity-10 transition-all duration-300`}
               />
 
               {/* Icon Background */}
               <div
                 className={`absolute top-4 right-4 p-3 rounded-full ${getIconBgClass(
                   stat.title
-                )} opacity-30 transition-all duration-300`}
+                )} transition-all duration-300`}
               >
                 <Icon className={`h-6 w-6 ${getIconColor(stat.title)}`} />
               </div>
 
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-700">
+                <CardTitle className="text-base font-bold text-gray-700">
                   {stat.title}
                 </CardTitle>
               </CardHeader>
