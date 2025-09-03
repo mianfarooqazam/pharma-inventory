@@ -23,7 +23,7 @@ interface EditMedicineDialogProps {
 }
 
 export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedicineDialogProps) {
-  const { medicines, updateMedicine } = useInventory();
+  const { medicines, batches, updateMedicine } = useInventory();
   const { addNotification } = useNotifications();
   const [formData, setFormData] = useState({
     name: '',
@@ -32,10 +32,17 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
     strength: '',
     unit: 'Tablet',
     minStockLevel: '',
+    currentStock: '',
     price: '',
+    batchNumber: '',
+    purchasePrice: '',
+    expiryDate: '',
   });
 
   const medicine = medicines.find(m => m.id === medicineId);
+  
+  // Get the first available batch for this medicine (for auto-population)
+  const medicineBatch = batches.find(b => b.medicineId === medicineId);
 
   const categories = [
     'Analgesic', 'Antibiotic', 'Anti-inflammatory', 'Antacid', 'Vitamin',
@@ -53,10 +60,14 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
         strength: medicine.strength,
         unit: medicine.unit,
         minStockLevel: medicine.minStockLevel.toString(),
+        currentStock: medicine.currentStock.toString(),
         price: medicine.price.toString(),
+        batchNumber: medicineBatch?.batchNumber || '',
+        purchasePrice: medicineBatch?.costPrice.toString() || '',
+        expiryDate: medicineBatch?.expiryDate ? medicineBatch.expiryDate.toISOString().split('T')[0] : '',
       });
     }
-  }, [medicine]);
+  }, [medicine, medicineBatch]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,6 +79,7 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
       strength: formData.strength,
       unit: formData.unit,
       minStockLevel: parseInt(formData.minStockLevel),
+      currentStock: parseInt(formData.currentStock),
       price: parseFloat(formData.price),
     });
 
@@ -166,6 +178,35 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="batchNumber">Batch Number</Label>
+                <Input
+                  id="batchNumber"
+                  value={formData.batchNumber}
+                  onChange={(e) => handleInputChange('batchNumber', e.target.value)}
+                  placeholder="Enter batch number"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Pricing Information */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="purchasePrice">Purchase Price (PKR)</Label>
+                <Input
+                  id="purchasePrice"
+                  type="number"
+                  step="0.01"
+                  value={formData.purchasePrice}
+                  onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="price">Expected Selling Price (PKR)</Label>
                 <Input
                   id="price"
@@ -180,9 +221,21 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
             </div>
           </div>
 
-          {/* Stock Information */}
+          {/* Stock & Batch Information */}
           <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="currentStock">Initial Stock</Label>
+                <Input
+                  id="currentStock"
+                  type="number"
+                  value={formData.currentStock}
+                  onChange={(e) => handleInputChange('currentStock', e.target.value)}
+                  placeholder="0"
+                  required
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="minStockLevel">Minimum Stock Level</Label>
                 <Input
@@ -191,6 +244,17 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
                   value={formData.minStockLevel}
                   onChange={(e) => handleInputChange('minStockLevel', e.target.value)}
                   placeholder="100"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="expiryDate">Expiry Date</Label>
+                <Input
+                  id="expiryDate"
+                  type="date"
+                  value={formData.expiryDate}
+                  onChange={(e) => handleInputChange('expiryDate', e.target.value)}
                   required
                 />
               </div>
