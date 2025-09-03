@@ -180,7 +180,7 @@ export function PurchaseForm() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="purchasePrice">Purchase Price (PKR)</Label>
+                  <Label htmlFor="purchasePrice">Purchase Price per Unit (PKR)</Label>
                   <Input
                     id="purchasePrice"
                     type="number"
@@ -193,7 +193,7 @@ export function PurchaseForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="price">Expected Selling Price (PKR)</Label>
+                  <Label htmlFor="price">Expected Selling Price per Unit (PKR)</Label>
                   <Input
                     id="price"
                     type="number"
@@ -207,13 +207,24 @@ export function PurchaseForm() {
               </div>
             </div>
 
+            {formData.purchasePrice && formData.currentStock && (
+              <div className="bg-blue-600 border-blue-600 rounded-lg p-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-white font-medium">Total Purchase Amount:</span>
+                  <span className="font-bold text-lg text-white">
+                    PKR {(parseInt(formData.currentStock) * parseFloat(formData.purchasePrice)).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Stock & Batch Information */}
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-4">
                
 
                 <div className="space-y-2">
-                  <Label htmlFor="currentStock">Initial Stock</Label>
+                  <Label htmlFor="currentStock">Quantity</Label>
                   <Input
                     id="currentStock"
                     type="number"
@@ -260,7 +271,12 @@ export function PurchaseForm() {
           </div>
 
         <div className="flex justify-end space-x-2">
-          <Button type="submit">Record Purchase</Button>
+          <Button 
+            type="submit" 
+            disabled={!formData.name || !formData.category || !formData.manufacturer || !formData.strength || !formData.batchNumber || !formData.purchasePrice || !formData.price || !formData.minStockLevel || !formData.expiryDate}
+          >
+            Record Purchase
+          </Button>
         </div>
       </form>
     </div>
