@@ -39,7 +39,6 @@ export function AddMedicineDialog({
     manufacturer: "",
     strength: "",
     unit: "Tablet",
-    description: "",
     minStockLevel: "",
     currentStock: "",
     price: "",
@@ -80,7 +79,6 @@ export function AddMedicineDialog({
       manufacturer: formData.manufacturer,
       strength: formData.strength,
       unit: formData.unit,
-      description: formData.description,
       minStockLevel: parseInt(formData.minStockLevel),
       currentStock: parseInt(formData.currentStock),
       price: parseFloat(formData.price),
@@ -111,7 +109,6 @@ export function AddMedicineDialog({
       manufacturer: "",
       strength: "",
       unit: "Tablet",
-      description: "",
       minStockLevel: "",
       currentStock: "",
       price: "",
@@ -132,17 +129,17 @@ export function AddMedicineDialog({
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Add New Medicine</DialogTitle>
-          <DialogDescription>
-            Enter the details for the new medicine to add to your inventory.
-          </DialogDescription>
+          
         </DialogHeader>
+        
+        <div className="border-t border-gray-200" />
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Medicine Information */}
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Medicine Name *</Label>
+                <Label htmlFor="name">Medicine Name</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -153,7 +150,7 @@ export function AddMedicineDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category">Category *</Label>
+                <Label htmlFor="category">Category</Label>
                 <Select
                   value={formData.category}
                   onValueChange={(value) =>
@@ -174,7 +171,7 @@ export function AddMedicineDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="manufacturer">Manufacturer *</Label>
+                <Label htmlFor="manufacturer">Manufacturer</Label>
                 <Input
                   id="manufacturer"
                   value={formData.manufacturer}
@@ -187,7 +184,7 @@ export function AddMedicineDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="strength">Strength *</Label>
+                <Label htmlFor="strength">Strength</Label>
                 <Input
                   id="strength"
                   value={formData.strength}
@@ -200,7 +197,7 @@ export function AddMedicineDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="unit">Unit *</Label>
+                <Label htmlFor="unit">Unit</Label>
                 <Select
                   value={formData.unit}
                   onValueChange={(value) => handleInputChange("unit", value)}
@@ -219,7 +216,7 @@ export function AddMedicineDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="batchNumber">Batch Number *</Label>
+                <Label htmlFor="batchNumber">Batch Number</Label>
                 <Input
                   id="batchNumber"
                   value={formData.batchNumber}
@@ -237,7 +234,7 @@ export function AddMedicineDialog({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="purchasePrice">Purchase Price (PKR) *</Label>
+                <Label htmlFor="purchasePrice">Purchase Price (PKR)</Label>
                 <Input
                   id="purchasePrice"
                   type="number"
@@ -252,7 +249,7 @@ export function AddMedicineDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="price">Expected Selling Price (PKR) *</Label>
+                <Label htmlFor="price">Expected Selling Price (PKR)</Label>
                 <Input
                   id="price"
                   type="number"
@@ -270,20 +267,6 @@ export function AddMedicineDialog({
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="minStockLevel">Minimum Stock Level *</Label>
-                <Input
-                  id="minStockLevel"
-                  type="number"
-                  value={formData.minStockLevel}
-                  onChange={(e) =>
-                    handleInputChange("minStockLevel", e.target.value)
-                  }
-                  placeholder="Enter minimum stock"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="currentStock">Initial Stock</Label>
                 <Input
                   id="currentStock"
@@ -293,11 +276,25 @@ export function AddMedicineDialog({
                     handleInputChange("currentStock", e.target.value)
                   }
                   placeholder="0"
+                  required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="expiryDate">Expiry Date *</Label>
+                <Label htmlFor="minStockLevel">Minimum Stock Level</Label>
+                <Input
+                  id="minStockLevel"
+                  type="number"
+                  value={formData.minStockLevel}
+                  onChange={(e) =>
+                    handleInputChange("minStockLevel", e.target.value)
+                  }
+                  placeholder="100"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="expiryDate">Expiry Date</Label>
                 <Input
                   id="expiryDate"
                   type="date"
@@ -311,15 +308,7 @@ export function AddMedicineDialog({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Input
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              placeholder="Optional description"
-            />
-          </div>
+
 
           <DialogFooter>
             <Button
