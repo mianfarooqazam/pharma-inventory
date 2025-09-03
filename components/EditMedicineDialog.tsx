@@ -31,7 +31,6 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
     manufacturer: '',
     strength: '',
     unit: 'Tablet',
-    description: '',
     minStockLevel: '',
     price: '',
   });
@@ -53,7 +52,6 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
         manufacturer: medicine.manufacturer,
         strength: medicine.strength,
         unit: medicine.unit,
-        description: medicine.description || '',
         minStockLevel: medicine.minStockLevel.toString(),
         price: medicine.price.toString(),
       });
@@ -69,7 +67,6 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
       manufacturer: formData.manufacturer,
       strength: formData.strength,
       unit: formData.unit,
-      description: formData.description,
       minStockLevel: parseInt(formData.minStockLevel),
       price: parseFloat(formData.price),
     });
@@ -94,107 +91,110 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Edit Medicine</DialogTitle>
-          <DialogDescription>
-            Update the details for {medicine.name}.
-          </DialogDescription>
+          
         </DialogHeader>
+        
+        <div className="border-t border-gray-200" />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Medicine Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Medicine Information */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Medicine Name</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  placeholder="Enter medicine name"
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="category">Category *</Label>
-              <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="manufacturer">Manufacturer *</Label>
-              <Input
-                id="manufacturer"
-                value={formData.manufacturer}
-                onChange={(e) => handleInputChange('manufacturer', e.target.value)}
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="manufacturer">Manufacturer</Label>
+                <Input
+                  id="manufacturer"
+                  value={formData.manufacturer}
+                  onChange={(e) => handleInputChange('manufacturer', e.target.value)}
+                  placeholder="Enter manufacturer"
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="strength">Strength *</Label>
-              <Input
-                id="strength"
-                value={formData.strength}
-                onChange={(e) => handleInputChange('strength', e.target.value)}
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="strength">Strength</Label>
+                <Input
+                  id="strength"
+                  value={formData.strength}
+                  onChange={(e) => handleInputChange('strength', e.target.value)}
+                  placeholder="e.g., 500mg"
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="unit">Unit *</Label>
-              <Select value={formData.unit} onValueChange={(value) => handleInputChange('unit', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {units.map((unit) => (
-                    <SelectItem key={unit} value={unit}>
-                      {unit}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="unit">Unit</Label>
+                <Select value={formData.unit} onValueChange={(value) => handleInputChange('unit', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {units.map((unit) => (
+                      <SelectItem key={unit} value={unit}>
+                        {unit}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="price">Expected Selling Price (PKR) *</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) => handleInputChange('price', e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="minStockLevel">Minimum Stock Level *</Label>
-              <Input
-                id="minStockLevel"
-                type="number"
-                value={formData.minStockLevel}
-                onChange={(e) => handleInputChange('minStockLevel', e.target.value)}
-                required
-              />
+              <div className="space-y-2">
+                <Label htmlFor="price">Expected Selling Price (PKR)</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={(e) => handleInputChange('price', e.target.value)}
+                  placeholder="0.00"
+                  required
+                />
+              </div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Input
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Optional description"
-            />
+          {/* Stock Information */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="minStockLevel">Minimum Stock Level</Label>
+                <Input
+                  id="minStockLevel"
+                  type="number"
+                  value={formData.minStockLevel}
+                  onChange={(e) => handleInputChange('minStockLevel', e.target.value)}
+                  placeholder="100"
+                  required
+                />
+              </div>
+            </div>
           </div>
 
           <DialogFooter>
