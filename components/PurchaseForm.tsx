@@ -91,18 +91,15 @@ export function PurchaseForm() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Add New Medicine</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="overflow-y-auto max-h-[60vh] pr-2 space-y-6">
+    <div>
+      
+      <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-6">
             {/* Basic Medicine Information */}
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Medicine Name *</Label>
+                  <Label htmlFor="name">Medicine Name</Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -113,7 +110,7 @@ export function PurchaseForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
+                  <Label htmlFor="category">Category</Label>
                   <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
@@ -129,7 +126,7 @@ export function PurchaseForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="manufacturer">Manufacturer *</Label>
+                  <Label htmlFor="manufacturer">Manufacturer</Label>
                   <Input
                     id="manufacturer"
                     value={formData.manufacturer}
@@ -140,7 +137,7 @@ export function PurchaseForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="strength">Strength *</Label>
+                  <Label htmlFor="strength">Strength</Label>
                   <Input
                     id="strength"
                     value={formData.strength}
@@ -151,7 +148,7 @@ export function PurchaseForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="unit">Unit *</Label>
+                  <Label htmlFor="unit">Unit</Label>
                   <Select value={formData.unit} onValueChange={(value) => handleInputChange('unit', value)}>
                     <SelectTrigger>
                       <SelectValue />
@@ -167,7 +164,7 @@ export function PurchaseForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="batchNumber">Batch Number *</Label>
+                  <Label htmlFor="batchNumber">Batch Number</Label>
                   <Input
                     id="batchNumber"
                     value={formData.batchNumber}
@@ -183,7 +180,7 @@ export function PurchaseForm() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="purchasePrice">Purchase Price (PKR) *</Label>
+                  <Label htmlFor="purchasePrice">Purchase Price (PKR)</Label>
                   <Input
                     id="purchasePrice"
                     type="number"
@@ -196,7 +193,7 @@ export function PurchaseForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="price">Expected Selling Price (PKR) *</Label>
+                  <Label htmlFor="price">Expected Selling Price (PKR)</Label>
                   <Input
                     id="price"
                     type="number"
@@ -212,9 +209,9 @@ export function PurchaseForm() {
 
             {/* Stock & Batch Information */}
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="minStockLevel">Minimum Stock Level *</Label>
+                  <Label htmlFor="minStockLevel">Minimum Stock Level</Label>
                   <Input
                     id="minStockLevel"
                     type="number"
@@ -237,7 +234,7 @@ export function PurchaseForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="expiryDate">Expiry Date *</Label>
+                  <Label htmlFor="expiryDate">Expiry Date</Label>
                   <Input
                     id="expiryDate"
                     type="date"
@@ -260,11 +257,10 @@ export function PurchaseForm() {
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2">
-            <Button type="submit">Add New Medicine</Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+        <div className="flex justify-end space-x-2">
+          <Button type="submit">Record Purchase</Button>
+        </div>
+      </form>
+    </div>
   );
 }

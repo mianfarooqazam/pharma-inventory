@@ -13,13 +13,43 @@ import { TransactionHistory } from './TransactionHistory';
 export function PurchaseAndSell() {
   const [activeOperation, setActiveOperation] = useState('purchase');
 
+  const getTabTitle = (tab: string) => {
+    switch (tab) {
+      case 'purchase':
+        return 'Record Purchase';
+      case 'sale':
+        return 'Record Sale';
+      case 'return':
+        return 'Record Return';
+      case 'history':
+        return 'Transaction History';
+      default:
+        return 'Purchase & Sell';
+    }
+  };
+
+  const getTabIcon = (tab: string) => {
+    switch (tab) {
+      case 'purchase':
+        return <Package className="h-5 w-5" />;
+      case 'sale':
+        return <ShoppingCart className="h-5 w-5" />;
+      case 'return':
+        return <RotateCcw className="h-5 w-5" />;
+      case 'history':
+        return <History className="h-5 w-5" />;
+      default:
+        return <Activity className="h-5 w-5" />;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Activity className="h-5 w-5" />
-            <span>Purchase & Sell</span>
+            {getTabIcon(activeOperation)}
+            <span>{getTabTitle(activeOperation)}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
