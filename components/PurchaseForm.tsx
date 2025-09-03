@@ -11,7 +11,7 @@ import { useInventory } from '@/contexts/InventoryContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 
 export function PurchaseForm() {
-  const { medicines, addMedicine, addBatch, addTransaction } = useInventory();
+  const { medicines, batches, addMedicine, addBatch, addTransaction } = useInventory();
   const { addNotification } = useNotifications();
   const [purchaseType, setPurchaseType] = useState<'new' | 'restock'>('new');
   const [selectedMedicineId, setSelectedMedicineId] = useState('');
@@ -43,6 +43,12 @@ export function PurchaseForm() {
     setSelectedMedicineId(medicineId);
     const medicine = medicines.find(m => m.id === medicineId);
     if (medicine) {
+      // Find the most recent batch for this medicine
+      const medicineBatches = batches.filter(batch => batch.medicineId === medicineId);
+      const mostRecentBatch = medicineBatches.sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )[0];
+      
       setFormData(prev => ({
         ...prev,
         name: medicine.name,
@@ -53,6 +59,7 @@ export function PurchaseForm() {
         description: medicine.description || '',
         minStockLevel: medicine.minStockLevel.toString(),
         price: medicine.price.toString(),
+        batchNumber: mostRecentBatch?.batchNumber || '',
       }));
     }
   };
@@ -261,6 +268,7 @@ export function PurchaseForm() {
                     onChange={(e) => handleInputChange('batchNumber', e.target.value)}
                     placeholder="Enter batch number"
                     required
+                    disabled={purchaseType === 'restock'}
                   />
                 </div>
               </div>
