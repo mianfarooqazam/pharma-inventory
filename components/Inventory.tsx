@@ -192,9 +192,7 @@ export function Inventory() {
                 <Package className="h-5 w-5" />
                 <span>Inventory Overview</span>
               </CardTitle>
-              <CardDescription>
-                Complete view of all medicines and their current stock levels
-              </CardDescription>
+              
             </div>
           </div>
         </CardHeader>
