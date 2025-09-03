@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Search } from 'lucide-react';
 import { useInventory } from '@/contexts/InventoryContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { formatDate } from '@/lib/utils';
@@ -19,6 +20,7 @@ export function ReturnForm() {
     reason: '',
     notes: '',
   });
+  const [searchTerm, setSearchTerm] = useState('');
 
   const reasons = [
     'Near Expiry',
@@ -54,6 +56,17 @@ export function ReturnForm() {
       };
     })
     .filter(transaction => transaction.remainingQuantity > 0) // Only show transactions that still have items to return
+    .filter(transaction => {
+      // Apply search filter
+      if (!searchTerm) return true;
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        transaction.medicineName.toLowerCase().includes(searchLower) ||
+        transaction.medicineStrength.toLowerCase().includes(searchLower) ||
+        transaction.batchNumber.toLowerCase().includes(searchLower) ||
+        transaction.type.toLowerCase().includes(searchLower)
+      );
+    })
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   const selectedTransaction = saleTransactions.find(t => t.id === formData.transactionId);
@@ -111,9 +124,19 @@ export function ReturnForm() {
     <div>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-6">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search sales for return..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
           {/* Available Sales for Return */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Available Sales for Return</h3>
             <div className="border rounded-lg">
               <Table>
                 <TableHeader>

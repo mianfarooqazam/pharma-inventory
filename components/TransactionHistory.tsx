@@ -40,16 +40,10 @@ export function TransactionHistory() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Calendar className="h-5 w-5" />
-          <span>Transaction History</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div>
+      <div className="space-y-6">
         {/* Search */}
-        <div className="relative mb-6">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search transactions..."
@@ -64,12 +58,13 @@ export function TransactionHistory() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>S.No</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Medicine</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Batch/Expiry</TableHead>
                 <TableHead>Quantity</TableHead>
-                <TableHead>Actual Price</TableHead>
+                <TableHead>Unit Price</TableHead>
                 <TableHead>Total Amount</TableHead>
                 <TableHead>Notes</TableHead>
               </TableRow>
@@ -77,13 +72,14 @@ export function TransactionHistory() {
             <TableBody>
               {filteredTransactions
                 .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-                .map((transaction) => {
+                .map((transaction, index) => {
                   const medicine = medicines.find(m => m.id === transaction.medicineId);
                   
                   const batch = batches.find(b => b.id === transaction.batchId);
                   
                   return (
                     <TableRow key={transaction.id}>
+                      <TableCell>{index + 1}</TableCell>
                       <TableCell>
                         {formatDate(transaction.createdAt)}
                       </TableCell>
@@ -138,7 +134,7 @@ export function TransactionHistory() {
             </p>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
