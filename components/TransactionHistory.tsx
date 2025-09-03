@@ -22,11 +22,20 @@ export function TransactionHistory() {
 
   const filteredTransactions = transactions.filter(transaction => {
     const medicine = medicines.find(m => m.id === transaction.medicineId);
+    const isRestock = transaction.type === 'purchase' && transaction.notes === 'Medicine restock';
+    const transactionType = isRestock ? 'restocked' : transaction.type;
+    
     return medicine?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           transaction.type.toLowerCase().includes(searchTerm.toLowerCase());
+           transactionType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           transaction.notes?.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
-  const getTransactionBadge = (type: string) => {
+  const getTransactionBadge = (type: string, notes?: string) => {
+    // Check if it's a restock transaction based on notes
+    if (type === 'purchase' && notes === 'Medicine restock') {
+      return <Badge className="bg-purple-600 text-white hover:bg-purple-700">Restocked</Badge>;
+    }
+    
     switch (type) {
       case 'purchase':
         return <Badge className="bg-blue-600 text-white hover:bg-blue-700">Purchase</Badge>;
@@ -90,7 +99,7 @@ export function TransactionHistory() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {getTransactionBadge(transaction.type)}
+                        {getTransactionBadge(transaction.type, transaction.notes)}
                       </TableCell>
                       <TableCell>
                         {batch ? (

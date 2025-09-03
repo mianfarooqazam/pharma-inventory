@@ -6,12 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useInventory } from '@/contexts/InventoryContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 
 export function PurchaseForm() {
   const { medicines, addMedicine, addBatch, addTransaction } = useInventory();
   const { addNotification } = useNotifications();
+  const [purchaseType, setPurchaseType] = useState<'new' | 'restock'>('new');
+  const [selectedMedicineId, setSelectedMedicineId] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -34,28 +37,56 @@ export function PurchaseForm() {
 
   const units = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Spray'];
 
+  const selectedMedicine = medicines.find(m => m.id === selectedMedicineId);
+
+  const handleMedicineSelect = (medicineId: string) => {
+    setSelectedMedicineId(medicineId);
+    const medicine = medicines.find(m => m.id === medicineId);
+    if (medicine) {
+      setFormData(prev => ({
+        ...prev,
+        name: medicine.name,
+        category: medicine.category,
+        manufacturer: medicine.manufacturer,
+        strength: medicine.strength,
+        unit: medicine.unit,
+        description: medicine.description || '',
+        minStockLevel: medicine.minStockLevel.toString(),
+        price: medicine.price.toString(),
+      }));
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Add new medicine first
-    const newMedicine = {
-      name: formData.name,
-      category: formData.category,
-      manufacturer: formData.manufacturer,
-      strength: formData.strength,
-      unit: formData.unit,
-      description: formData.description,
-      minStockLevel: parseInt(formData.minStockLevel),
-      currentStock: parseInt(formData.currentStock) || 0,
-      price: parseFloat(formData.price),
-    };
+    let medicineId: string;
     
-    // Add the new medicine and get its ID
-    const addedMedicine = addMedicine(newMedicine);
+    if (purchaseType === 'new') {
+      // Add new medicine first
+      const newMedicine = {
+        name: formData.name,
+        category: formData.category,
+        manufacturer: formData.manufacturer,
+        strength: formData.strength,
+        unit: formData.unit,
+        description: formData.description,
+        minStockLevel: parseInt(formData.minStockLevel),
+        currentStock: parseInt(formData.currentStock) || 0,
+        price: parseFloat(formData.price),
+      };
+      
+      // Add the new medicine and get its ID
+      const addedMedicine = addMedicine(newMedicine);
+      medicineId = addedMedicine.id;
+    } else {
+      // Restock existing medicine
+      medicineId = selectedMedicineId;
+    }
     
-    // Add new batch for the new medicine
+    // Add new batch for the medicine
     addBatch({
-      medicineId: addedMedicine.id,
+      medicineId: medicineId,
       batchNumber: formData.batchNumber,
       expiryDate: new Date(formData.expiryDate),
       quantity: parseInt(formData.currentStock) || 0,
@@ -63,10 +94,22 @@ export function PurchaseForm() {
       sellingPrice: parseFloat(formData.price),
     });
 
+    // Add transaction record
+    addTransaction({
+      medicineId: medicineId,
+      batchId: '', // Will be set by addBatch
+      type: 'purchase',
+      quantity: parseInt(formData.currentStock) || 0,
+      unitPrice: parseFloat(formData.purchasePrice),
+      totalAmount: (parseInt(formData.currentStock) || 0) * parseFloat(formData.purchasePrice),
+      notes: purchaseType === 'new' ? 'New medicine purchase' : 'Medicine restock',
+      createdBy: 'current-user',
+    });
+
     addNotification({
       type: 'success',
-      title: 'New Medicine Added',
-      message: `Successfully added ${formData.name} with ${formData.currentStock || 0} units`,
+      title: purchaseType === 'new' ? 'New Medicine Added' : 'Medicine Restocked',
+      message: `Successfully ${purchaseType === 'new' ? 'added' : 'restocked'} ${formData.name} with ${formData.currentStock || 0} units`,
     });
 
     // Reset form
@@ -84,6 +127,8 @@ export function PurchaseForm() {
       purchasePrice: '',
       expiryDate: '',
     });
+    setSelectedMedicineId('');
+    setPurchaseType('new');
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -95,23 +140,62 @@ export function PurchaseForm() {
       
       <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-6">
+            {/* Purchase Type Selection */}
+            <div className="space-y-4">
+             
+              <RadioGroup value={purchaseType} onValueChange={(value: 'new' | 'restock') => setPurchaseType(value)}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="new" id="new" />
+                  <Label htmlFor="new">Purchase New Medicine</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="restock" id="restock" />
+                  <Label htmlFor="restock">Restock Existing Medicine</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
             {/* Basic Medicine Information */}
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Medicine Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder="Enter medicine name"
-                    required
-                  />
+                  {purchaseType === 'restock' ? (
+                    <Select value={selectedMedicineId} onValueChange={handleMedicineSelect}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select existing medicine" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {medicines.map((medicine) => (
+                          <SelectItem key={medicine.id} value={medicine.id}>
+                            <div className="flex items-center justify-between w-full">
+                              <span>{medicine.name} - {medicine.strength}</span>
+                              <span className="text-sm text-gray-500 ml-2">
+                                {medicine.currentStock} units
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      placeholder="Enter medicine name"
+                      required
+                    />
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
-                  <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                  <Select 
+                    value={formData.category} 
+                    onValueChange={(value) => handleInputChange('category', value)}
+                    disabled={purchaseType === 'restock'}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
@@ -133,6 +217,7 @@ export function PurchaseForm() {
                     onChange={(e) => handleInputChange('manufacturer', e.target.value)}
                     placeholder="Enter manufacturer"
                     required
+                    disabled={purchaseType === 'restock'}
                   />
                 </div>
 
@@ -144,12 +229,17 @@ export function PurchaseForm() {
                     onChange={(e) => handleInputChange('strength', e.target.value)}
                     placeholder="e.g., 500mg"
                     required
+                    disabled={purchaseType === 'restock'}
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="unit">Unit</Label>
-                  <Select value={formData.unit} onValueChange={(value) => handleInputChange('unit', value)}>
+                  <Select 
+                    value={formData.unit} 
+                    onValueChange={(value) => handleInputChange('unit', value)}
+                    disabled={purchaseType === 'restock'}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -243,6 +333,7 @@ export function PurchaseForm() {
                     onChange={(e) => handleInputChange('minStockLevel', e.target.value)}
                     placeholder="100"
                     required
+                    disabled={purchaseType === 'restock'}
                   />
                 </div>
 
@@ -273,9 +364,13 @@ export function PurchaseForm() {
         <div className="flex justify-end space-x-2">
           <Button 
             type="submit" 
-            disabled={!formData.name || !formData.category || !formData.manufacturer || !formData.strength || !formData.batchNumber || !formData.purchasePrice || !formData.price || !formData.minStockLevel || !formData.expiryDate}
+            disabled={
+              purchaseType === 'new' 
+                ? (!formData.name || !formData.category || !formData.manufacturer || !formData.strength || !formData.batchNumber || !formData.purchasePrice || !formData.price || !formData.minStockLevel || !formData.expiryDate)
+                : (!selectedMedicineId || !formData.batchNumber || !formData.purchasePrice || !formData.price || !formData.expiryDate)
+            }
           >
-            Record Purchase
+            {purchaseType === 'new' ? 'Record Purchase' : 'Record Restock'}
           </Button>
         </div>
       </form>
