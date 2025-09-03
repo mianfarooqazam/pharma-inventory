@@ -49,13 +49,13 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const getIconBgClass = (title: string) => {
     switch (title) {
       case 'Total Medicines':
-        return 'bg-blue-100';
+        return 'bg-white';
       case 'Total Stock':
-        return 'bg-green-100';
+        return 'bg-white';
       case 'Stock Value':
-        return 'bg-purple-100';
+        return 'bg-white';
       case 'Monthly Profit':
-        return 'bg-emerald-100';
+        return 'bg-white';
       default:
         return 'bg-gray-100';
     }
@@ -74,6 +74,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     return sum + (batch ? batch.costPrice * t.quantity : 0);
   }, 0);
   const profit = totalSales - totalCost;
+
+  // Get current month name
+  const currentMonth = new Date().toLocaleString('default', { month: 'long' });
 
   const stats = [
     {
@@ -97,11 +100,11 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       description: 'Total inventory value',
       color: 'text-purple-600',
     },
-    {
-      title: 'Monthly Profit',
-              value: `PKR ${profit.toFixed(2)}`,
+        {
+      title: 'September Profit',
+      value: `PKR ${profit.toFixed(2)}`,
       icon: TrendingUp,
-      description: 'This month',
+      description: 'Current period',
       color: profit >= 0 ? 'text-green-600' : 'text-red-600',
     },
   ];
@@ -115,15 +118,15 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           return (
             <Card key={stat.title} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden relative">
               {/* Background Color */}
-              <div className={`absolute inset-0 ${getGradientClass(stat.title)} opacity-20 transition-all duration-300`} />
+              <div className={`absolute inset-0 ${getGradientClass(stat.title)} opacity-10 transition-all duration-300`} />
               
               {/* Icon Background */}
-              <div className={`absolute top-4 right-4 p-3 rounded-full ${getIconBgClass(stat.title)} opacity-30 transition-all duration-300`}>
+              <div className={`absolute top-4 right-4 p-3 rounded-full ${getIconBgClass(stat.title)}  transition-all duration-300`}>
                 <Icon className={`h-6 w-6 ${stat.color}`} />
               </div>
               
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-medium text-gray-700">
+                <CardTitle className="text-base font-bold text-gray-700">
                   {stat.title}
                 </CardTitle>
               </CardHeader>
