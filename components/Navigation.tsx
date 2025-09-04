@@ -61,7 +61,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
     { id: "dashboard", label: "Dashboard", icon: BarChart3 },
     { id: "medicines", label: "Medicines", icon: Package },
     { id: "inventory", label: "Inventory", icon: Warehouse },
-    { id: "purchase-and-sell", label: "Purchase and Sell", icon: Activity },
+    { id: "purchase-and-sell", label: "Purchase & Sell", icon: Activity },
     { id: "users", label: "Revenue & Profit", icon: DollarSign },
     { id: "settings", label: "Settings", icon: Settings },
   ];
