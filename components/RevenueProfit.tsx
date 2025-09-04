@@ -23,7 +23,8 @@ import {
   Search,
   Plus,
   Eye,
-  FileText
+  FileText,
+  ShoppingCart
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -41,13 +42,12 @@ export function RevenueProfit() {
     { id: '5', date: '2024-01-13', medicine: 'Metformin 500mg', quantity: 120, unitPrice: 400, totalRevenue: 48000, cost: 28800, profit: 19200, margin: '40%' },
   ];
 
-  const summaryData = {
-    totalRevenue: 236500,
-    totalCost: 132150,
-    totalProfit: 104350,
-    profitMargin: '44.1%',
-    revenueGrowth: '+12.5%',
-    profitGrowth: '+8.3%'
+  // New metrics data
+  const metricsData = {
+    allTimePurchase: 1850000, // Total purchases made since inception
+    purchaseThisMonth: 132150, // Purchases made this month
+    soldThisMonth: 236500, // Sales made this month
+    profitMarginThisMonth: '44.1%' // Profit margin for this month
   };
 
   const getProfitBadge = (margin: string) => {
@@ -76,40 +76,38 @@ export function RevenueProfit() {
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
+      {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           {
-            title: "Total Revenue",
-            value: `₨ ${summaryData.totalRevenue.toLocaleString()}`,
-            icon: DollarSign,
-            description: summaryData.revenueGrowth,
-            color: "text-green-600",
-            gradient: "bg-green-600",
-            growth: summaryData.revenueGrowth
+            title: "All Time Purchase",
+            value: `₨ ${metricsData.allTimePurchase.toLocaleString()}`,
+            icon: ShoppingCart,
+            description: "Total purchases since inception",
+            color: "text-blue-600",
+            gradient: "bg-blue-600"
           },
           {
-            title: "Total Cost",
-            value: `₨ ${summaryData.totalCost.toLocaleString()}`,
-            icon: BarChart3,
-            description: "Cost of goods sold",
+            title: "Total Purchase This Month",
+            value: `₨ ${metricsData.purchaseThisMonth.toLocaleString()}`,
+            icon: DollarSign,
+            description: "Current month purchases",
             color: "text-orange-600",
             gradient: "bg-orange-600"
           },
           {
-            title: "Total Profit",
-            value: `₨ ${summaryData.totalProfit.toLocaleString()}`,
+            title: "Total Sold This Month",
+            value: `₨ ${metricsData.soldThisMonth.toLocaleString()}`,
             icon: TrendingUp,
-            description: summaryData.profitGrowth,
-            color: "text-blue-600",
-            gradient: "bg-blue-600",
-            growth: summaryData.profitGrowth
+            description: "Current month sales",
+            color: "text-green-600",
+            gradient: "bg-green-600"
           },
           {
-            title: "Profit Margin",
-            value: summaryData.profitMargin,
+            title: "Profit Margin This Month",
+            value: metricsData.profitMarginThisMonth,
             icon: BarChart3,
-            description: "Net profit margin",
+            description: "Current month profit margin",
             color: "text-purple-600",
             gradient: "bg-purple-600"
           }
@@ -142,10 +140,9 @@ export function RevenueProfit() {
                   {stat.value}
                 </div>
                 <div className="flex items-center space-x-1 text-xs text-gray-600 font-medium">
-                  {stat.growth && getGrowthIcon(stat.growth)}
                   <span>{stat.description}</span>
                 </div>
-              </CardContent>
+              </CardContent>  
             </Card>
           );
         })}
@@ -226,15 +223,15 @@ export function RevenueProfit() {
                     </TableCell>
                     <TableCell className="font-medium">{item.medicine}</TableCell>
                     <TableCell>{item.quantity}</TableCell>
-                    <TableCell>₨{item.unitPrice.toLocaleString()}</TableCell>
+                    <TableCell>₨ {item.unitPrice.toLocaleString()}</TableCell>
                     <TableCell className="font-semibold text-green-600">
-                      ₨{item.totalRevenue.toLocaleString()}
+                      ₨ {item.totalRevenue.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-orange-600">
-                      ₨{item.cost.toLocaleString()}
+                      ₨ {item.cost.toLocaleString()}
                     </TableCell>
                     <TableCell className="font-semibold text-blue-600">
-                      ₨{item.profit.toLocaleString()}
+                      ₨ {item.profit.toLocaleString()}
                     </TableCell>
                     <TableCell>
                       {getProfitBadge(item.margin)}
@@ -257,63 +254,7 @@ export function RevenueProfit() {
         </CardContent>
       </Card>
 
-      {/* Additional Analytics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Top Performing Medicines</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {revenueData
-                .sort((a, b) => b.profit - a.profit)
-                .slice(0, 5)
-                .map((item, index) => (
-                  <div key={item.id} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs font-bold">
-                        {index + 1}
-                      </div>
-                      <span className="text-sm font-medium">{item.medicine}</span>
-                    </div>
-                                         <div className="text-right">
-                       <div className="text-sm font-semibold text-green-600">
-                         ₨{item.profit.toLocaleString()}
-                       </div>
-                       <div className="text-xs text-gray-500">{item.margin} margin</div>
-                     </div>
-                  </div>
-                ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Profit Trends</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-                             <div className="flex items-center justify-between">
-                 <span className="text-sm text-gray-600">Daily Average</span>
-                 <span className="font-semibold">₨{Math.round(summaryData.totalProfit / 5).toLocaleString()}</span>
-               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Best Day</span>
-                <span className="font-semibold text-green-600">Jan 14, 2024</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Profit Growth</span>
-                <span className="font-semibold text-blue-600">{summaryData.profitGrowth}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Revenue Growth</span>
-                <span className="font-semibold text-green-600">{summaryData.revenueGrowth}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+     
     </div>
   );
 }
