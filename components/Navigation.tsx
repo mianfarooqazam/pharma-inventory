@@ -22,6 +22,7 @@ import {
   CheckCircle,
   AlertCircle,
   Warehouse,
+  Settings,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNotifications } from "@/contexts/NotificationContext";
@@ -62,6 +63,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
     { id: "inventory", label: "Inventory", icon: Warehouse },
     { id: "purchase-and-sell", label: "Purchase and Sell", icon: Activity },
     { id: "users", label: "Revenue & Profit", icon: DollarSign },
+    { id: "settings", label: "Settings", icon: Settings },
   ];
 
   return (

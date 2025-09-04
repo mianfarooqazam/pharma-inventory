@@ -23,6 +23,7 @@ import { Inventory } from '@/components/Inventory';
 import { PurchaseAndSell } from '@/components/PurchaseAndSell';
 
 import { RevenueProfit } from '@/components/RevenueProfit';
+import { Settings } from '@/components/Settings';
 import { Navigation } from '@/components/Navigation';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { InventoryProvider } from '@/contexts/InventoryContext';
@@ -67,6 +68,10 @@ function AppContent() {
           
           <TabsContent value="users">
             <RevenueProfit />
+          </TabsContent>
+          
+          <TabsContent value="settings">
+            <Settings />
           </TabsContent>
         </Tabs>
       </main>
