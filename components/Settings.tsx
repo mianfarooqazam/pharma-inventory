@@ -72,14 +72,7 @@ export function Settings() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <SettingsIcon className="h-5 w-5" />
-            <span>Company Settings</span>
-          </CardTitle>
-        </CardHeader>
-      </Card>
+      
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Company Information */}
@@ -206,8 +199,9 @@ export function Settings() {
           <CardTitle>Invoice Preview</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 bg-gray-50">
-            <div className="flex items-start justify-between mb-4">
+          <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 bg-white">
+            {/* Header Section */}
+            <div className="flex items-start justify-between mb-8">
               <div className="flex items-center space-x-4">
                 <Avatar className="h-16 w-16">
                   <AvatarImage src={logoPreview || undefined} alt="Company Logo" />
@@ -223,16 +217,110 @@ export function Settings() {
               </div>
               <div className="text-right">
                 <h2 className="text-2xl font-bold text-gray-900">INVOICE</h2>
-                <p className="text-sm text-gray-600">Invoice #: INV-001</p>
+                <p className="text-sm text-gray-600">Invoice #: INV-2024-001</p>
                 <p className="text-sm text-gray-600">Date: {new Date().toLocaleDateString('en-GB', { 
+                  day: '2-digit', 
+                  month: 'short', 
+                  year: 'numeric' 
+                }).replace(/ /g, '-').toLowerCase()}</p>
+                <p className="text-sm text-gray-600">Due Date: {(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)).toLocaleDateString('en-GB', { 
                   day: '2-digit', 
                   month: 'short', 
                   year: 'numeric' 
                 }).replace(/ /g, '-').toLowerCase()}</p>
               </div>
             </div>
-            <div className="text-center text-sm text-gray-500 mt-4">
-              This is how your company information will appear on invoices
+
+            {/* Customer Information */}
+            <div className="mb-8">
+              <div>
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">Bill To:</h4>
+                <div className="text-sm text-gray-600">
+                  <p className="font-medium">Dr. Ahmed Hassan</p>
+                  <p>Karachi Medical Center</p>
+                  <p>Block 6, PECHS</p>
+                  <p>Karachi, 75400</p>
+                  <p>Phone: +92-21-1234567</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Items Table */}
+            <div className="mb-8">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Batch No</th>
+                    <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Medicine</th>
+                    <th className="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700">Unit</th>
+                    <th className="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700">Qty</th>
+                    <th className="border border-gray-200 px-4 py-3 text-right text-sm font-semibold text-gray-700">Unit Price</th>
+                    <th className="border border-gray-200 px-4 py-3 text-right text-sm font-semibold text-gray-700">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">BCH-2024-001</td>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">Pantoprazole 40mg</td>
+                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">Tablet</td>
+                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">30</td>
+                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 2.50</td>
+                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 75.00</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">BCH-2024-002</td>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">Amoxicillin 500mg</td>
+                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">Capsule</td>
+                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">21</td>
+                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 3.20</td>
+                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 67.20</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">BCH-2024-003</td>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">Paracetamol 500mg</td>
+                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">Tablet</td>
+                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">100</td>
+                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 0.80</td>
+                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 80.00</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">BCH-2024-004</td>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">Metformin 500mg</td>
+                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">Tablet</td>
+                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">60</td>
+                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 1.50</td>
+                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 90.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Totals Section */}
+            <div className="flex justify-end mb-8">
+              <div className="w-64">
+                <div className="flex justify-between py-2 border-b border-gray-200">
+                  <span className="text-sm text-gray-600">Subtotal:</span>
+                  <span className="text-sm text-gray-900">Rs. 312.20</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-200">
+                  <span className="text-sm text-gray-600">Tax (17%):</span>
+                  <span className="text-sm text-gray-900">Rs. 53.07</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-200">
+                  <span className="text-sm text-gray-600">Discount (5%):</span>
+                  <span className="text-sm text-gray-900">-Rs. 15.61</span>
+                </div>
+                <div className="flex justify-between py-3 bg-gray-50 px-3 rounded">
+                  <span className="text-base font-semibold text-gray-900">Total:</span>
+                  <span className="text-base font-semibold text-gray-900">Rs. 349.66</span>
+                </div>
+              </div>
+            </div>
+
+
+            {/* Footer */}
+            <div className="text-center text-sm text-gray-500 border-t border-gray-200 pt-4">
+              This is a computer generated slip and does not require signature
             </div>
           </div>
         </CardContent>
