@@ -44,7 +44,9 @@ export function RevenueProfit() {
 
   // New metrics data
   const metricsData = {
-    allTimePurchase: 1850000, // Total purchases made since inception
+    purchaseThisYear: 1580000, // Purchases made this year
+    soldThisYear: 2840000, // Sales made this year
+    profitMarginThisYear: '44.4%', // Profit margin for this year
     purchaseThisMonth: 132150, // Purchases made this month
     soldThisMonth: 236500, // Sales made this month
     profitMarginThisMonth: '44.1%' // Profit margin for this month
@@ -77,18 +79,34 @@ export function RevenueProfit() {
   return (
     <div className="space-y-6">
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[
           {
-            title: "All Time Purchase",
-            value: `₨ ${metricsData.allTimePurchase.toLocaleString()}`,
+            title: "Purchase This Year",
+            value: `₨ ${metricsData.purchaseThisYear.toLocaleString()}`,
             icon: ShoppingCart,
-            description: "Total purchases since inception",
+            description: "Total purchases this year",
             color: "text-blue-600",
             gradient: "bg-blue-600"
           },
           {
-            title: "Total Purchase This Month",
+            title: "Sold This Year",
+            value: `₨ ${metricsData.soldThisYear.toLocaleString()}`,
+            icon: TrendingUp,
+            description: "Total sales this year",
+            color: "text-green-600",
+            gradient: "bg-green-600"
+          },
+          {
+            title: "Profit Margin This Year",
+            value: metricsData.profitMarginThisYear,
+            icon: BarChart3,
+            description: "Yearly profit margin",
+            color: "text-purple-600",
+            gradient: "bg-purple-600"
+          },
+          {
+            title: "Purchase This Month",
             value: `₨ ${metricsData.purchaseThisMonth.toLocaleString()}`,
             icon: DollarSign,
             description: "Current month purchases",
@@ -96,20 +114,20 @@ export function RevenueProfit() {
             gradient: "bg-orange-600"
           },
           {
-            title: "Total Sold This Month",
+            title: "Sold This Month",
             value: `₨ ${metricsData.soldThisMonth.toLocaleString()}`,
             icon: TrendingUp,
             description: "Current month sales",
-            color: "text-green-600",
-            gradient: "bg-green-600"
+            color: "text-emerald-600",
+            gradient: "bg-emerald-600"
           },
           {
             title: "Profit Margin This Month",
             value: metricsData.profitMarginThisMonth,
             icon: BarChart3,
             description: "Current month profit margin",
-            color: "text-purple-600",
-            gradient: "bg-purple-600"
+            color: "text-indigo-600",
+            gradient: "bg-indigo-600"
           }
         ].map((stat) => {
           const Icon = stat.icon;
