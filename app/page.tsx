@@ -20,6 +20,7 @@ import {
 import { Dashboard } from '@/components/Dashboard';
 import { MedicineList } from '@/components/MedicineList';
 import { Inventory } from '@/components/Inventory';
+import { Customers } from '@/components/Customers';
 import { PurchaseAndSell } from '@/components/PurchaseAndSell';
 
 import { RevenueProfit } from '@/components/RevenueProfit';
@@ -58,6 +59,10 @@ function AppContent() {
           
           <TabsContent value="inventory">
             <Inventory />
+          </TabsContent>
+
+          <TabsContent value="customers">
+            <Customers />
           </TabsContent>
           
           <TabsContent value="purchase-and-sell">
