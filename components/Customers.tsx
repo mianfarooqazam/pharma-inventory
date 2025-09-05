@@ -18,7 +18,19 @@ import { AddCustomerDialog, NewCustomer } from "./AddCustomerDialog";
 interface Customer extends NewCustomer {}
 
 export function Customers() {
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const initialCustomers: Customer[] = [
+    { name: "Ali Khan", address: "12 Mall Road", city: "Lahore", phone: "03001234567", outstandingDues: 0 },
+    { name: "Sara Ahmed", address: "45 Clifton Block 5", city: "Karachi", phone: "03111234567", outstandingDues: 1250.5 },
+    { name: "Usman Iqbal", address: "88 Satellite Town", city: "Rawalpindi", phone: "03211234567", outstandingDues: 300 },
+    { name: "Ayesha Noor", address: "7 University Rd", city: "Peshawar", phone: "03331234567", outstandingDues: 0 },
+    { name: "Bilal Hussain", address: "19 Jail Road", city: "Lahore", phone: "03011239876", outstandingDues: 950 },
+    { name: "Hina Malik", address: "2 Jinnah Avenue", city: "Islamabad", phone: "03451234567", outstandingDues: 0 },
+    { name: "Faisal Raza", address: "55 Shahrah-e-Faisal", city: "Karachi", phone: "03021234567", outstandingDues: 4200.75 },
+    { name: "Nida Shah", address: "101 MQ Road", city: "Multan", phone: "03151234567", outstandingDues: 110 },
+    { name: "Hamza Tariq", address: "6 Cantt Bazaar", city: "Quetta", phone: "03301234567", outstandingDues: 0 },
+    { name: "Maryam Zafar", address: "23 Civil Lines", city: "Faisalabad", phone: "03251234567", outstandingDues: 780 }
+  ];
+  const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
