@@ -78,8 +78,13 @@ export function AddCustomerDialog({ open, onOpenChange, onAdd }: AddCustomerDial
               <Label htmlFor="phone">Phone Number</Label>
               <Input
                 id="phone"
+                type="tel"
+                inputMode="numeric"
                 value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
+                onChange={(e) => {
+                  const digitsOnly = e.target.value.replace(/\D/g, "");
+                  handleInputChange("phone", digitsOnly);
+                }}
                 placeholder="e.g., 03001234567"
               />
             </div>
@@ -99,7 +104,10 @@ export function AddCustomerDialog({ open, onOpenChange, onAdd }: AddCustomerDial
               <Input
                 id="city"
                 value={formData.city}
-                onChange={(e) => handleInputChange("city", e.target.value)}
+                onChange={(e) => {
+                  const lettersOnly = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+                  handleInputChange("city", lettersOnly);
+                }}
                 placeholder="Enter city"
               />
             </div>

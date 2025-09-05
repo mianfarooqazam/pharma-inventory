@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Users } from "lucide-react";
+import { Plus, Search, Users, FileText, Trash2 } from "lucide-react";
 import { AddCustomerDialog, NewCustomer } from "./AddCustomerDialog";
 
 interface Customer extends NewCustomer {}
@@ -73,6 +73,7 @@ export function Customers() {
                   <TableHead>City</TableHead>
                   <TableHead>Phone Number</TableHead>
                   <TableHead>Outstanding Dues</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -82,13 +83,31 @@ export function Customers() {
                     <TableCell>
                       <div>
                         <p className="font-medium">{c.name}</p>
-                        
+                      
                       </div>
                     </TableCell>
                     <TableCell>{c.address}</TableCell>
                     <TableCell>{c.city}</TableCell>
                     <TableCell>{c.phone}</TableCell>
                     <TableCell>PKR {c.outstandingDues.toFixed(2)}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="ghost" size="sm">
+                        <FileText className="h-4 w-4" />
+
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() =>
+                            setCustomers((prev) => prev.filter((_, i) => i !== idx))
+                          }
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
