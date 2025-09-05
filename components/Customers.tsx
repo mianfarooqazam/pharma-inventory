@@ -82,7 +82,7 @@ export function Customers() {
                     <TableCell>
                       <div>
                         <p className="font-medium">{c.name}</p>
-                        <p className="text-sm text-gray-500">{c.phone}</p>
+                        
                       </div>
                     </TableCell>
                     <TableCell>{c.address}</TableCell>
