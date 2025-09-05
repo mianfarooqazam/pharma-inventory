@@ -104,8 +104,15 @@ export function Customers() {
                     <TableCell>PKR {c.outstandingDues.toFixed(2)}</TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm">
-                        <FileText className="h-4 w-4" />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const hash = `#invoices?customer=${encodeURIComponent(c.name)}`;
+                            window.location.hash = hash;
+                          }}
+                        >
+                          <FileText className="h-4 w-4" />
 
                         </Button>
                         <Button

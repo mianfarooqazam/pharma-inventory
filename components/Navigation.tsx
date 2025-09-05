@@ -24,6 +24,7 @@ import {
   AlertCircle,
   Warehouse,
   Settings,
+  Receipt,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNotifications } from "@/contexts/NotificationContext";
@@ -63,6 +64,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
     { id: "medicines", label: "Medicines", icon: Package },
     { id: "inventory", label: "Inventory", icon: Warehouse },
     { id: "customers", label: "Customers", icon: Users },
+    { id: "invoices", label: "Invoices", icon: Receipt },
     { id: "purchase-and-sell", label: "Purchase & Sell", icon: Activity },
     { id: "users", label: "Revenue & Profit", icon: DollarSign },
     { id: "settings", label: "Settings", icon: Settings },

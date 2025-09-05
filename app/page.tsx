@@ -21,6 +21,7 @@ import { Dashboard } from '@/components/Dashboard';
 import { MedicineList } from '@/components/MedicineList';
 import { Inventory } from '@/components/Inventory';
 import { Customers } from '@/components/Customers';
+import { Invoices } from '@/components/Invoices';
 import { PurchaseAndSell } from '@/components/PurchaseAndSell';
 
 import { RevenueProfit } from '@/components/RevenueProfit';
@@ -36,6 +37,19 @@ function AppContent() {
   const { user, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
 
+  // Sync active tab with URL hash for simple cross-tab navigation
+  useEffect(() => {
+    const applyHash = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (!hash) return;
+      const [tab] = hash.split('?');
+      if (tab) setActiveTab(tab);
+    };
+    applyHash();
+    window.addEventListener('hashchange', applyHash);
+    return () => window.removeEventListener('hashchange', applyHash);
+  }, []);
+
   if (!isAuthenticated) {
     return <LoginForm />;
   }
@@ -48,7 +62,7 @@ function AppContent() {
       <main className="container mx-auto px-4 py-6 pt-24">
       
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(val) => { setActiveTab(val); window.location.hash = `#${val}`; }}>
           <TabsContent value="dashboard">
             <Dashboard onNavigate={setActiveTab} />
           </TabsContent>
@@ -63,6 +77,10 @@ function AppContent() {
 
           <TabsContent value="customers">
             <Customers />
+          </TabsContent>
+
+          <TabsContent value="invoices">
+            <Invoices />
           </TabsContent>
           
           <TabsContent value="purchase-and-sell">
