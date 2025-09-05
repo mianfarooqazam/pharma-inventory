@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -14,12 +13,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Search, Receipt, Eye } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { InvoicePreviewDialog } from "./InvoicePreviewDialog";
 
 interface InvoiceItem {
   id: string;
   invoiceNo: string;
   customer: string;
+  city: string;
+  address: string;
   date: string;
   amount: number;
   status: "Paid" | "Unpaid";
@@ -30,17 +34,18 @@ export function Invoices() {
   const [customerFilter, setCustomerFilter] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceItem | null>(null);
+  const { toast } = useToast();
   const [invoices] = useState<InvoiceItem[]>([
-    { id: "1", invoiceNo: "INV-1001", customer: "Ali Khan", date: "2025-01-12", amount: 4500, status: "Paid" },
-    { id: "2", invoiceNo: "INV-1002", customer: "Sara Ahmed", date: "2025-01-12", amount: 1250.5, status: "Unpaid" },
-    { id: "3", invoiceNo: "INV-1003", customer: "Usman Iqbal", date: "2025-01-13", amount: 300, status: "Paid" },
-    { id: "4", invoiceNo: "INV-1004", customer: "Ayesha Noor", date: "2025-01-13", amount: 980, status: "Paid" },
-    { id: "5", invoiceNo: "INV-1005", customer: "Bilal Hussain", date: "2025-01-14", amount: 950, status: "Unpaid" },
-    { id: "6", invoiceNo: "INV-1006", customer: "Ali Khan", date: "2025-01-15", amount: 2100, status: "Paid" },
-    { id: "7", invoiceNo: "INV-1007", customer: "Ali Khan", date: "2025-01-20", amount: 760, status: "Unpaid" },
-    { id: "8", invoiceNo: "INV-1008", customer: "Sara Ahmed", date: "2025-01-22", amount: 845, status: "Paid" },
-    { id: "9", invoiceNo: "INV-1009", customer: "Hina Malik", date: "2025-01-23", amount: 1200, status: "Paid" },
-    { id: "10", invoiceNo: "INV-1010", customer: "Faisal Raza", date: "2025-01-24", amount: 4200.75, status: "Unpaid" },
+    { id: "1", invoiceNo: "INV-1001", customer: "Ali Khan", city: "Lahore", address: "12 Mall Road, Lahore", date: "2025-01-12", amount: 4500, status: "Paid" },
+    { id: "2", invoiceNo: "INV-1002", customer: "Sara Ahmed", city: "Karachi", address: "45 Clifton Block 5, Karachi", date: "2025-01-12", amount: 1250.5, status: "Unpaid" },
+    { id: "3", invoiceNo: "INV-1003", customer: "Usman Iqbal", city: "Rawalpindi", address: "88 Satellite Town, Rawalpindi", date: "2025-01-13", amount: 300, status: "Paid" },
+    { id: "4", invoiceNo: "INV-1004", customer: "Ayesha Noor", city: "Peshawar", address: "7 University Rd, Peshawar", date: "2025-01-13", amount: 980, status: "Paid" },
+    { id: "5", invoiceNo: "INV-1005", customer: "Bilal Hussain", city: "Lahore", address: "19 Jail Road, Lahore", date: "2025-01-14", amount: 950, status: "Unpaid" },
+    { id: "6", invoiceNo: "INV-1006", customer: "Ali Khan", city: "Lahore", address: "12 Mall Road, Lahore", date: "2025-01-15", amount: 2100, status: "Paid" },
+    { id: "7", invoiceNo: "INV-1007", customer: "Ali Khan", city: "Lahore", address: "12 Mall Road, Lahore", date: "2025-01-20", amount: 760, status: "Unpaid" },
+    { id: "8", invoiceNo: "INV-1008", customer: "Sara Ahmed", city: "Karachi", address: "45 Clifton Block 5, Karachi", date: "2025-01-22", amount: 845, status: "Paid" },
+    { id: "9", invoiceNo: "INV-1009", customer: "Hina Malik", city: "Islamabad", address: "2 Jinnah Avenue, Islamabad", date: "2025-01-23", amount: 1200, status: "Paid" },
+    { id: "10", invoiceNo: "INV-1010", customer: "Faisal Raza", city: "Karachi", address: "55 Shahrah-e-Faisal, Karachi", date: "2025-01-24", amount: 4200.75, status: "Unpaid" },
   ]);
 
   const customerOptions = Array.from(new Set(invoices.map(i => i.customer)));
@@ -74,6 +79,51 @@ export function Invoices() {
     return matchesText && matchesCustomer;
   });
 
+  const [paymentStatus, setPaymentStatus] = useState<{ [key: string]: boolean }>(() =>
+    invoices.reduce((acc, inv) => {
+      acc[inv.id] = inv.status === "Paid";
+      return acc;
+    }, {} as { [key: string]: boolean })
+  );
+
+  const handlePaymentStatusChange = (invoice: InvoiceItem, nextChecked: boolean) => {
+    const confirmation = toast({
+      title: "Confirm Payment Status Change",
+      description: (
+        <div className="space-y-1">
+          <div>
+            <span className="font-semibold">Invoice #</span>
+            <span className="font-semibold">{invoice.invoiceNo}</span>
+          </div>
+          <div>Customer: {invoice.customer}</div>
+          <div>Address: {invoice.address}</div>
+          <div className="mt-2">Mark as {nextChecked ? "Paid" : "Unpaid"}?</div>
+        </div>
+      ),
+      action: (
+        <div className="flex gap-2">
+          <ToastAction
+            altText="Confirm"
+            onClick={() => {
+              confirmation.dismiss();
+              setPaymentStatus((prev) => ({ ...prev, [invoice.id]: nextChecked }));
+            }}
+            className="bg-green-600 text-white hover:bg-green-700"
+          >
+            Confirm
+          </ToastAction>
+          <ToastAction
+            altText="Cancel"
+            onClick={() => confirmation.dismiss()}
+            className="bg-gray-600 text-white hover:bg-gray-700"
+          >
+            Cancel
+          </ToastAction>
+        </div>
+      ),
+    });
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -83,28 +133,7 @@ export function Invoices() {
               <Receipt className="h-5 w-5" />
               <span>Invoices{customerFilter ? ` — ${customerFilter}` : ''}</span>
             </CardTitle>
-            <div className="flex items-center gap-2">
-              <Select
-                value={customerFilter || "all"}
-                onValueChange={(val) => {
-                  const v = val === "all" ? null : val;
-                  setCustomerFilter(v);
-                  setSearchTerm(v || "");
-                  const base = "#invoices";
-                  window.location.hash = v ? `${base}?customer=${encodeURIComponent(v)}` : base;
-                }}
-              >
-                <SelectTrigger className="w-[220px]">
-                  <SelectValue placeholder="Filter by customer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Customers</SelectItem>
-                  {customerOptions.map((c) => (
-                    <SelectItem key={c} value={c}>{c}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            
           </div>
         </CardHeader>
         <CardContent>
@@ -125,6 +154,7 @@ export function Invoices() {
                   <TableHead>Sr No</TableHead>
                   <TableHead>Invoice No</TableHead>
                   <TableHead>Customer</TableHead>
+                  <TableHead>City</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Status</TableHead>
@@ -137,9 +167,25 @@ export function Invoices() {
                     <TableCell className="text-center font-medium">{idx + 1}</TableCell>
                     <TableCell className="font-medium">{inv.invoiceNo}</TableCell>
                     <TableCell>{inv.customer}</TableCell>
+                    <TableCell>{inv.city}</TableCell>
                     <TableCell>{inv.date}</TableCell>
                     <TableCell>PKR {inv.amount.toFixed(2)}</TableCell>
-                    <TableCell>{inv.status}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`inv-paid-${inv.id}`}
+                          checked={paymentStatus[inv.id] || false}
+                          onCheckedChange={(checked) => handlePaymentStatusChange(inv, checked as boolean)}
+                          className={`${paymentStatus[inv.id] ? 'data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600' : 'data-[state=unchecked]:border-red-300'}`}
+                        />
+                        <label
+                          htmlFor={`inv-paid-${inv.id}`}
+                          className={`text-sm font-medium leading-none ${paymentStatus[inv.id] ? 'text-green-600' : 'text-red-600'}`}
+                        >
+                          {paymentStatus[inv.id] ? 'Paid' : 'Unpaid'}
+                        </label>
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
                         <Button
