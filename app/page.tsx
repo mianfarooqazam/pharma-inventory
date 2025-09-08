@@ -1,28 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent,  CardHeader, CardTitle } from '@/components/ui/card';
+
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { 
-  BarChart3, 
-  Package, 
-  AlertTriangle, 
-  TrendingUp, 
-  Search,
-  Plus,
-  Users,
-  Calendar,
-  DollarSign
+  PackagePlus,
+  ShoppingCart,
+  RotateCcw,
 } from 'lucide-react';
 import { Dashboard } from '@/components/Dashboard';
 import { MedicineList } from '@/components/MedicineList';
 import { Inventory } from '@/components/Inventory';
 import { Customers } from '@/components/Customers';
 import { Invoices } from '@/components/Invoices';
-import { PurchaseAndSell } from '@/components/PurchaseAndSell';
 import { PurchaseForm } from '@/components/PurchaseForm';
 import { SaleForm } from '@/components/SaleForm';
 
@@ -86,21 +77,54 @@ function AppContent() {
           </TabsContent>
           
           <TabsContent value="transactions-purchase">
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Purchase</h2>
-              <PurchaseForm initialType="new" hideTypeSwitcher />
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center space-x-2">
+                      <PackagePlus className="h-5 w-5" />
+                      <span>Purchase</span>
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <PurchaseForm initialType="new" hideTypeSwitcher />
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
           <TabsContent value="transactions-sell">
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Sell</h2>
-              <SaleForm />
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center space-x-2">
+                      <ShoppingCart className="h-5 w-5" />
+                      <span>Sell</span>
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <SaleForm />
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
           <TabsContent value="transactions-restock">
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Restock</h2>
-              <PurchaseForm initialType="restock" hideTypeSwitcher />
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center space-x-2">
+                      <RotateCcw className="h-5 w-5" />
+                      <span>Restock</span>
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <PurchaseForm initialType="restock" hideTypeSwitcher />
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
           
