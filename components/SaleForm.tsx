@@ -47,6 +47,8 @@ export function SaleForm() {
 
   const [invoiceOpen, setInvoiceOpen] = useState(false);
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+  const [taxPercent, setTaxPercent] = useState<string>('0');
+  const [discountPercent, setDiscountPercent] = useState<string>('0');
 
   const selectedMedicine = medicines.find(m => m.id === formData.medicineId);
   const availableStock = selectedMedicine ? getMedicineStock(selectedMedicine.id) : 0;
@@ -185,7 +187,7 @@ export function SaleForm() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="customer">Customer</Label>
+                <Label htmlFor="customer">Customer Name</Label>
                 <Select value={customerName} onValueChange={(value) => setCustomerName(value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select customer" />
@@ -264,7 +266,7 @@ export function SaleForm() {
                   required
                 />
                 {selectedBatch && (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-blue-500">
                     Available in selected batch: {batchStock} units
                   </p>
                 )}
@@ -284,32 +286,23 @@ export function SaleForm() {
                 {selectedMedicine && (
                   <div className="space-y-1">
                     {selectedBatch && (
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-blue-500">
                         Purchase price: PKR {selectedBatch.costPrice.toFixed(2)}
                       </p>
                     )}
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-blue-500">
                       Expected selling price: PKR {selectedMedicine.price.toFixed(2)}
                     </p>
                   </div>
                 )}
                 <div className="pt-2">
-                  <Button type="button" variant="outline" onClick={handleAddItem} disabled={!formData.medicineId || !formData.batchId || !formData.quantity || !formData.actualSellingPrice}>Add Item</Button>
+                  <Button type="button" variant="default" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={handleAddItem} disabled={!formData.medicineId || !formData.batchId || !formData.quantity || !formData.actualSellingPrice}>Add Item</Button>
                 </div>
               </div>
             </div>
           </div>
 
-          {formData.actualSellingPrice && formData.quantity && (
-            <div className="bg-blue-600 border-blue-600 rounded-lg p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-white font-medium">Total Amount:</span>
-                <span className="font-bold text-lg text-white">
-                  PKR {(parseInt(formData.quantity) * parseFloat(formData.actualSellingPrice)).toFixed(2)}
-                </span>
-              </div>
-            </div>
-          )}
+          {/* Per-item total preview removed; totals shown in Cart Items below */}
 
           {cartItems.length > 0 && (
             <div className="space-y-3">
@@ -346,6 +339,60 @@ export function SaleForm() {
                   </tbody>
                 </table>
               </div>
+              <div className="flex flex-col sm:flex-row sm:justify-end gap-4">
+                <div className="w-full sm:w-64 space-y-3">
+                  <div className="flex justify-between py-2">
+                    <span className="text-sm text-gray-600">Subtotal:</span>
+                    <span className="text-sm font-semibold">PKR {cartItems.reduce((sum, it) => sum + it.quantity * it.unitPrice, 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <label htmlFor="taxPercent" className="text-gray-600">Tax (%)</label>
+                    <Input
+                      id="taxPercent"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      className="w-28 h-8 text-right"
+                      value={taxPercent}
+                      onChange={(e) => setTaxPercent(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <label htmlFor="discountPercent" className="text-gray-600">Discount (%)</label>
+                    <Input
+                      id="discountPercent"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      className="w-28 h-8 text-right"
+                      value={discountPercent}
+                      onChange={(e) => setDiscountPercent(e.target.value)}
+                    />
+                  </div>
+                  {(() => {
+                    const subtotal = cartItems.reduce((s, it) => s + it.quantity * it.unitPrice, 0);
+                    const tax = subtotal * (parseFloat(taxPercent || '0') / 100);
+                    const discount = subtotal * (parseFloat(discountPercent || '0') / 100);
+                    const total = Math.max(0, subtotal + tax - discount);
+                    return (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Tax</span>
+                          <span className="font-medium">PKR {tax.toFixed(2)}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Discount</span>
+                          <span className="font-medium">- PKR {discount.toFixed(2)}</span>
+                        </div>
+                        <div className="flex items-center justify-between pt-2 border-t">
+                          <span className="font-semibold">Total</span>
+                          <span className="font-semibold">PKR {total.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
             </div>
           )}
 
@@ -361,7 +408,7 @@ export function SaleForm() {
         </div>
 
         <div className="flex justify-end space-x-2">
-          <Button type="submit" disabled={!customerName || cartItems.length === 0}>
+          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={!customerName || cartItems.length === 0}>
             Record Sale
           </Button>
         </div>
