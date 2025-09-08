@@ -3,11 +3,19 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+export interface InvoiceItemData {
+  batchNo: string;
+  medicine: string;
+  unit: string;
+  quantity: number;
+  unitPrice: number;
+}
+
 export interface InvoiceData {
   invoiceNo: string;
-  customer: string;
+  customerName: string;
   date: string;
-  amount: number;
+  items: InvoiceItemData[];
   status: "Paid" | "Unpaid";
 }
 
@@ -37,7 +45,7 @@ export function InvoicePreview({ invoice, company, taxRate = 0.17, discountRate 
     .join("")
     .toUpperCase();
 
-  const subtotal = invoice ? invoice.amount : 0;
+  const subtotal = invoice ? invoice.items.reduce((sum, it) => sum + it.quantity * it.unitPrice, 0) : 0;
   const tax = Math.round(subtotal * taxRate * 100) / 100;
   const discount = Math.round(subtotal * discountRate * 100) / 100;
   const total = Math.round((subtotal + tax - discount) * 100) / 100;
@@ -70,11 +78,7 @@ export function InvoicePreview({ invoice, company, taxRate = 0.17, discountRate 
             <div className="mb-8">
               <h4 className="text-sm font-semibold text-gray-700 mb-2">Bill To:</h4>
               <div className="text-sm text-gray-600">
-                <p className="font-medium">Dr. Ahmed Hassan</p>
-                <p>Karachi Medical Center</p>
-                <p>Block 6, PECHS</p>
-                <p>Karachi, 75400</p>
-                <p>Phone: +92-21-1234567</p>
+                <p className="font-medium">{invoice?.customerName}</p>
               </div>
             </div>
 
@@ -92,38 +96,16 @@ export function InvoicePreview({ invoice, company, taxRate = 0.17, discountRate 
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">BCH-2024-001</td>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">Pantoprazole 40mg</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">Tablet</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">30</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 2.50</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 75.00</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">BCH-2024-002</td>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">Amoxicillin 500mg</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">Capsule</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">21</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 3.20</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 67.20</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">BCH-2024-003</td>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">Paracetamol 500mg</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">Tablet</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">100</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 0.80</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 80.00</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">BCH-2024-004</td>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">Metformin 500mg</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">Tablet</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">60</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 1.50</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 90.00</td>
-                  </tr>
+                  {invoice?.items.map((item, idx) => (
+                    <tr key={`${item.batchNo}-${idx}`}>
+                      <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">{item.batchNo}</td>
+                      <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">{item.medicine}</td>
+                      <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">{item.unit}</td>
+                      <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">{item.quantity}</td>
+                      <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. {item.unitPrice.toFixed(2)}</td>
+                      <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. {(item.quantity * item.unitPrice).toFixed(2)}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

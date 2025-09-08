@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { InvoicePreviewDialog } from './InvoicePreviewDialog';
+import { InvoiceData } from './InvoicePreview';
 import { useInventory } from '@/contexts/InventoryContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { formatDate } from '@/lib/utils';
@@ -22,6 +24,30 @@ export function SaleForm() {
     notes: '',
   });
 
+  const customers = useMemo(() => [
+    { name: 'Ali Khan', city: 'Lahore' },
+    { name: 'Sara Ahmed', city: 'Karachi' },
+    { name: 'Usman Iqbal', city: 'Rawalpindi' },
+    { name: 'Ayesha Noor', city: 'Peshawar' },
+    { name: 'Bilal Hussain', city: 'Lahore' },
+    { name: 'Hina Malik', city: 'Islamabad' },
+    { name: 'Faisal Raza', city: 'Karachi' },
+    { name: 'Nida Shah', city: 'Multan' },
+    { name: 'Hamza Tariq', city: 'Quetta' },
+    { name: 'Maryam Zafar', city: 'Faisalabad' },
+  ], []);
+
+  const [customerName, setCustomerName] = useState('');
+  const [cartItems, setCartItems] = useState<Array<{
+    medicineId: string;
+    batchId: string;
+    quantity: number;
+    unitPrice: number;
+  }>>([]);
+
+  const [invoiceOpen, setInvoiceOpen] = useState(false);
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+
   const selectedMedicine = medicines.find(m => m.id === formData.medicineId);
   const availableStock = selectedMedicine ? getMedicineStock(selectedMedicine.id) : 0;
 
@@ -34,52 +60,101 @@ export function SaleForm() {
 
   const availableBatches = getAvailableBatches(formData.medicineId);
   const selectedBatch = batches.find(b => b.id === formData.batchId);
-  const batchStock = selectedBatch ? selectedBatch.quantity : 0;
+  const reservedInCartForBatch = useMemo(() => {
+    if (!formData.batchId) return 0;
+    return cartItems
+      .filter(ci => ci.batchId === formData.batchId)
+      .reduce((sum, ci) => sum + ci.quantity, 0);
+  }, [cartItems, formData.batchId]);
+  const batchStock = selectedBatch ? Math.max(0, selectedBatch.quantity - reservedInCartForBatch) : 0;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!selectedMedicine) return;
-    
+  const handleAddItem = () => {
+    if (!formData.medicineId || !formData.batchId || !formData.quantity || !formData.actualSellingPrice) return;
     const quantity = parseInt(formData.quantity);
-    
-    if (!formData.batchId) {
-      addNotification({
-        type: 'error',
-        title: 'Sale Failed',
-        message: 'Please select a batch to sell from',
-      });
+    const unitPrice = parseFloat(formData.actualSellingPrice);
+    if (!selectedBatch) return;
+
+    if (quantity <= 0 || unitPrice <= 0) {
+      addNotification({ type: 'error', title: 'Invalid Item', message: 'Quantity and price must be greater than 0' });
       return;
     }
 
     if (quantity > batchStock) {
-      addNotification({
-        type: 'error',
-        title: 'Insufficient Stock',
-        message: `Only ${batchStock} units available in selected batch`,
-      });
+      addNotification({ type: 'error', title: 'Insufficient Stock', message: `Only ${batchStock} units available in selected batch` });
       return;
     }
 
-    // Record sale transaction with actual selling price
-    addTransaction({
+    setCartItems(prev => [...prev, {
       medicineId: formData.medicineId,
       batchId: formData.batchId,
-      type: 'sale',
-      quantity: quantity,
-      unitPrice: parseFloat(formData.actualSellingPrice),
-      totalAmount: quantity * parseFloat(formData.actualSellingPrice),
-      notes: formData.notes,
-      createdBy: 'current-user',
+      quantity,
+      unitPrice,
+    }]);
+
+    setFormData(prev => ({ ...prev, batchId: '', quantity: '', actualSellingPrice: '' }));
+  };
+
+  const handleRemoveItem = (index: number) => {
+    setCartItems(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!customerName) {
+      addNotification({ type: 'error', title: 'Missing Customer', message: 'Please select a customer' });
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      addNotification({ type: 'error', title: 'Empty Cart', message: 'Please add at least one item' });
+      return;
+    }
+
+    // Record each item as a sale transaction
+    cartItems.forEach(item => {
+      addTransaction({
+        medicineId: item.medicineId,
+        batchId: item.batchId,
+        type: 'sale',
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        totalAmount: item.quantity * item.unitPrice,
+        notes: formData.notes,
+        createdBy: 'current-user',
+      });
     });
+
+    const itemsForInvoice = cartItems.map(ci => {
+      const med = medicines.find(m => m.id === ci.medicineId);
+      const batch = batches.find(b => b.id === ci.batchId);
+      return {
+        batchNo: batch ? batch.batchNumber : '',
+        medicine: med ? `${med.name} ${med.strength}` : 'Unknown',
+        unit: med ? med.unit : '',
+        quantity: ci.quantity,
+        unitPrice: ci.unitPrice,
+      };
+    });
+
+    const invoice: InvoiceData = {
+      invoiceNo: `INV-${Date.now()}`,
+      customerName,
+      date: formatDate(new Date()),
+      items: itemsForInvoice,
+      status: 'Paid',
+    };
+
+    setInvoiceData(invoice);
+    setInvoiceOpen(true);
 
     addNotification({
       type: 'success',
       title: 'Sale Recorded',
-      message: `Successfully sold ${quantity} units of ${selectedMedicine.name}`,
+      message: `Successfully recorded ${cartItems.length} item(s) for ${customerName}`,
     });
 
-    // Reset form
+    // Reset item fields and cart
     setFormData({
       medicineId: '',
       batchId: '',
@@ -87,6 +162,7 @@ export function SaleForm() {
       actualSellingPrice: '',
       notes: '',
     });
+    setCartItems([]);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -100,6 +176,24 @@ export function SaleForm() {
           {/* Sale Information */}
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="customer">Customer</Label>
+                <Select value={customerName} onValueChange={(value) => setCustomerName(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select customer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {customers.map((c) => (
+                      <SelectItem key={c.name} value={c.name}>
+                        <div className="flex items-center justify-between w-full">
+                          <span>{c.name}</span>
+                          <span className="text-sm text-gray-500 ml-2">{c.city}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="medicine">Medicine Name</Label>
                 <Select value={formData.medicineId} onValueChange={(value) => handleInputChange('medicineId', value)}>
@@ -191,6 +285,9 @@ export function SaleForm() {
                     </p>
                   </div>
                 )}
+                <div className="pt-2">
+                  <Button type="button" variant="outline" onClick={handleAddItem} disabled={!formData.medicineId || !formData.batchId || !formData.quantity || !formData.actualSellingPrice}>Add Item</Button>
+                </div>
               </div>
             </div>
           </div>
@@ -202,6 +299,44 @@ export function SaleForm() {
                 <span className="font-bold text-lg text-white">
                   PKR {(parseInt(formData.quantity) * parseFloat(formData.actualSellingPrice)).toFixed(2)}
                 </span>
+              </div>
+            </div>
+          )}
+
+          {cartItems.length > 0 && (
+            <div className="space-y-3">
+              <div className="text-sm font-medium">Cart Items</div>
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="border border-gray-200 px-3 py-2 text-left text-sm">Batch</th>
+                      <th className="border border-gray-200 px-3 py-2 text-left text-sm">Medicine</th>
+                      <th className="border border-gray-200 px-3 py-2 text-center text-sm">Qty</th>
+                      <th className="border border-gray-200 px-3 py-2 text-right text-sm">Unit Price</th>
+                      <th className="border border-gray-200 px-3 py-2 text-right text-sm">Total</th>
+                      <th className="border border-gray-200 px-3 py-2 text-right text-sm">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cartItems.map((ci, idx) => {
+                      const med = medicines.find(m => m.id === ci.medicineId);
+                      const batch = batches.find(b => b.id === ci.batchId);
+                      return (
+                        <tr key={`cart-${idx}`}>
+                          <td className="border border-gray-200 px-3 py-2 text-sm">{batch?.batchNumber}</td>
+                          <td className="border border-gray-200 px-3 py-2 text-sm">{med ? `${med.name} ${med.strength}` : ''}</td>
+                          <td className="border border-gray-200 px-3 py-2 text-center text-sm">{ci.quantity}</td>
+                          <td className="border border-gray-200 px-3 py-2 text-right text-sm">PKR {ci.unitPrice.toFixed(2)}</td>
+                          <td className="border border-gray-200 px-3 py-2 text-right text-sm">PKR {(ci.quantity * ci.unitPrice).toFixed(2)}</td>
+                          <td className="border border-gray-200 px-3 py-2 text-right text-sm">
+                            <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveItem(idx)}>Remove</Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
@@ -218,11 +353,12 @@ export function SaleForm() {
         </div>
 
         <div className="flex justify-end space-x-2">
-          <Button type="submit" disabled={!formData.medicineId || !formData.batchId || !formData.quantity || !formData.actualSellingPrice}>
+          <Button type="submit" disabled={!customerName || cartItems.length === 0}>
             Record Sale
           </Button>
         </div>
       </form>
+      <InvoicePreviewDialog open={invoiceOpen} onOpenChange={setInvoiceOpen} invoice={invoiceData} />
     </div>
   );
 }

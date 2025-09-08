@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { InvoicePreview } from "./InvoicePreview";
+import { InvoicePreview, InvoiceData } from "./InvoicePreview";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { useRef } from "react";
@@ -14,13 +14,7 @@ import { useRef } from "react";
 interface InvoicePreviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  invoice: {
-    invoiceNo: string;
-    customer: string;
-    date: string;
-    amount: number;
-    status: "Paid" | "Unpaid";
-  } | null;
+  invoice: InvoiceData | null;
 }
 
 export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePreviewDialogProps) {
