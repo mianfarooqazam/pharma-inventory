@@ -11,7 +11,10 @@ import { InvoicePreviewDialog } from './InvoicePreviewDialog';
 import { InvoiceData } from './InvoicePreview';
 import { useInventory } from '@/contexts/InventoryContext';
 import { useNotifications } from '@/contexts/NotificationContext';
+import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from '@/components/ui/toast';
 import { formatDate } from '@/lib/utils';
+import { Pencil, Trash2 } from 'lucide-react';
 
 export function SaleForm() {
   const { medicines, batches, addTransaction, getMedicineStock } = useInventory();
@@ -49,6 +52,8 @@ export function SaleForm() {
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
   const [taxPercent, setTaxPercent] = useState<string>('0');
   const [discountPercent, setDiscountPercent] = useState<string>('0');
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const { toast } = useToast();
 
   const selectedMedicine = medicines.find(m => m.id === formData.medicineId);
   const availableStock = selectedMedicine ? getMedicineStock(selectedMedicine.id) : 0;
@@ -65,12 +70,12 @@ export function SaleForm() {
   const reservedInCartForBatch = useMemo(() => {
     if (!formData.batchId) return 0;
     return cartItems
-      .filter(ci => ci.batchId === formData.batchId)
+      .filter((ci, idx) => ci.batchId === formData.batchId && idx !== editingIndex)
       .reduce((sum, ci) => sum + ci.quantity, 0);
-  }, [cartItems, formData.batchId]);
+  }, [cartItems, formData.batchId, editingIndex]);
   const batchStock = selectedBatch ? Math.max(0, selectedBatch.quantity - reservedInCartForBatch) : 0;
 
-  const handleAddItem = () => {
+  const handleAddOrUpdateItem = () => {
     if (!formData.medicineId || !formData.batchId || !formData.quantity || !formData.actualSellingPrice) return;
     const quantity = parseInt(formData.quantity);
     const unitPrice = parseFloat(formData.actualSellingPrice);
@@ -86,12 +91,21 @@ export function SaleForm() {
       return;
     }
 
-    setCartItems(prev => [...prev, {
-      medicineId: formData.medicineId,
-      batchId: formData.batchId,
-      quantity,
-      unitPrice,
-    }]);
+    if (editingIndex !== null) {
+      setCartItems(prev => prev.map((item, idx) => idx === editingIndex ? {
+        medicineId: formData.medicineId,
+        batchId: formData.batchId,
+        quantity,
+        unitPrice,
+      } : item));
+    } else {
+      setCartItems(prev => [...prev, {
+        medicineId: formData.medicineId,
+        batchId: formData.batchId,
+        quantity,
+        unitPrice,
+      }]);
+    }
 
     // Clear all item inputs for next entry, keep customer selection
     setFormData(prev => ({
@@ -102,10 +116,28 @@ export function SaleForm() {
       actualSellingPrice: '',
       notes: '',
     }));
+    setEditingIndex(null);
+  };
+
+  const handleEditItem = (index: number) => {
+    const item = cartItems[index];
+    setEditingIndex(index);
+    setFormData(prev => ({
+      ...prev,
+      medicineId: item.medicineId,
+      batchId: item.batchId,
+      quantity: String(item.quantity),
+      actualSellingPrice: String(item.unitPrice),
+    }));
   };
 
   const handleRemoveItem = (index: number) => {
     setCartItems(prev => prev.filter((_, i) => i !== index));
+    if (editingIndex === index) {
+      // If removing the item being edited, reset edit mode and clear inputs
+      setEditingIndex(null);
+      setFormData(prev => ({ ...prev, medicineId: '', batchId: '', quantity: '', actualSellingPrice: '' }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -120,59 +152,86 @@ export function SaleForm() {
       addNotification({ type: 'error', title: 'Empty Cart', message: 'Please add at least one item' });
       return;
     }
+    const subtotal = cartItems.reduce((s, it) => s + it.quantity * it.unitPrice, 0);
+    const tax = subtotal * (parseFloat(taxPercent || '0') / 100);
+    const discount = subtotal * (parseFloat(discountPercent || '0') / 100);
+    const total = Math.max(0, subtotal + tax - discount);
 
-    // Record each item as a sale transaction
-    cartItems.forEach(item => {
-      addTransaction({
-        medicineId: item.medicineId,
-        batchId: item.batchId,
-        type: 'sale',
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        totalAmount: item.quantity * item.unitPrice,
-        notes: formData.notes,
-        createdBy: 'current-user',
-      });
+    const confirmation = toast({
+      title: 'Are you sure?',
+      action: (
+        <div className="flex gap-2">
+          <ToastAction
+            altText="Confirm"
+            className="bg-green-600 text-white hover:bg-green-700"
+            onClick={() => {
+              confirmation.dismiss();
+              // Record each item as a sale transaction
+              cartItems.forEach(item => {
+                addTransaction({
+                  medicineId: item.medicineId,
+                  batchId: item.batchId,
+                  type: 'sale',
+                  quantity: item.quantity,
+                  unitPrice: item.unitPrice,
+                  totalAmount: item.quantity * item.unitPrice,
+                  notes: formData.notes,
+                  createdBy: 'current-user',
+                });
+              });
+
+              const itemsForInvoice = cartItems.map(ci => {
+                const med = medicines.find(m => m.id === ci.medicineId);
+                const batch = batches.find(b => b.id === ci.batchId);
+                return {
+                  batchNo: batch ? batch.batchNumber : '',
+                  medicine: med ? `${med.name} ${med.strength}` : 'Unknown',
+                  unit: med ? med.unit : '',
+                  quantity: ci.quantity,
+                  unitPrice: ci.unitPrice,
+                };
+              });
+
+              const invoice: InvoiceData = {
+                invoiceNo: `INV-${Date.now()}`,
+                customerName,
+                date: formatDate(new Date()),
+                items: itemsForInvoice,
+                status: 'Paid',
+              };
+
+              setInvoiceData(invoice);
+              setInvoiceOpen(true);
+
+              addNotification({
+                type: 'success',
+                title: 'Sale Recorded',
+                message: `Successfully recorded ${cartItems.length} item(s) for ${customerName}`,
+              });
+
+              // Reset item fields and cart
+              setFormData({
+                medicineId: '',
+                batchId: '',
+                quantity: '',
+                actualSellingPrice: '',
+                notes: '',
+              });
+              setCartItems([]);
+            }}
+          >
+            Confirm
+          </ToastAction>
+          <ToastAction
+            altText="Cancel"
+            className="bg-gray-600 text-white hover:bg-gray-700"
+            onClick={() => confirmation.dismiss()}
+          >
+            Cancel
+          </ToastAction>
+        </div>
+      ),
     });
-
-    const itemsForInvoice = cartItems.map(ci => {
-      const med = medicines.find(m => m.id === ci.medicineId);
-      const batch = batches.find(b => b.id === ci.batchId);
-      return {
-        batchNo: batch ? batch.batchNumber : '',
-        medicine: med ? `${med.name} ${med.strength}` : 'Unknown',
-        unit: med ? med.unit : '',
-        quantity: ci.quantity,
-        unitPrice: ci.unitPrice,
-      };
-    });
-
-    const invoice: InvoiceData = {
-      invoiceNo: `INV-${Date.now()}`,
-      customerName,
-      date: formatDate(new Date()),
-      items: itemsForInvoice,
-      status: 'Paid',
-    };
-
-    setInvoiceData(invoice);
-    setInvoiceOpen(true);
-
-    addNotification({
-      type: 'success',
-      title: 'Sale Recorded',
-      message: `Successfully recorded ${cartItems.length} item(s) for ${customerName}`,
-    });
-
-    // Reset item fields and cart
-    setFormData({
-      medicineId: '',
-      batchId: '',
-      quantity: '',
-      actualSellingPrice: '',
-      notes: '',
-    });
-    setCartItems([]);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -263,7 +322,6 @@ export function SaleForm() {
                   onChange={(e) => handleInputChange('quantity', e.target.value)}
                   placeholder="Enter quantity"
                   max={batchStock}
-                  required
                 />
                 {selectedBatch && (
                   <p className="text-sm text-blue-500">
@@ -281,7 +339,6 @@ export function SaleForm() {
                   value={formData.actualSellingPrice}
                   onChange={(e) => handleInputChange('actualSellingPrice', e.target.value)}
                   placeholder="0.00"
-                  required
                 />
                 {selectedMedicine && (
                   <div className="space-y-1">
@@ -296,7 +353,7 @@ export function SaleForm() {
                   </div>
                 )}
                 <div className="pt-2">
-                  <Button type="button" variant="default" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={handleAddItem} disabled={!formData.medicineId || !formData.batchId || !formData.quantity || !formData.actualSellingPrice}>Add Item</Button>
+                  <Button type="button" variant="default" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={handleAddOrUpdateItem} disabled={!formData.medicineId || !formData.batchId || !formData.quantity || !formData.actualSellingPrice}>{editingIndex !== null ? 'Update Item' : 'Add Item'}</Button>
                 </div>
               </div>
             </div>
@@ -331,7 +388,14 @@ export function SaleForm() {
                           <td className="border border-gray-200 px-3 py-2 text-right text-sm">PKR {ci.unitPrice.toFixed(2)}</td>
                           <td className="border border-gray-200 px-3 py-2 text-right text-sm">PKR {(ci.quantity * ci.unitPrice).toFixed(2)}</td>
                           <td className="border border-gray-200 px-3 py-2 text-right text-sm">
-                            <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveItem(idx)}>Remove</Button>
+                            <div className="flex items-center justify-end gap-1">
+                              <Button type="button" variant="ghost" size="icon" onClick={() => handleEditItem(idx)} title="Edit">
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveItem(idx)} title="Delete">
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       );

@@ -87,9 +87,9 @@ export function InvoicePreview({ invoice, company, taxRate = 0.17, discountRate 
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-gray-50">
+                    <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Sr No</th>
                     <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Batch No</th>
                     <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Medicine</th>
-                    <th className="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700">Unit</th>
                     <th className="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700">Qty</th>
                     <th className="border border-gray-200 px-4 py-3 text-right text-sm font-semibold text-gray-700">Unit Price</th>
                     <th className="border border-gray-200 px-4 py-3 text-right text-sm font-semibold text-gray-700">Total</th>
@@ -98,9 +98,12 @@ export function InvoicePreview({ invoice, company, taxRate = 0.17, discountRate 
                 <tbody>
                   {invoice?.items.map((item, idx) => (
                     <tr key={`${item.batchNo}-${idx}`}>
+                      <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">{idx + 1}</td>
                       <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">{item.batchNo}</td>
-                      <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">{item.medicine}</td>
-                      <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">{item.unit}</td>
+                      <td className="border border-gray-200 px-4 py-3 text-sm text-gray-900">
+                        <div>{item.medicine}</div>
+                        <div className="text-xs text-gray-500">{item.unit}</div>
+                      </td>
                       <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">{item.quantity}</td>
                       <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. {item.unitPrice.toFixed(2)}</td>
                       <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. {(item.quantity * item.unitPrice).toFixed(2)}</td>
