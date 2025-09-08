@@ -23,6 +23,8 @@ import { Inventory } from '@/components/Inventory';
 import { Customers } from '@/components/Customers';
 import { Invoices } from '@/components/Invoices';
 import { PurchaseAndSell } from '@/components/PurchaseAndSell';
+import { PurchaseForm } from '@/components/PurchaseForm';
+import { SaleForm } from '@/components/SaleForm';
 
 import { RevenueProfit } from '@/components/RevenueProfit';
 import { Settings } from '@/components/Settings';
@@ -83,8 +85,23 @@ function AppContent() {
             <Invoices />
           </TabsContent>
           
-          <TabsContent value="purchase-and-sell">
-            <PurchaseAndSell />
+          <TabsContent value="transactions-purchase">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Purchase</h2>
+              <PurchaseForm initialType="new" hideTypeSwitcher />
+            </div>
+          </TabsContent>
+          <TabsContent value="transactions-sell">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Sell</h2>
+              <SaleForm />
+            </div>
+          </TabsContent>
+          <TabsContent value="transactions-restock">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Restock</h2>
+              <PurchaseForm initialType="restock" hideTypeSwitcher />
+            </div>
           </TabsContent>
           
 

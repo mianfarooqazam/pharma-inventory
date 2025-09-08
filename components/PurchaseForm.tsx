@@ -10,10 +10,15 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useInventory } from '@/contexts/InventoryContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 
-export function PurchaseForm() {
+interface PurchaseFormProps {
+  initialType?: 'new' | 'restock';
+  hideTypeSwitcher?: boolean;
+}
+
+export function PurchaseForm({ initialType = 'new', hideTypeSwitcher = false }: PurchaseFormProps) {
   const { medicines, batches, addMedicine, addBatch, addTransaction } = useInventory();
   const { addNotification } = useNotifications();
-  const [purchaseType, setPurchaseType] = useState<'new' | 'restock'>('new');
+  const [purchaseType, setPurchaseType] = useState<'new' | 'restock'>(initialType);
   const [selectedMedicineId, setSelectedMedicineId] = useState('');
   const [formData, setFormData] = useState({
     name: '',
@@ -148,19 +153,20 @@ export function PurchaseForm() {
       <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-6">
             {/* Purchase Type Selection */}
-            <div className="space-y-4">
-             
-              <RadioGroup value={purchaseType} onValueChange={(value: 'new' | 'restock') => setPurchaseType(value)}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="new" id="new" />
-                  <Label htmlFor="new">Purchase New Medicine</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="restock" id="restock" />
-                  <Label htmlFor="restock">Restock Existing Medicine</Label>
-                </div>
-              </RadioGroup>
-            </div>
+            {!hideTypeSwitcher && (
+              <div className="space-y-4">
+                <RadioGroup value={purchaseType} onValueChange={(value: 'new' | 'restock') => setPurchaseType(value)}>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="new" id="new" />
+                    <Label htmlFor="new">Purchase New Medicine</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="restock" id="restock" />
+                    <Label htmlFor="restock">Restock Existing Medicine</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
 
             {/* Basic Medicine Information */}
             <div className="space-y-4">
