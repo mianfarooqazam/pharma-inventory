@@ -94,7 +94,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
           <div className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => {
               const Icon = item.icon;
-              return (
+              const button = (
                 <Button
                   key={item.id}
                   variant={activeTab === item.id ? "default" : "ghost"}
@@ -105,44 +105,52 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
                   <span>{item.label}</span>
                 </Button>
               );
+              if (item.id === 'customers') {
+                return (
+                  <div key={item.id} className="flex items-center space-x-1">
+                    {button}
+                    {/* Transactions dropdown placed right after Customers */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant={
+                            ["transactions-purchase","transactions-sell","transactions-restock"].includes(activeTab)
+                              ? "default"
+                              : "ghost"
+                          }
+                          className="flex items-center space-x-2"
+                        >
+                          <Activity className="h-4 w-4" />
+                          <span>Transactions</span>
+                          <ChevronDown className="h-4 w-4 opacity-70" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        <DropdownMenuItem onClick={() => setActiveTab("transactions-purchase")}>
+                          <div className="flex items-center space-x-2">
+                            <PackagePlus className="h-4 w-4" />
+                            <span>Purchase</span>
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setActiveTab("transactions-sell")}>
+                          <div className="flex items-center space-x-2">
+                            <ShoppingCart className="h-4 w-4" />
+                            <span>Sell</span>
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setActiveTab("transactions-restock")}>
+                          <div className="flex items-center space-x-2">
+                            <RotateCcw className="h-4 w-4" />
+                            <span>Restock</span>
+                          </div>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                );
+              }
+              return button;
             })}
-            {/* Transactions dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant={
-                    ["transactions-purchase","transactions-sell","transactions-restock"].includes(activeTab)
-                      ? "default"
-                      : "ghost"
-                  }
-                  className="flex items-center space-x-2"
-                >
-                  <Activity className="h-4 w-4" />
-                  <span>Transactions</span>
-                  <ChevronDown className="h-4 w-4 opacity-70" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem onClick={() => setActiveTab("transactions-purchase")}>
-                  <div className="flex items-center space-x-2">
-                    <PackagePlus className="h-4 w-4" />
-                    <span>Purchase</span>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActiveTab("transactions-sell")}>
-                  <div className="flex items-center space-x-2">
-                    <ShoppingCart className="h-4 w-4" />
-                    <span>Sell</span>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActiveTab("transactions-restock")}>
-                  <div className="flex items-center space-x-2">
-                    <RotateCcw className="h-4 w-4" />
-                    <span>Restock</span>
-                  </div>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
 
           {/* Right side actions */}
@@ -318,7 +326,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
             <div className="space-y-2">
               {navItems.map((item) => {
                 const Icon = item.icon;
-                return (
+                const button = (
                   <Button
                     key={item.id}
                     variant={activeTab === item.id ? "default" : "ghost"}
@@ -332,53 +340,60 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
                     <span>{item.label}</span>
                   </Button>
                 );
+                if (item.id === 'customers') {
+                  return (
+                    <div key={item.id} className="space-y-2">
+                      {button}
+                      {/* Transactions group for mobile placed right after Customers */}
+                      <div className="pt-2">
+                        <div className="px-3 text-xs uppercase text-gray-500">Transactions</div>
+                        <div className="mt-1 space-y-1">
+                          <Button
+                            variant={activeTab === "transactions-purchase" ? "default" : "ghost"}
+                            onClick={() => {
+                              setActiveTab("transactions-purchase");
+                              setIsMobileMenuOpen(false);
+                            }}
+                            className="w-full justify-start"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <PackagePlus className="h-4 w-4" />
+                              <span>Purchase</span>
+                            </div>
+                          </Button>
+                          <Button
+                            variant={activeTab === "transactions-sell" ? "default" : "ghost"}
+                            onClick={() => {
+                              setActiveTab("transactions-sell");
+                              setIsMobileMenuOpen(false);
+                            }}
+                            className="w-full justify-start"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <ShoppingCart className="h-4 w-4" />
+                              <span>Sell</span>
+                            </div>
+                          </Button>
+                          <Button
+                            variant={activeTab === "transactions-restock" ? "default" : "ghost"}
+                            onClick={() => {
+                              setActiveTab("transactions-restock");
+                              setIsMobileMenuOpen(false);
+                            }}
+                            className="w-full justify-start"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RotateCcw className="h-4 w-4" />
+                              <span>Restock</span>
+                            </div>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return button;
               })}
-
-              {/* Transactions group for mobile */}
-              <div className="pt-2">
-                <div className="px-3 text-xs uppercase text-gray-500">Transactions</div>
-                <div className="mt-1 space-y-1">
-                  <Button
-                    variant={activeTab === "transactions-purchase" ? "default" : "ghost"}
-                    onClick={() => {
-                      setActiveTab("transactions-purchase");
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full justify-start"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <PackagePlus className="h-4 w-4" />
-                      <span>Purchase</span>
-                    </div>
-                  </Button>
-                  <Button
-                    variant={activeTab === "transactions-sell" ? "default" : "ghost"}
-                    onClick={() => {
-                      setActiveTab("transactions-sell");
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full justify-start"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <ShoppingCart className="h-4 w-4" />
-                      <span>Sell</span>
-                    </div>
-                  </Button>
-                  <Button
-                    variant={activeTab === "transactions-restock" ? "default" : "ghost"}
-                    onClick={() => {
-                      setActiveTab("transactions-restock");
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full justify-start"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RotateCcw className="h-4 w-4" />
-                      <span>Restock</span>
-                    </div>
-                  </Button>
-                </div>
-              </div>
             </div>
           </div>
         )}
