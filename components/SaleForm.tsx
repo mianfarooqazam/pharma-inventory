@@ -91,7 +91,15 @@ export function SaleForm() {
       unitPrice,
     }]);
 
-    setFormData(prev => ({ ...prev, batchId: '', quantity: '', actualSellingPrice: '' }));
+    // Clear all item inputs for next entry, keep customer selection
+    setFormData(prev => ({
+      ...prev,
+      medicineId: '',
+      batchId: '',
+      quantity: '',
+      actualSellingPrice: '',
+      notes: '',
+    }));
   };
 
   const handleRemoveItem = (index: number) => {
