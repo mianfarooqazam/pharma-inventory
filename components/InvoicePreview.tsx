@@ -45,7 +45,8 @@ export function InvoicePreview({ invoice, company, taxRate = 0.17, discountRate 
     .join("")
     .toUpperCase();
 
-  const subtotal = invoice ? invoice.items.reduce((sum, it) => sum + it.quantity * it.unitPrice, 0) : 0;
+  const items = invoice?.items ?? [];
+  const subtotal = items.reduce((sum, it) => sum + it.quantity * it.unitPrice, 0);
   const tax = Math.round(subtotal * taxRate * 100) / 100;
   const discount = Math.round(subtotal * discountRate * 100) / 100;
   const total = Math.round((subtotal + tax - discount) * 100) / 100;
@@ -96,7 +97,7 @@ export function InvoicePreview({ invoice, company, taxRate = 0.17, discountRate 
                   </tr>
                 </thead>
                 <tbody>
-                  {invoice?.items.map((item, idx) => (
+                  {items.map((item, idx) => (
                     <tr key={`${item.batchNo}-${idx}`}>
                       <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">{idx + 1}</td>
                       <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">{item.batchNo}</td>

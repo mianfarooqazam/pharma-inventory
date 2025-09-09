@@ -142,7 +142,16 @@ export function Invoices() {
             <Input
               placeholder="Search by invoice no, customer, or date..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSearchTerm(value);
+                if (value === "") {
+                  setCustomerFilter(null);
+                  if (window.location.hash.startsWith('#invoices')) {
+                    window.location.hash = '#invoices';
+                  }
+                }
+              }}
               className="pl-10"
             />
           </div>
@@ -153,9 +162,9 @@ export function Invoices() {
                 <TableRow>
                   <TableHead>Sr No</TableHead>
                   <TableHead>Invoice No</TableHead>
+                  <TableHead>Date</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>City</TableHead>
-                  <TableHead>Date</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
@@ -166,9 +175,9 @@ export function Invoices() {
                   <TableRow key={inv.id}>
                     <TableCell className="text-center font-medium">{idx + 1}</TableCell>
                     <TableCell className="font-medium">{inv.invoiceNo}</TableCell>
+                    <TableCell>{inv.date}</TableCell>
                     <TableCell>{inv.customer}</TableCell>
                     <TableCell>{inv.city}</TableCell>
-                    <TableCell>{inv.date}</TableCell>
                     <TableCell>PKR {inv.amount.toFixed(2)}</TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
