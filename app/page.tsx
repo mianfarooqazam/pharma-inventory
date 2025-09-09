@@ -48,11 +48,11 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
       
       
-      <main className="container mx-auto px-4 py-6 pt-24">
+      <main className="container mx-auto px-4 py-6 pt-24 overflow-x-hidden">
       
 
         <Tabs value={activeTab} onValueChange={(val) => { setActiveTab(val); window.location.hash = `#${val}`; }}>
