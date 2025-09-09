@@ -4,7 +4,6 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import { InvoicePreview, InvoiceData } from "./InvoicePreview";
 import { Button } from "@/components/ui/button";
@@ -43,8 +42,7 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl w-[900px]">
         <DialogHeader>
-          <div className="flex items-center justify-between w-full">
-            <DialogTitle>Invoice Preview</DialogTitle>
+          <div className="flex items-center justify-start w-full">
             <Button variant="outline" size="sm" onClick={handleDownload}>
               <Download className="h-4 w-4 mr-2" /> Download / Print
             </Button>
