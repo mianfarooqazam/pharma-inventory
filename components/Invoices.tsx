@@ -15,9 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Search, Receipt, Eye } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
-import { ToastAction } from "@/components/ui/toast";
+// removed interactive status controls
 import { InvoicePreviewDialog } from "./InvoicePreviewDialog";
 
 interface InvoiceItem {
@@ -37,7 +35,7 @@ export function Invoices() {
   const [selectedPeriod, setSelectedPeriod] = useState<'all' | 'today' | 'week' | 'month' | 'year'>('all');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(null);
-  const { toast } = useToast();
+  
   const [invoices] = useState<InvoiceItem[]>([
     { id: "1", invoiceNo: "INV-1001", customer: "Ali Khan", city: "Lahore", address: "12 Mall Road, Lahore", date: "2025-01-12", amount: 4500, status: "Paid" },
     { id: "2", invoiceNo: "INV-1002", customer: "Sara Ahmed", city: "Karachi", address: "45 Clifton Block 5, Karachi", date: "2025-01-12", amount: 1250.5, status: "Unpaid" },
@@ -112,50 +110,9 @@ export function Invoices() {
     return matchesText && matchesCustomer && matchesPeriod;
   });
 
-  const [paymentStatus, setPaymentStatus] = useState<{ [key: string]: boolean }>(() =>
-    invoices.reduce((acc, inv) => {
-      acc[inv.id] = inv.status === "Paid";
-      return acc;
-    }, {} as { [key: string]: boolean })
-  );
+  // status is read-only from data
 
-  const handlePaymentStatusChange = (invoice: InvoiceItem, nextChecked: boolean) => {
-    const confirmation = toast({
-      title: "Confirm Payment Status Change",
-      description: (
-        <div className="space-y-1">
-          <div>
-            <span className="font-semibold">Invoice #</span>
-            <span className="font-semibold">{invoice.invoiceNo}</span>
-          </div>
-          <div>Customer: {invoice.customer}</div>
-          <div>Address: {invoice.address}</div>
-          <div className="mt-2">Mark as {nextChecked ? "Paid" : "Unpaid"}?</div>
-        </div>
-      ),
-      action: (
-        <div className="flex gap-2">
-          <ToastAction
-            altText="Confirm"
-            onClick={() => {
-              confirmation.dismiss();
-              setPaymentStatus((prev) => ({ ...prev, [invoice.id]: nextChecked }));
-            }}
-            className="bg-green-600 text-white hover:bg-green-700"
-          >
-            Confirm
-          </ToastAction>
-          <ToastAction
-            altText="Cancel"
-            onClick={() => confirmation.dismiss()}
-            className="bg-gray-600 text-white hover:bg-gray-700"
-          >
-            Cancel
-          </ToastAction>
-        </div>
-      ),
-    });
-  };
+  // removed status change handler
 
   return (
     <div className="space-y-6">
@@ -229,20 +186,9 @@ export function Invoices() {
                     <TableCell>{inv.city}</TableCell>
                     <TableCell>PKR {inv.amount.toFixed(2)}</TableCell>
                     <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`inv-paid-${inv.id}`}
-                          checked={paymentStatus[inv.id] || false}
-                          onCheckedChange={(checked) => handlePaymentStatusChange(inv, checked as boolean)}
-                          className={`${paymentStatus[inv.id] ? 'data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600' : 'data-[state=unchecked]:border-red-300'}`}
-                        />
-                        <label
-                          htmlFor={`inv-paid-${inv.id}`}
-                          className={`text-sm font-medium leading-none ${paymentStatus[inv.id] ? 'text-green-600' : 'text-red-600'}`}
-                        >
-                          {paymentStatus[inv.id] ? 'Paid' : 'Unpaid'}
-                        </label>
-                      </div>
+                      <span className={`text-sm font-medium ${inv.status === 'Paid' ? 'text-green-600' : 'text-red-600'}`}>
+                        {inv.status}
+                      </span>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
@@ -258,7 +204,7 @@ export function Invoices() {
                               customerPhone: "", // phone not available in mock, keep empty
                               date: inv.date,
                               items: [],
-                              status: (paymentStatus[inv.id] ? "Paid" : "Unpaid") as "Paid" | "Unpaid",
+                              status: inv.status,
                             });
                             setPreviewOpen(true);
                           }}
