@@ -34,7 +34,7 @@ interface InvoicePreviewProps {
   discountRate?: number; // e.g. 0.05 for 5%
 }
 
-export function InvoicePreview({ invoice, company, taxRate = 0.17, discountRate = 0.05 }: InvoicePreviewProps) {
+export function InvoicePreview({ invoice, company, taxRate = 0, discountRate = 0 }: InvoicePreviewProps) {
   const fallbackCompany = {
     name: "MediStock Pharmacy",
     phone: "+92-300-1234567",

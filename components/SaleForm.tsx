@@ -28,16 +28,16 @@ export function SaleForm() {
   });
 
   const customers = useMemo(() => [
-    { name: 'Ali Khan', city: 'Lahore' },
-    { name: 'Sara Ahmed', city: 'Karachi' },
-    { name: 'Usman Iqbal', city: 'Rawalpindi' },
-    { name: 'Ayesha Noor', city: 'Peshawar' },
-    { name: 'Bilal Hussain', city: 'Lahore' },
-    { name: 'Hina Malik', city: 'Islamabad' },
-    { name: 'Faisal Raza', city: 'Karachi' },
-    { name: 'Nida Shah', city: 'Multan' },
-    { name: 'Hamza Tariq', city: 'Quetta' },
-    { name: 'Maryam Zafar', city: 'Faisalabad' },
+    { name: 'Ali Khan', address: '12 Mall Road', city: 'Lahore', phone: '03001234567' },
+    { name: 'Sara Ahmed', address: '45 Clifton Block 5', city: 'Karachi', phone: '03111234567' },
+    { name: 'Usman Iqbal', address: '88 Satellite Town', city: 'Rawalpindi', phone: '03211234567' },
+    { name: 'Ayesha Noor', address: '7 University Rd', city: 'Peshawar', phone: '03331234567' },
+    { name: 'Bilal Hussain', address: '19 Jail Road', city: 'Lahore', phone: '03011239876' },
+    { name: 'Hina Malik', address: '2 Jinnah Avenue', city: 'Islamabad', phone: '03451234567' },
+    { name: 'Faisal Raza', address: '55 Shahrah-e-Faisal', city: 'Karachi', phone: '03021234567' },
+    { name: 'Nida Shah', address: '101 MQ Road', city: 'Multan', phone: '03151234567' },
+    { name: 'Hamza Tariq', address: '6 Cantt Bazaar', city: 'Quetta', phone: '03301234567' },
+    { name: 'Maryam Zafar', address: '23 Civil Lines', city: 'Faisalabad', phone: '03251234567' },
   ], []);
 
   const [customerName, setCustomerName] = useState('');
@@ -192,9 +192,13 @@ export function SaleForm() {
                 };
               });
 
+              const customer = customers.find(c => c.name === customerName);
               const invoice: InvoiceData = {
                 invoiceNo: `INV-${Date.now()}`,
                 customerName,
+                customerAddress: customer?.address || '',
+                customerCity: customer?.city || '',
+                customerPhone: customer?.phone || '',
                 date: formatDate(new Date()),
                 items: itemsForInvoice,
                 status: 'Paid',
@@ -323,10 +327,8 @@ export function SaleForm() {
                   placeholder="Enter quantity"
                   max={batchStock}
                 />
-                {selectedBatch && (
-                  <p className="text-sm text-blue-500">
-                    Available in selected batch: {batchStock} units
-                  </p>
+                {formData.quantity && selectedBatch && parseInt(formData.quantity) > batchStock && (
+                  <p className="text-sm text-red-600">Quantity exceeds available. Only {batchStock} units.</p>
                 )}
               </div>
 
@@ -477,7 +479,13 @@ export function SaleForm() {
           </Button>
         </div>
       </form>
-      <InvoicePreviewDialog open={invoiceOpen} onOpenChange={setInvoiceOpen} invoice={invoiceData} />
+      <InvoicePreviewDialog
+        open={invoiceOpen}
+        onOpenChange={setInvoiceOpen}
+        invoice={invoiceData}
+        taxRate={parseFloat(taxPercent || '0') / 100}
+        discountRate={parseFloat(discountPercent || '0') / 100}
+      />
     </div>
   );
 }

@@ -14,9 +14,11 @@ interface InvoicePreviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   invoice: InvoiceData | null;
+  taxRate?: number;
+  discountRate?: number;
 }
 
-export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePreviewDialogProps) {
+export function InvoicePreviewDialog({ open, onOpenChange, invoice, taxRate = 0, discountRate = 0 }: InvoicePreviewDialogProps) {
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   const handleDownload = () => {
@@ -49,7 +51,7 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice }: InvoicePre
           </div>
         </DialogHeader>
         <div ref={contentRef}>
-          <InvoicePreview invoice={invoice} />
+          <InvoicePreview invoice={invoice} taxRate={taxRate} discountRate={discountRate} />
         </div>
       </DialogContent>
     </Dialog>
