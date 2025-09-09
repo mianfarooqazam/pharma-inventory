@@ -14,6 +14,9 @@ export interface InvoiceItemData {
 export interface InvoiceData {
   invoiceNo: string;
   customerName: string;
+  customerAddress?: string;
+  customerCity?: string;
+  customerPhone?: string;
   date: string;
   items: InvoiceItemData[];
   status: "Paid" | "Unpaid";
@@ -51,6 +54,20 @@ export function InvoicePreview({ invoice, company, taxRate = 0.17, discountRate 
   const discount = Math.round(subtotal * discountRate * 100) / 100;
   const total = Math.round((subtotal + tax - discount) * 100) / 100;
 
+  const addressLine = (() => {
+    const addr = (invoice?.customerAddress || "").trim();
+    const city = (invoice?.customerCity || "").trim();
+    if (!addr && !city) return "";
+    if (!city) return addr;
+    const addrLower = addr.toLowerCase();
+    const cityLower = city.toLowerCase();
+    // Avoid duplicating city if it's already in the address
+    if (addrLower.includes(cityLower)) {
+      return addr;
+    }
+    return addr ? `${addr}, ${city}` : city;
+  })();
+
   return (
     <Card>
       <CardContent className="p-6">
@@ -80,6 +97,8 @@ export function InvoicePreview({ invoice, company, taxRate = 0.17, discountRate 
               <h4 className="text-sm font-semibold text-gray-700 mb-2">Bill To:</h4>
               <div className="text-sm text-gray-600">
                 <p className="font-medium">{invoice?.customerName}</p>
+                {addressLine ? (<p>{addressLine}</p>) : null}
+                {invoice?.customerPhone ? <p>{invoice.customerPhone}</p> : null}
               </div>
             </div>
 

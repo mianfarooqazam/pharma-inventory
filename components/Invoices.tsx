@@ -253,6 +253,9 @@ export function Invoices() {
                             setSelectedInvoice({
                               invoiceNo: inv.invoiceNo,
                               customerName: inv.customer,
+                              customerAddress: inv.address,
+                              customerCity: inv.city,
+                              customerPhone: "", // phone not available in mock, keep empty
                               date: inv.date,
                               items: [],
                               status: (paymentStatus[inv.id] ? "Paid" : "Unpaid") as "Paid" | "Unpaid",
