@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Plus, Search, Users, FileText, Trash2 } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { AddCustomerDialog, NewCustomer } from "./AddCustomerDialog";
 
 interface Customer extends NewCustomer {}
@@ -112,7 +113,16 @@ export function Customers() {
                             window.location.hash = hash;
                           }}
                         >
-                          <FileText className="h-4 w-4" />
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span><FileText className="h-4 w-4" /></span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                view invoices
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
 
                         </Button>
                         <Button

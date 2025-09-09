@@ -31,6 +31,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 
 export function RevenueProfit() {
   const [selectedPeriod, setSelectedPeriod] = useState('month');
@@ -325,7 +326,16 @@ export function RevenueProfit() {
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="sm">
-                          <FileText className="h-4 w-4" />
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span><FileText className="h-4 w-4" /></span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                view invoices
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </Button>
                       </div>
                     </TableCell>
