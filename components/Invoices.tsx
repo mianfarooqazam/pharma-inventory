@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { InvoiceData } from "./InvoicePreview";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -32,8 +34,9 @@ interface InvoiceItem {
 export function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
   const [customerFilter, setCustomerFilter] = useState<string | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState<'all' | 'today' | 'week' | 'month' | 'year'>('all');
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceItem | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(null);
   const { toast } = useToast();
   const [invoices] = useState<InvoiceItem[]>([
     { id: "1", invoiceNo: "INV-1001", customer: "Ali Khan", city: "Lahore", address: "12 Mall Road, Lahore", date: "2025-01-12", amount: 4500, status: "Paid" },
@@ -68,6 +71,35 @@ export function Invoices() {
     return () => window.removeEventListener('hashchange', applyHashFilter);
   }, []);
 
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setHours(0, 0, 0, 0);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+  const isInSelectedPeriod = (dateStr: string) => {
+    if (selectedPeriod === 'all') return true;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const cd = new Date(d);
+    cd.setHours(0, 0, 0, 0);
+    switch (selectedPeriod) {
+      case 'today':
+        return cd.getTime() === today.getTime();
+      case 'week':
+        return cd.getTime() >= startOfWeek.getTime() && cd.getTime() <= endOfWeek.getTime();
+      case 'month':
+        return cd.getFullYear() === now.getFullYear() && cd.getMonth() === now.getMonth();
+      case 'year':
+        return cd.getFullYear() === now.getFullYear();
+      default:
+        return true;
+    }
+  };
+
   const filtered = invoices.filter((i) => {
     const matchesText =
       i.invoiceNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -76,7 +108,8 @@ export function Invoices() {
     const matchesCustomer = customerFilter
       ? i.customer.toLowerCase() === customerFilter.toLowerCase()
       : true;
-    return matchesText && matchesCustomer;
+    const matchesPeriod = isInSelectedPeriod(i.date);
+    return matchesText && matchesCustomer && matchesPeriod;
   });
 
   const [paymentStatus, setPaymentStatus] = useState<{ [key: string]: boolean }>(() =>
@@ -137,23 +170,39 @@ export function Invoices() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search by invoice no, customer, or date..."
-              value={searchTerm}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSearchTerm(value);
-                if (value === "") {
-                  setCustomerFilter(null);
-                  if (window.location.hash.startsWith('#invoices')) {
-                    window.location.hash = '#invoices';
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search by invoice no, customer, or date..."
+                value={searchTerm}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearchTerm(value);
+                  if (value === "") {
+                    setCustomerFilter(null);
+                    if (window.location.hash.startsWith('#invoices')) {
+                      window.location.hash = '#invoices';
+                    }
                   }
-                }
-              }}
-              className="pl-10"
-            />
+                }}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Select value={selectedPeriod} onValueChange={(v) => setSelectedPeriod(v as any)}>
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                  <SelectItem value="year">This Year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="border rounded-lg">
@@ -201,7 +250,13 @@ export function Invoices() {
                           variant="ghost"
                           size="sm"
                           onClick={() => {
-                            setSelectedInvoice(inv);
+                            setSelectedInvoice({
+                              invoiceNo: inv.invoiceNo,
+                              customerName: inv.customer,
+                              date: inv.date,
+                              items: [],
+                              status: (paymentStatus[inv.id] ? "Paid" : "Unpaid") as "Paid" | "Unpaid",
+                            });
                             setPreviewOpen(true);
                           }}
                         >
