@@ -112,26 +112,26 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   // Get current month name
   const currentMonthName = currentDate.toLocaleString('default', { month: 'long' });
   
-  // Generate month sales comparison data (last 6 months)
+  // Generate month sales comparison data (all 12 months of current year)
   const generateMonthSalesData = () => {
     const months = [];
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
+    const currentYear = new Date().getFullYear();
+    
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(currentYear, i, 1); // First day of each month
       const monthName = date.toLocaleString('default', { month: 'short' });
-      const year = date.getFullYear();
       
       const monthSales = salesTransactions.filter(t => {
         const transactionDate = new Date(t.createdAt || new Date());
-        return transactionDate.getMonth() === date.getMonth() && 
-               transactionDate.getFullYear() === date.getFullYear();
+        return transactionDate.getMonth() === i && 
+               transactionDate.getFullYear() === currentYear;
       }).reduce((sum, t) => sum + t.totalAmount, 0);
       
       months.push({
         month: monthName,
-        year: year.toString(),
+        year: currentYear.toString(),
         sales: monthSales,
-        fullMonth: `${monthName} ${year}`
+        fullMonth: `${monthName} ${currentYear}`
       });
     }
     return months;
@@ -177,15 +177,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       changeType: 'positive'
     },
     {
-      title: 'Monthly Profit',
-      value: `PKR ${monthlyProfit.toLocaleString()}`,
-      icon: TrendingUp,
-      description: `${currentMonthName} profit`,
-      color: monthlyProfit >= 0 ? 'text-green-600' : 'text-red-600',
-      change: `${((monthlyProfit / monthlySales) * 100 || 0).toFixed(1)}% margin`,
-      changeType: monthlyProfit >= 0 ? 'positive' : 'negative'
-    },
-    {
       title: 'Total Customers',
       value: uniqueCustomers.toString(),
       icon: Users,
@@ -213,7 +204,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -256,73 +247,79 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Sales */}
+        {/* Monthly Sales Comparison Chart */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <ShoppingCart className="h-5 w-5 text-green-500" />
-                <CardTitle>Recent Sales</CardTitle>
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => onNavigate?.('invoices')}
-                className="flex items-center space-x-1"
-              >
-                <Eye className="h-4 w-4" />
-                <span>View All</span>
-              </Button>
-            </div>
+            <CardTitle className="flex items-center space-x-2">
+              <TrendingUp className="h-5 w-5 text-blue-500" />
+              <span>Monthly Sales Comparison</span>
+            </CardTitle>
             <CardDescription>
-              Latest sales transactions from your pharmacy
+              Sales performance for all months of {new Date().getFullYear()}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {recentSales.length === 0 ? (
-              <div className="text-center py-8">
-                <ShoppingCart className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-sm text-gray-500">No recent sales</p>
-                <p className="text-xs text-gray-400 mt-1">Start selling to see transactions here</p>
+            <div className="h-80 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthSalesData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="month" 
+                    tick={{ fontSize: 12 }}
+                    axisLine={{ stroke: '#e0e0e0' }}
+                    tickLine={{ stroke: '#e0e0e0' }}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    axisLine={{ stroke: '#e0e0e0' }}
+                    tickLine={{ stroke: '#e0e0e0' }}
+                    tickFormatter={(value) => `PKR ${(value / 1000).toFixed(0)}k`}
+                  />
+                  <Tooltip 
+                    formatter={(value: number) => [`PKR ${value.toLocaleString()}`, 'Sales']}
+                    labelFormatter={(label, payload) => {
+                      if (payload && payload[0]) {
+                        return payload[0].payload.fullMonth;
+                      }
+                      return label;
+                    }}
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Bar 
+                    dataKey="sales" 
+                    fill="#3b82f6" 
+                    radius={[4, 4, 0, 0]}
+                    stroke="#2563eb"
+                    strokeWidth={1}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            
+            {/* Chart Summary */}
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="text-center p-3 bg-blue-50 rounded-lg">
+                <div className="text-lg font-bold text-blue-600">
+                  PKR {monthSalesData.reduce((sum, month) => sum + month.sales, 0).toLocaleString()}
+                </div>
+                <div className="text-xs text-blue-600 font-medium">Total {new Date().getFullYear()}</div>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {recentSales.map((transaction, index) => {
-                  const medicine = medicines.find(m => m.id === transaction.medicineId);
-                  const batch = batches.find(b => b.id === transaction.batchId);
-                  const customerName = transaction.notes?.split(' - ')[0] || 'Walk-in Customer';
-                  const transactionDate = new Date(transaction.createdAt || new Date());
-                  
-                  return (
-                    <div key={transaction.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                          <span className="text-xs font-semibold text-green-600">#{index + 1}</span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{medicine?.name || 'Unknown Medicine'}</p>
-                          <p className="text-xs text-gray-500">
-                            {customerName} • {transaction.quantity} units • {formatDate(transactionDate)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-semibold text-green-600">
-                          PKR {transaction.totalAmount.toFixed(2)}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {batch?.batchNumber || 'N/A'}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <div className="text-lg font-bold text-gray-600">
+                  PKR {Math.round(monthSalesData.reduce((sum, month) => sum + month.sales, 0) / monthSalesData.length).toLocaleString()}
+                </div>
+                <div className="text-xs text-gray-600 font-medium">Average Monthly</div>
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
 
-        {/* Alerts and Quick Actions */}
+        {/* Right Sidebar - Alerts and Quick Actions */}
         <div className="space-y-6">
           {/* Low Stock Alerts */}
           <Card>
@@ -344,8 +341,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                   <p className="text-sm text-gray-500">All medicines well stocked</p>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {lowStockMedicines.slice(0, 4).map((medicine) => (
+                <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
+                  {lowStockMedicines.map((medicine) => (
                     <div key={medicine.id} className="flex items-center justify-between p-2 bg-orange-50 rounded-lg">
                       <span className="text-sm font-medium">{medicine.name}</span>
                       <Badge variant="destructive" className="text-xs">
@@ -353,11 +350,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                       </Badge>
                     </div>
                   ))}
-                  {lowStockMedicines.length > 4 && (
-                    <p className="text-xs text-gray-500 text-center">
-                      +{lowStockMedicines.length - 4} more items
-                    </p>
-                  )}
                 </div>
               )}
             </CardContent>
@@ -383,8 +375,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                   <p className="text-sm text-gray-500">No expiring medicines</p>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {expiringBatches.slice(0, 4).map((batch) => (
+                <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
+                  {expiringBatches.map((batch) => (
                     <div key={batch.id} className="flex items-center justify-between p-2 bg-red-50 rounded-lg">
                       <div>
                         <span className="text-sm font-medium">{batch.medicineName}</span>
@@ -395,11 +387,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                       </Badge>
                     </div>
                   ))}
-                  {expiringBatches.length > 4 && (
-                    <p className="text-xs text-gray-500 text-center">
-                      +{expiringBatches.length - 4} more items
-                    </p>
-                  )}
                 </div>
               )}
             </CardContent>
@@ -448,83 +435,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         </Card>
       )}
 
-      {/* Month Sales Comparison Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <TrendingUp className="h-5 w-5 text-blue-500" />
-            <span>Monthly Sales Comparison</span>
-          </CardTitle>
-          <CardDescription>
-            Sales performance over the last 6 months
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthSalesData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis 
-                  dataKey="month" 
-                  tick={{ fontSize: 12 }}
-                  axisLine={{ stroke: '#e0e0e0' }}
-                  tickLine={{ stroke: '#e0e0e0' }}
-                />
-                <YAxis 
-                  tick={{ fontSize: 12 }}
-                  axisLine={{ stroke: '#e0e0e0' }}
-                  tickLine={{ stroke: '#e0e0e0' }}
-                  tickFormatter={(value) => `PKR ${(value / 1000).toFixed(0)}k`}
-                />
-                <Tooltip 
-                  formatter={(value: number) => [`PKR ${value.toLocaleString()}`, 'Sales']}
-                  labelFormatter={(label, payload) => {
-                    if (payload && payload[0]) {
-                      return payload[0].payload.fullMonth;
-                    }
-                    return label;
-                  }}
-                  contentStyle={{
-                    backgroundColor: 'white',
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
-                <Bar 
-                  dataKey="sales" 
-                  fill="#3b82f6" 
-                  radius={[4, 4, 0, 0]}
-                  stroke="#2563eb"
-                  strokeWidth={1}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          
-          {/* Chart Summary */}
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="text-center p-3 bg-blue-50 rounded-lg">
-              <div className="text-lg font-bold text-blue-600">
-                PKR {monthSalesData.reduce((sum, month) => sum + month.sales, 0).toLocaleString()}
-              </div>
-              <div className="text-xs text-blue-600 font-medium">Total 6 Months</div>
-            </div>
-            <div className="text-center p-3 bg-green-50 rounded-lg">
-              <div className="text-lg font-bold text-green-600">
-                PKR {Math.max(...monthSalesData.map(m => m.sales)).toLocaleString()}
-              </div>
-              <div className="text-xs text-green-600 font-medium">Best Month</div>
-            </div>
-            <div className="text-center p-3 bg-gray-50 rounded-lg">
-              <div className="text-lg font-bold text-gray-600">
-                PKR {Math.round(monthSalesData.reduce((sum, month) => sum + month.sales, 0) / monthSalesData.length).toLocaleString()}
-              </div>
-              <div className="text-xs text-gray-600 font-medium">Average Monthly</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
