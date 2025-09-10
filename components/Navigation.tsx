@@ -29,6 +29,10 @@ import {
   PackagePlus,
   RotateCcw,
   ChevronDown,
+  ShoppingBag,
+  CreditCard,
+  Package2,
+  Undo2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNotifications } from "@/contexts/NotificationContext";
@@ -114,7 +118,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant={
-                            ["transactions-purchase","transactions-sell","transactions-restock"].includes(activeTab)
+                            ["transactions-purchase","transactions-sell","transactions-restock","transactions-return"].includes(activeTab)
                               ? "default"
                               : "ghost"
                           }
@@ -128,20 +132,26 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
                       <DropdownMenuContent align="start">
                         <DropdownMenuItem onClick={() => setActiveTab("transactions-purchase")}>
                           <div className="flex items-center space-x-2">
-                            <PackagePlus className="h-4 w-4" />
+                            <ShoppingBag className="h-4 w-4" />
                             <span>Purchase</span>
                           </div>
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setActiveTab("transactions-sell")}>
                           <div className="flex items-center space-x-2">
-                            <ShoppingCart className="h-4 w-4" />
+                            <CreditCard className="h-4 w-4" />
                             <span>Sell</span>
                           </div>
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setActiveTab("transactions-restock")}>
                           <div className="flex items-center space-x-2">
-                            <RotateCcw className="h-4 w-4" />
+                            <Package2 className="h-4 w-4" />
                             <span>Restock</span>
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setActiveTab("transactions-return")}>
+                          <div className="flex items-center space-x-2">
+                            <Undo2 className="h-4 w-4" />
+                            <span>Return</span>
                           </div>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -357,7 +367,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
                             className="w-full justify-start"
                           >
                             <div className="flex items-center space-x-2">
-                              <PackagePlus className="h-4 w-4" />
+                              <ShoppingBag className="h-4 w-4" />
                               <span>Purchase</span>
                             </div>
                           </Button>
@@ -370,7 +380,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
                             className="w-full justify-start"
                           >
                             <div className="flex items-center space-x-2">
-                              <ShoppingCart className="h-4 w-4" />
+                              <CreditCard className="h-4 w-4" />
                               <span>Sell</span>
                             </div>
                           </Button>
@@ -383,8 +393,21 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
                             className="w-full justify-start"
                           >
                             <div className="flex items-center space-x-2">
-                              <RotateCcw className="h-4 w-4" />
+                              <Package2 className="h-4 w-4" />
                               <span>Restock</span>
+                            </div>
+                          </Button>
+                          <Button
+                            variant={activeTab === "transactions-return" ? "default" : "ghost"}
+                            onClick={() => {
+                              setActiveTab("transactions-return");
+                              setIsMobileMenuOpen(false);
+                            }}
+                            className="w-full justify-start"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <Undo2 className="h-4 w-4" />
+                              <span>Return</span>
                             </div>
                           </Button>
                         </div>

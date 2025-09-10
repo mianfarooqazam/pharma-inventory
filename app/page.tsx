@@ -5,9 +5,10 @@ import { Card, CardContent,  CardHeader, CardTitle } from '@/components/ui/card'
 
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { 
-  PackagePlus,
-  ShoppingCart,
-  RotateCcw,
+  ShoppingBag,
+  CreditCard,
+  Package2,
+  Undo2,
 } from 'lucide-react';
 import { Dashboard } from '@/components/Dashboard';
 import { MedicineList } from '@/components/MedicineList';
@@ -16,6 +17,7 @@ import { Customers } from '@/components/Customers';
 import { Invoices } from '@/components/Invoices';
 import { PurchaseForm } from '@/components/PurchaseForm';
 import { SaleForm } from '@/components/SaleForm';
+import { ReturnForm } from '@/components/ReturnForm';
 
 import { RevenueProfit } from '@/components/RevenueProfit';
 import { Settings } from '@/components/Settings';
@@ -82,7 +84,7 @@ function AppContent() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center space-x-2">
-                      <PackagePlus className="h-5 w-5" />
+                      <ShoppingBag className="h-5 w-5" />
                       <span>Purchase</span>
                     </CardTitle>
                   </div>
@@ -99,7 +101,7 @@ function AppContent() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center space-x-2">
-                      <ShoppingCart className="h-5 w-5" />
+                      <CreditCard className="h-5 w-5" />
                       <span>Sell</span>
                     </CardTitle>
                   </div>
@@ -116,13 +118,30 @@ function AppContent() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center space-x-2">
-                      <RotateCcw className="h-5 w-5" />
+                      <Package2 className="h-5 w-5" />
                       <span>Restock</span>
                     </CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <PurchaseForm initialType="restock" hideTypeSwitcher />
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          <TabsContent value="transactions-return">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center space-x-2">
+                      <Undo2 className="h-5 w-5" />
+                      <span>Return</span>
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ReturnForm />
                 </CardContent>
               </Card>
             </div>
