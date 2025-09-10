@@ -112,11 +112,6 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
       message: `${pendingChanges.name} has been successfully updated`,
     });
 
-    toast({
-      title: "Medicine Updated Successfully",
-      description: `${pendingChanges.name} has been updated with the new details.`,
-      variant: "default",
-    });
     
     setConfirmationOpen(false);
     onOpenChange(false);

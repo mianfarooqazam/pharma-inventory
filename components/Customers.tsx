@@ -42,11 +42,6 @@ export function Customers() {
 
   const handleAddCustomer = (customer: NewCustomer) => {
     setCustomers((prev) => [...prev, customer]);
-    toast({
-      title: "Customer Added",
-      description: `${customer.name} has been added successfully.`,
-      variant: "default",
-    });
   };
 
   const handleDeleteClick = (customerName: string, index: number) => {
@@ -58,11 +53,6 @@ export function Customers() {
     if (!customerToDelete) return;
 
     setCustomers((prev) => prev.filter((_, i) => i !== customerToDelete.index));
-    toast({
-      title: "Customer Deleted",
-      description: `${customerToDelete.name} has been deleted successfully.`,
-      variant: "default",
-    });
   };
 
   const filteredCustomers = customers.filter((c) => {

@@ -51,11 +51,6 @@ export function MedicineList() {
     if (!medicineToDelete) return;
 
     deleteMedicine(medicineToDelete.id);
-    toast({
-      title: "Medicine Deleted",
-      description: `${medicineToDelete.name} has been deleted successfully.`,
-      variant: "default",
-    });
   };
 
 

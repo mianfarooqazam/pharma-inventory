@@ -140,12 +140,6 @@ export function Invoices() {
           : inv
       )
     );
-    
-    toast({
-      title: "Status Updated",
-      description: `Invoice ${confirmationData.invoiceNo} marked as ${confirmationData.newStatus}`,
-      variant: "default",
-    });
   };
 
   return (
