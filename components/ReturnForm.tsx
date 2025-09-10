@@ -27,68 +27,8 @@ export function ReturnForm() {
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmationOpen, setConfirmationOpen] = useState(false);
 
-  // Mock invoice data with items - in a real app this would come from a context or API
-  const [invoices] = useState([
-    { 
-      id: "1", 
-      invoiceNo: `${settings.invoicePrefix}-0000-0001`, 
-      customer: "Ali Khan", 
-      date: "12-Jan-25", 
-      amount: 4500, 
-      status: "Paid",
-      items: [
-        { id: "1-1", medicineName: "Paracetamol", strength: "500mg", quantity: 10, unitPrice: 5.00, totalPrice: 50.00 },
-        { id: "1-2", medicineName: "Amoxicillin", strength: "250mg", quantity: 20, unitPrice: 12.50, totalPrice: 250.00 },
-        { id: "1-3", medicineName: "Ibuprofen", strength: "400mg", quantity: 15, unitPrice: 8.00, totalPrice: 120.00 }
-      ]
-    },
-    { 
-      id: "2", 
-      invoiceNo: `${settings.invoicePrefix}-0000-0002`, 
-      customer: "Sara Ahmed", 
-      date: "12-Jan-25", 
-      amount: 1250.5, 
-      status: "Unpaid",
-      items: [
-        { id: "2-1", medicineName: "Aspirin", strength: "100mg", quantity: 30, unitPrice: 2.50, totalPrice: 75.00 },
-        { id: "2-2", medicineName: "Vitamin C", strength: "1000mg", quantity: 5, unitPrice: 15.00, totalPrice: 75.00 }
-      ]
-    },
-    { 
-      id: "3", 
-      invoiceNo: `${settings.invoicePrefix}-0000-0003`, 
-      customer: "Usman Iqbal", 
-      date: "13-Jan-25", 
-      amount: 300, 
-      status: "Paid",
-      items: [
-        { id: "3-1", medicineName: "Cetirizine", strength: "10mg", quantity: 20, unitPrice: 3.00, totalPrice: 60.00 }
-      ]
-    },
-    { 
-      id: "4", 
-      invoiceNo: `${settings.invoicePrefix}-0000-0004`, 
-      customer: "Ayesha Noor", 
-      date: "13-Jan-25", 
-      amount: 980, 
-      status: "Paid",
-      items: [
-        { id: "4-1", medicineName: "Metformin", strength: "500mg", quantity: 10, unitPrice: 8.50, totalPrice: 85.00 },
-        { id: "4-2", medicineName: "Omeprazole", strength: "20mg", quantity: 15, unitPrice: 6.00, totalPrice: 90.00 }
-      ]
-    },
-    { 
-      id: "5", 
-      invoiceNo: `${settings.invoicePrefix}-0000-0005`, 
-      customer: "Bilal Hussain", 
-      date: "14-Jan-25", 
-      amount: 950, 
-      status: "Unpaid",
-      items: [
-        { id: "5-1", medicineName: "Lisinopril", strength: "10mg", quantity: 12, unitPrice: 7.50, totalPrice: 90.00 }
-      ]
-    }
-  ]);
+  // Invoice data - in a real app this would come from a context or API
+  const [invoices] = useState<any[]>([]);
 
   const reasons = [
     'Near Expiry',
@@ -109,8 +49,8 @@ export function ReturnForm() {
     );
   }) : [];
 
-  const selectedInvoice = invoices.find(inv => inv.id === formData.invoiceId);
-  const selectedItem = selectedInvoice?.items.find(item => item.id === formData.itemId);
+  const selectedInvoice = invoices.find((inv: any) => inv.id === formData.invoiceId);
+  const selectedItem = selectedInvoice?.items.find((item: any) => item.id === formData.itemId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -280,7 +220,7 @@ export function ReturnForm() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {selectedInvoice.items.map((item, index) => (
+                    {selectedInvoice.items.map((item: any, index: number) => (
                       <TableRow key={item.id}>
                         <TableCell>{index + 1}</TableCell>
                         <TableCell className="font-medium">{item.medicineName}</TableCell>

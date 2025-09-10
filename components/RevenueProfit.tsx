@@ -37,23 +37,17 @@ export function RevenueProfit() {
   const [statusFilter, setStatusFilter] = useState('all');
   const { toast } = useToast();
 
-  // Mock data for revenue and profit in PKR
-  const revenueData = [
-    { id: '1', date: '15-Jan-24', invoiceNo: 'INV-1001', customerName: 'Ali Khan', city: 'Lahore', totalBill: 37500, profit: 18750, status: 'Paid' },
-    { id: '2', date: '15-Jan-24', invoiceNo: 'INV-1002', customerName: 'Sara Ahmed', city: 'Karachi', totalBill: 40000, profit: 16000, status: 'Unpaid' },
-    { id: '3', date: '14-Jan-24', invoiceNo: 'INV-1003', customerName: 'Usman Iqbal', city: 'Rawalpindi', totalBill: 60000, profit: 30000, status: 'Paid' },
-    { id: '4', date: '14-Jan-24', invoiceNo: 'INV-1004', customerName: 'Ayesha Noor', city: 'Peshawar', totalBill: 51000, profit: 20400, status: 'Paid' },
-    { id: '5', date: '13-Jan-24', invoiceNo: 'INV-1005', customerName: 'Bilal Hussain', city: 'Lahore', totalBill: 48000, profit: 19200, status: 'Unpaid' },
-  ];
+  // Revenue and profit data - in a real app this would come from a context or API
+  const revenueData: any[] = [];
 
-  // New metrics data
+  // Metrics data - in a real app this would be calculated from actual data
   const metricsData = {
-    purchaseThisYear: 1580000, // Purchases made this year
-    soldThisYear: 2840000, // Sales made this year
-    profitMarginThisYear: '44.4%', // Profit margin for this year
-    purchaseThisMonth: 132150, // Purchases made this month
-    soldThisMonth: 236500, // Sales made this month
-    profitMarginThisMonth: '44.1%' // Profit margin for this month
+    purchaseThisYear: 0,
+    soldThisYear: 0,
+    profitMarginThisYear: '0%',
+    purchaseThisMonth: 0,
+    soldThisMonth: 0,
+    profitMarginThisMonth: '0%'
   };
 
 

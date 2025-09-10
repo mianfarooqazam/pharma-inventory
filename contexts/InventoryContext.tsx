@@ -61,83 +61,10 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
   const [batches, setBatches] = useState<Batch[]>([]);
   const [transactions, setTransactions] = useState<StockTransaction[]>([]);
 
-  useEffect(() => {
-    // Initialize with sample data
-    const sampleMedicines: Medicine[] = [
-      {
-        id: '1',
-        name: 'Paracetamol',
-        category: 'Analgesic',
-        manufacturer: 'PharmaCorp',
-        strength: '500mg',
-        unit: 'Tablet',
-        minStockLevel: 100,
-        currentStock: 250,
-        price: 0.50,
-        createdAt: new Date(),
-      },
-      {
-        id: '2',
-        name: 'Amoxicillin',
-        category: 'Antibiotic',
-        manufacturer: 'MediLab',
-        strength: '250mg',
-        unit: 'Capsule',
-        minStockLevel: 50,
-        currentStock: 75,
-        price: 1.20,
-        createdAt: new Date(),
-      },
-      {
-        id: '3',
-        name: 'Ibuprofen',
-        category: 'Anti-inflammatory',
-        manufacturer: 'HealthPlus',
-        strength: '400mg',
-        unit: 'Tablet',
-        minStockLevel: 80,
-        currentStock: 30,
-        price: 0.75,
-        createdAt: new Date(),
-      },
-    ];
-
-    const sampleBatches: Batch[] = [
-      {
-        id: '1',
-        medicineId: '1',
-        batchNumber: 'PCT001',
-        expiryDate: new Date('2025-12-31'),
-        quantity: 250,
-        costPrice: 0.40,
-        sellingPrice: 0.50,
-        createdAt: new Date(),
-      },
-      {
-        id: '2',
-        medicineId: '2',
-        batchNumber: 'AMX002',
-        expiryDate: new Date('2025-03-15'),
-        quantity: 75,
-        costPrice: 1.00,
-        sellingPrice: 1.20,
-        createdAt: new Date(),
-      },
-      {
-        id: '3',
-        medicineId: '3',
-        batchNumber: 'IBU003',
-        expiryDate: new Date('2025-02-28'),
-        quantity: 30,
-        costPrice: 0.60,
-        sellingPrice: 0.75,
-        createdAt: new Date(),
-      },
-    ];
-
-    setMedicines(sampleMedicines);
-    setBatches(sampleBatches);
-  }, []);
+  // Initialize with empty arrays - data will be loaded from API or user input
+  // useEffect(() => {
+  //   // Load data from API or localStorage
+  // }, []);
 
   const addMedicine = (medicine: Omit<Medicine, 'id' | 'createdAt'>) => {
     const newMedicine: Medicine = {
