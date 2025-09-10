@@ -22,7 +22,6 @@ import {
   Filter,
   Search,
   Plus,
-  Eye,
   FileText,
   ShoppingCart
 } from 'lucide-react';
@@ -241,10 +240,10 @@ export function RevenueProfit() {
                     <TableCell className="font-medium">{item.invoiceNo}</TableCell>
                     <TableCell className="font-medium">{item.customerName}</TableCell>
                     <TableCell>{item.city}</TableCell>
-                    <TableCell className="font-semibold text-green-600">
+                    <TableCell className="font-semibold ">
                       ₨ {item.totalBill.toLocaleString()}
                     </TableCell>
-                    <TableCell className="font-semibold text-blue-600">
+                    <TableCell className={`font-semibold ${item.status === 'Paid' ? 'text-green-600' : 'text-red-600'}`}>
                       ₨ {item.profit.toLocaleString()}
                     </TableCell>
                     <TableCell>
@@ -254,10 +253,14 @@ export function RevenueProfit() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            const hash = `#invoices?customer=${encodeURIComponent(item.customerName)}`;
+                            window.location.hash = hash;
+                          }}
+                        >
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
