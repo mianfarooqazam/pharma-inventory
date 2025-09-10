@@ -31,7 +31,7 @@ export function ReturnForm() {
   const [invoices] = useState([
     { 
       id: "1", 
-      invoiceNo: `${settings.invoicePrefix}-1001`, 
+      invoiceNo: `${settings.invoicePrefix}-0000-0001`, 
       customer: "Ali Khan", 
       date: "12-Jan-25", 
       amount: 4500, 
@@ -44,7 +44,7 @@ export function ReturnForm() {
     },
     { 
       id: "2", 
-      invoiceNo: `${settings.invoicePrefix}-1002`, 
+      invoiceNo: `${settings.invoicePrefix}-0000-0002`, 
       customer: "Sara Ahmed", 
       date: "12-Jan-25", 
       amount: 1250.5, 
@@ -56,7 +56,7 @@ export function ReturnForm() {
     },
     { 
       id: "3", 
-      invoiceNo: `${settings.invoicePrefix}-1003`, 
+      invoiceNo: `${settings.invoicePrefix}-0000-0003`, 
       customer: "Usman Iqbal", 
       date: "13-Jan-25", 
       amount: 300, 
@@ -67,7 +67,7 @@ export function ReturnForm() {
     },
     { 
       id: "4", 
-      invoiceNo: `${settings.invoicePrefix}-1004`, 
+      invoiceNo: `${settings.invoicePrefix}-0000-0004`, 
       customer: "Ayesha Noor", 
       date: "13-Jan-25", 
       amount: 980, 
@@ -79,7 +79,7 @@ export function ReturnForm() {
     },
     { 
       id: "5", 
-      invoiceNo: `${settings.invoicePrefix}-1005`, 
+      invoiceNo: `${settings.invoicePrefix}-0000-0005`, 
       customer: "Bilal Hussain", 
       date: "14-Jan-25", 
       amount: 950, 

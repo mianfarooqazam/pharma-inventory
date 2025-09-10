@@ -47,16 +47,16 @@ export function Invoices() {
   const { toast } = useToast();
   
   const [invoices, setInvoices] = useState<InvoiceItem[]>([
-    { id: "1", invoiceNo: `${settings.invoicePrefix}-1001`, customer: "Ali Khan", city: "Lahore", address: "12 Mall Road, Lahore", date: "12-Jan-25", amount: 4500, status: "Paid" },
-    { id: "2", invoiceNo: `${settings.invoicePrefix}-1002`, customer: "Sara Ahmed", city: "Karachi", address: "45 Clifton Block 5, Karachi", date: "12-Jan-25", amount: 1250.5, status: "Unpaid" },
-    { id: "3", invoiceNo: `${settings.invoicePrefix}-1003`, customer: "Usman Iqbal", city: "Rawalpindi", address: "88 Satellite Town, Rawalpindi", date: "13-Jan-25", amount: 300, status: "Paid" },
-    { id: "4", invoiceNo: `${settings.invoicePrefix}-1004`, customer: "Ayesha Noor", city: "Peshawar", address: "7 University Rd, Peshawar", date: "13-Jan-25", amount: 980, status: "Paid" },
-    { id: "5", invoiceNo: `${settings.invoicePrefix}-1005`, customer: "Bilal Hussain", city: "Lahore", address: "19 Jail Road, Lahore", date: "14-Jan-25", amount: 950, status: "Unpaid" },
-    { id: "6", invoiceNo: `${settings.invoicePrefix}-1006`, customer: "Ali Khan", city: "Lahore", address: "12 Mall Road, Lahore", date: "15-Jan-25", amount: 2100, status: "Paid" },
-    { id: "7", invoiceNo: `${settings.invoicePrefix}-1007`, customer: "Ali Khan", city: "Lahore", address: "12 Mall Road, Lahore", date: "20-Jan-25", amount: 760, status: "Unpaid" },
-    { id: "8", invoiceNo: `${settings.invoicePrefix}-1008`, customer: "Sara Ahmed", city: "Karachi", address: "45 Clifton Block 5, Karachi", date: "22-Jan-25", amount: 845, status: "Paid" },
-    { id: "9", invoiceNo: `${settings.invoicePrefix}-1009`, customer: "Hina Malik", city: "Islamabad", address: "2 Jinnah Avenue, Islamabad", date: "23-Jan-25", amount: 1200, status: "Paid" },
-    { id: "10", invoiceNo: `${settings.invoicePrefix}-1010`, customer: "Faisal Raza", city: "Karachi", address: "55 Shahrah-e-Faisal, Karachi", date: "24-Jan-25", amount: 4200.75, status: "Unpaid" },
+    { id: "1", invoiceNo: `${settings.invoicePrefix}-0000-0001`, customer: "Ali Khan", city: "Lahore", address: "12 Mall Road, Lahore", date: "12-Jan-25", amount: 4500, status: "Paid" },
+    { id: "2", invoiceNo: `${settings.invoicePrefix}-0000-0002`, customer: "Sara Ahmed", city: "Karachi", address: "45 Clifton Block 5, Karachi", date: "12-Jan-25", amount: 1250.5, status: "Unpaid" },
+    { id: "3", invoiceNo: `${settings.invoicePrefix}-0000-0003`, customer: "Usman Iqbal", city: "Rawalpindi", address: "88 Satellite Town, Rawalpindi", date: "13-Jan-25", amount: 300, status: "Paid" },
+    { id: "4", invoiceNo: `${settings.invoicePrefix}-0000-0004`, customer: "Ayesha Noor", city: "Peshawar", address: "7 University Rd, Peshawar", date: "13-Jan-25", amount: 980, status: "Paid" },
+    { id: "5", invoiceNo: `${settings.invoicePrefix}-0000-0005`, customer: "Bilal Hussain", city: "Lahore", address: "19 Jail Road, Lahore", date: "14-Jan-25", amount: 950, status: "Unpaid" },
+    { id: "6", invoiceNo: `${settings.invoicePrefix}-0000-0006`, customer: "Ali Khan", city: "Lahore", address: "12 Mall Road, Lahore", date: "15-Jan-25", amount: 2100, status: "Paid" },
+    { id: "7", invoiceNo: `${settings.invoicePrefix}-0000-0007`, customer: "Ali Khan", city: "Lahore", address: "12 Mall Road, Lahore", date: "20-Jan-25", amount: 760, status: "Unpaid" },
+    { id: "8", invoiceNo: `${settings.invoicePrefix}-0000-0008`, customer: "Sara Ahmed", city: "Karachi", address: "45 Clifton Block 5, Karachi", date: "22-Jan-25", amount: 845, status: "Paid" },
+    { id: "9", invoiceNo: `${settings.invoicePrefix}-0000-0009`, customer: "Hina Malik", city: "Islamabad", address: "2 Jinnah Avenue, Islamabad", date: "23-Jan-25", amount: 1200, status: "Paid" },
+    { id: "10", invoiceNo: `${settings.invoicePrefix}-0000-0010`, customer: "Faisal Raza", city: "Karachi", address: "55 Shahrah-e-Faisal, Karachi", date: "24-Jan-25", amount: 4200.75, status: "Unpaid" },
   ]);
 
   const customerOptions = Array.from(new Set(invoices.map(i => i.customer)));

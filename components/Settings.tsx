@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,13 +18,36 @@ import {
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { useSettings } from '@/contexts/SettingsContext';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 
 export function Settings() {
   const { settings, updateSettings, saveSettings } = useSettings();
   const [logoPreview, setLogoPreview] = useState<string | null>(settings.logo);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  
+  // Local form state - only updates when Save is pressed
+  const [formData, setFormData] = useState({
+    companyName: settings.companyName,
+    phone: settings.phone,
+    address: settings.address,
+    invoicePrefix: settings.invoicePrefix,
+    logo: settings.logo
+  });
+
+  // Update local state when settings change externally
+  useEffect(() => {
+    setFormData({
+      companyName: settings.companyName,
+      phone: settings.phone,
+      address: settings.address,
+      invoicePrefix: settings.invoicePrefix,
+      logo: settings.logo
+    });
+    setLogoPreview(settings.logo);
+  }, [settings]);
 
   const handleInputChange = (field: string, value: string) => {
-    updateSettings({ [field]: value });
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,7 +65,8 @@ export function Settings() {
         return;
       }
 
-      updateSettings({ logo: URL.createObjectURL(file) });
+      const logoUrl = URL.createObjectURL(file);
+      setFormData(prev => ({ ...prev, logo: logoUrl }));
 
       // Create preview
       const reader = new FileReader();
@@ -54,7 +78,14 @@ export function Settings() {
   };
 
   const handleSave = () => {
+    setConfirmationOpen(true);
+  };
+
+  const confirmSave = () => {
+    // Apply all form data to settings
+    updateSettings(formData);
     saveSettings();
+    setConfirmationOpen(false);
     alert('Settings saved successfully!');
   };
 
@@ -81,7 +112,7 @@ export function Settings() {
               </Label>
               <Input
                 id="company-name"
-                value={settings.companyName}
+                value={formData.companyName}
                 onChange={(e) => handleInputChange('companyName', e.target.value)}
                 placeholder="Enter company name"
                 className="w-full"
@@ -96,7 +127,7 @@ export function Settings() {
               </Label>
               <Input
                 id="phone"
-                value={settings.phone}
+                value={formData.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
                 placeholder="Enter phone number"
                 className="w-full"
@@ -111,7 +142,7 @@ export function Settings() {
               </Label>
               <Textarea
                 id="address"
-                value={settings.address}
+                value={formData.address}
                 onChange={(e) => handleInputChange('address', e.target.value)}
                 placeholder="Enter complete address"
                 className="w-full min-h-[100px]"
@@ -126,14 +157,14 @@ export function Settings() {
               </Label>
               <Input
                 id="invoice-prefix"
-                value={settings.invoicePrefix}
+                value={formData.invoicePrefix}
                 onChange={(e) => handleInputChange('invoicePrefix', e.target.value.toUpperCase())}
                 placeholder="Enter 3-letter prefix (e.g., MDP, ABC)"
                 className="w-full"
                 maxLength={3}
               />
               <p className="text-xs text-gray-500">
-                This will be used for all invoice numbers (e.g., {settings.invoicePrefix}-1001)
+                This will be used for all invoice numbers (e.g., {formData.invoicePrefix}-0000-0001)
               </p>
             </div>
           </CardContent>
@@ -152,9 +183,9 @@ export function Settings() {
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
                 <Avatar className="h-32 w-32">
-                  <AvatarImage src={logoPreview || settings.logo || undefined} alt="Company Logo" />
+                  <AvatarImage src={logoPreview || formData.logo || undefined} alt="Company Logo" />
                   <AvatarFallback className="text-2xl">
-                    {settings.companyName.split(' ').map(word => word[0]).join('').toUpperCase()}
+                    {formData.companyName.split(' ').map(word => word[0]).join('').toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -189,7 +220,7 @@ export function Settings() {
                 </Button>
               </div>
 
-              {settings.logo && (
+              {formData.logo && (
                 <div className="text-center">
                   <p className="text-sm text-green-600">
                     ✓ Logo uploaded successfully
@@ -212,20 +243,20 @@ export function Settings() {
             <div className="flex items-start justify-between mb-8">
               <div className="flex items-center space-x-4">
                 <Avatar className="h-16 w-16">
-                  <AvatarImage src={logoPreview || settings.logo || undefined} alt="Company Logo" />
+                  <AvatarImage src={logoPreview || formData.logo || undefined} alt="Company Logo" />
                   <AvatarFallback>
-                    {settings.companyName.split(' ').map(word => word[0]).join('').toUpperCase()}
+                    {formData.companyName.split(' ').map(word => word[0]).join('').toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">{settings.companyName}</h3>
-                  <p className="text-sm text-gray-600">{settings.phone}</p>
-                  <p className="text-sm text-gray-600">{settings.address}</p>
+                  <h3 className="text-lg font-bold text-gray-900">{formData.companyName}</h3>
+                  <p className="text-sm text-gray-600">{formData.phone}</p>
+                  <p className="text-sm text-gray-600">{formData.address}</p>
                 </div>
               </div>
               <div className="text-right">
                 <h2 className="text-2xl font-bold text-gray-900">INVOICE</h2>
-                <p className="text-sm text-gray-600">Invoice #: {settings.invoicePrefix}-2024-001</p>
+                <p className="text-sm text-gray-600">Invoice #: {formData.invoicePrefix}-0000-0001</p>
                 <p className="text-sm text-gray-600">Date: {formatDate(new Date())}</p>
                 <p className="text-sm text-gray-600">Due Date: {formatDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))}</p>
               </div>
@@ -333,6 +364,17 @@ export function Settings() {
           <span>Save Settings</span>
         </Button>
       </div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        open={confirmationOpen}
+        onOpenChange={setConfirmationOpen}
+        title="Save Settings"
+        description="Are you sure you want to save these settings? This will update your company information, logo, and invoice prefix throughout the application."
+        confirmText="Save Settings"
+        onConfirm={confirmSave}
+        variant="default"
+      />
     </div>
   );
 }
