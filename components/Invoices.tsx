@@ -14,9 +14,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Receipt, Eye } from "lucide-react";
-// removed interactive status controls
+import { Search, Receipt, Eye, CheckCircle, XCircle } from "lucide-react";
 import { InvoicePreviewDialog } from "./InvoicePreviewDialog";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 interface InvoiceItem {
   id: string;
@@ -32,11 +33,12 @@ interface InvoiceItem {
 export function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
   const [customerFilter, setCustomerFilter] = useState<string | null>(null);
-  const [selectedPeriod, setSelectedPeriod] = useState<'all' | 'today' | 'week' | 'month' | 'year'>('all');
+  const [selectedPeriod, setSelectedPeriod] = useState<'all' | 'today' | 'week' | 'month' | 'year'>('month');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(null);
+  const { toast } = useToast();
   
-  const [invoices] = useState<InvoiceItem[]>([
+  const [invoices, setInvoices] = useState<InvoiceItem[]>([
     { id: "1", invoiceNo: "INV-1001", customer: "Ali Khan", city: "Lahore", address: "12 Mall Road, Lahore", date: "2025-01-12", amount: 4500, status: "Paid" },
     { id: "2", invoiceNo: "INV-1002", customer: "Sara Ahmed", city: "Karachi", address: "45 Clifton Block 5, Karachi", date: "2025-01-12", amount: 1250.5, status: "Unpaid" },
     { id: "3", invoiceNo: "INV-1003", customer: "Usman Iqbal", city: "Rawalpindi", address: "88 Satellite Town, Rawalpindi", date: "2025-01-13", amount: 300, status: "Paid" },
@@ -110,9 +112,50 @@ export function Invoices() {
     return matchesText && matchesCustomer && matchesPeriod;
   });
 
-  // status is read-only from data
+  const handleStatusChange = (invoiceId: string, newStatus: "Paid" | "Unpaid") => {
+    const invoice = invoices.find(inv => inv.id === invoiceId);
+    if (!invoice) return;
 
-  // removed status change handler
+    const confirmationToast = toast({
+      title: "Confirm Status Change",
+      description: `Are you sure you want to mark invoice ${invoice.invoiceNo} as ${newStatus}?`,
+      variant: "default",
+      action: (
+        <div className="flex gap-2">
+          <ToastAction
+            altText="Confirm"
+            onClick={() => {
+              confirmationToast.dismiss();
+              setInvoices(prev => 
+                prev.map(inv => 
+                  inv.id === invoiceId 
+                    ? { ...inv, status: newStatus }
+                    : inv
+                )
+              );
+              toast({
+                title: "Status Updated",
+                description: `Invoice ${invoice.invoiceNo} marked as ${newStatus}`,
+                variant: "default",
+              });
+            }}
+            className="bg-green-600 text-white hover:bg-green-700"
+          >
+            Confirm
+          </ToastAction>
+          <ToastAction
+            altText="Cancel"
+            onClick={() => {
+              confirmationToast.dismiss();
+            }}
+            className="bg-gray-600 text-white hover:bg-gray-700"
+          >
+            Cancel
+          </ToastAction>
+        </div>
+      ),
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -186,9 +229,29 @@ export function Invoices() {
                     <TableCell>{inv.city}</TableCell>
                     <TableCell>PKR {inv.amount.toFixed(2)}</TableCell>
                     <TableCell>
-                      <span className={`text-sm font-medium ${inv.status === 'Paid' ? 'text-green-600' : 'text-red-600'}`}>
-                        {inv.status}
-                      </span>
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-sm font-medium ${inv.status === 'Paid' ? 'text-green-600' : 'text-red-600'}`}>
+                          {inv.status}
+                        </span>
+                        <div className="flex space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleStatusChange(inv.id, "Paid")}
+                            className={`p-1 h-6 w-6 ${inv.status === 'Paid' ? 'bg-green-100 text-green-600' : 'text-gray-400 hover:text-green-600'}`}
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleStatusChange(inv.id, "Unpaid")}
+                            className={`p-1 h-6 w-6 ${inv.status === 'Unpaid' ? 'bg-red-100 text-red-600' : 'text-gray-400 hover:text-red-600'}`}
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">

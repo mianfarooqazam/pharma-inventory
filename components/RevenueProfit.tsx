@@ -12,7 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
 import { 
   DollarSign, 
   TrendingUp, 
@@ -37,21 +36,14 @@ export function RevenueProfit() {
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
-  const [paymentStatus, setPaymentStatus] = useState<{[key: string]: boolean}>({
-    '1': true,  // Paracetamol - Paid
-    '2': false, // Amoxicillin - Unpaid
-    '3': true,  // Ibuprofen - Paid
-    '4': true,  // Omeprazole - Paid
-    '5': false, // Metformin - Unpaid
-  });
 
   // Mock data for revenue and profit in PKR
   const revenueData = [
-    { id: '1', date: '2024-01-15', medicine: 'Paracetamol 500mg', quantity: 150, unitPrice: 250, totalRevenue: 37500, cost: 18750, profit: 18750, status: 'Paid' },
-    { id: '2', date: '2024-01-15', medicine: 'Amoxicillin 250mg', quantity: 80, unitPrice: 500, totalRevenue: 40000, cost: 24000, profit: 16000, status: 'Unpaid' },
-    { id: '3', date: '2024-01-14', medicine: 'Ibuprofen 400mg', quantity: 200, unitPrice: 300, totalRevenue: 60000, cost: 30000, profit: 30000, status: 'Paid' },
-    { id: '4', date: '2024-01-14', medicine: 'Omeprazole 20mg', quantity: 60, unitPrice: 850, totalRevenue: 51000, cost: 30600, profit: 20400, status: 'Paid' },
-    { id: '5', date: '2024-01-13', medicine: 'Metformin 500mg', quantity: 120, unitPrice: 400, totalRevenue: 48000, cost: 28800, profit: 19200, status: 'Unpaid' },
+    { id: '1', date: '2024-01-15', invoiceNo: 'INV-1001', customerName: 'Ali Khan', city: 'Lahore', totalBill: 37500, profit: 18750, status: 'Paid' },
+    { id: '2', date: '2024-01-15', invoiceNo: 'INV-1002', customerName: 'Sara Ahmed', city: 'Karachi', totalBill: 40000, profit: 16000, status: 'Unpaid' },
+    { id: '3', date: '2024-01-14', invoiceNo: 'INV-1003', customerName: 'Usman Iqbal', city: 'Rawalpindi', totalBill: 60000, profit: 30000, status: 'Paid' },
+    { id: '4', date: '2024-01-14', invoiceNo: 'INV-1004', customerName: 'Ayesha Noor', city: 'Peshawar', totalBill: 51000, profit: 20400, status: 'Paid' },
+    { id: '5', date: '2024-01-13', invoiceNo: 'INV-1005', customerName: 'Bilal Hussain', city: 'Lahore', totalBill: 48000, profit: 19200, status: 'Unpaid' },
   ];
 
   // New metrics data
@@ -64,47 +56,6 @@ export function RevenueProfit() {
     profitMarginThisMonth: '44.1%' // Profit margin for this month
   };
 
-  const handlePaymentStatusChange = (itemId: string, checked: boolean) => {
-    // Find the medicine name for the toast message
-    const medicine = revenueData.find(item => item.id === itemId)?.medicine || 'Transaction';
-    
-    // Show confirmation toast directly
-    const confirmationToast = toast({
-      title: "Confirm Payment Status Change",
-      description: `Are you sure you want to mark "${medicine}" as ${checked ? 'Paid' : 'Unpaid'}?`,
-      variant: "default",
-      action: (
-        <div className="flex gap-2">
-          <ToastAction
-            altText="Confirm"
-            onClick={() => {
-              // Dismiss the confirmation toast
-              confirmationToast.dismiss();
-              
-              // Update the payment status silently
-              setPaymentStatus(prev => ({
-                ...prev,
-                [itemId]: checked
-              }));
-            }}
-            className="bg-green-600 text-white hover:bg-green-700"
-          >
-            Confirm
-          </ToastAction>
-          <ToastAction
-            altText="Cancel"
-            onClick={() => {
-              // Dismiss the confirmation toast
-              confirmationToast.dismiss();
-            }}
-            className="bg-gray-600 text-white hover:bg-gray-700"
-          >
-            Cancel
-          </ToastAction>
-        </div>
-      ),
-    });
-  };
 
   const getGrowthIcon = (growth: string) => {
     if (growth.startsWith('+')) {
@@ -115,7 +66,9 @@ export function RevenueProfit() {
   };
 
   const filteredData = revenueData.filter(item =>
-    item.medicine.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.invoiceNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.date.includes(searchTerm)
   );
 
@@ -233,7 +186,7 @@ export function RevenueProfit() {
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="flex-1">
               <Input
-                placeholder="Search medicines or dates..."
+                placeholder="Search invoices, customers, cities or dates..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="max-w-sm"
@@ -264,11 +217,10 @@ export function RevenueProfit() {
                 <TableRow>
                   <TableHead>Sr. No</TableHead>
                   <TableHead>Date</TableHead>
-                  <TableHead>Medicine</TableHead>
-                  <TableHead>Quantity</TableHead>
-                  <TableHead>Unit Price</TableHead>
-                  <TableHead>Revenue</TableHead>
-                  <TableHead>Cost</TableHead>
+                  <TableHead>Invoice No</TableHead>
+                  <TableHead>Customer Name</TableHead>
+                  <TableHead>City</TableHead>
+                  <TableHead>Total Bill</TableHead>
                   <TableHead>Profit</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
@@ -286,39 +238,19 @@ export function RevenueProfit() {
                         <span className="text-sm">{item.date}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="font-medium">{item.medicine}</TableCell>
-                    <TableCell>{item.quantity}</TableCell>
-                    <TableCell>₨ {item.unitPrice.toLocaleString()}</TableCell>
+                    <TableCell className="font-medium">{item.invoiceNo}</TableCell>
+                    <TableCell className="font-medium">{item.customerName}</TableCell>
+                    <TableCell>{item.city}</TableCell>
                     <TableCell className="font-semibold text-green-600">
-                      ₨ {item.totalRevenue.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-orange-600">
-                      ₨ {item.cost.toLocaleString()}
+                      ₨ {item.totalBill.toLocaleString()}
                     </TableCell>
                     <TableCell className="font-semibold text-blue-600">
                       ₨ {item.profit.toLocaleString()}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`payment-${item.id}`}
-                          checked={paymentStatus[item.id] || false}
-                          onCheckedChange={(checked) => handlePaymentStatusChange(item.id, checked as boolean)}
-                          className={`${
-                            paymentStatus[item.id] 
-                              ? 'data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600' 
-                              : 'data-[state=unchecked]:border-red-300'
-                          }`}
-                        />
-                        <label 
-                          htmlFor={`payment-${item.id}`}
-                          className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
-                            paymentStatus[item.id] ? 'text-green-600' : 'text-red-600'
-                          }`}
-                        >
-                          {paymentStatus[item.id] ? 'Paid' : 'Unpaid'}
-                        </label>
-                      </div>
+                      <span className={`text-sm font-medium ${item.status === 'Paid' ? 'text-green-600' : 'text-red-600'}`}>
+                        {item.status}
+                      </span>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
