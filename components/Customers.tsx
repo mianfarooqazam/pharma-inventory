@@ -15,6 +15,8 @@ import {
 import { Plus, Search, Users, FileText, Trash2 } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { AddCustomerDialog, NewCustomer } from "./AddCustomerDialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface Customer extends NewCustomer {}
 
@@ -34,9 +36,33 @@ export function Customers() {
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState<{ name: string; index: number } | null>(null);
+  const { toast } = useToast();
 
   const handleAddCustomer = (customer: NewCustomer) => {
     setCustomers((prev) => [...prev, customer]);
+    toast({
+      title: "Customer Added",
+      description: `${customer.name} has been added successfully.`,
+      variant: "default",
+    });
+  };
+
+  const handleDeleteClick = (customerName: string, index: number) => {
+    setCustomerToDelete({ name: customerName, index });
+    setConfirmationOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (!customerToDelete) return;
+
+    setCustomers((prev) => prev.filter((_, i) => i !== customerToDelete.index));
+    toast({
+      title: "Customer Deleted",
+      description: `${customerToDelete.name} has been deleted successfully.`,
+      variant: "default",
+    });
   };
 
   const filteredCustomers = customers.filter((c) => {
@@ -129,9 +155,7 @@ export function Customers() {
                           variant="ghost"
                           size="sm"
                           className="text-red-600 hover:text-red-700"
-                          onClick={() =>
-                            setCustomers((prev) => prev.filter((_, i) => i !== idx))
-                          }
+                          onClick={() => handleDeleteClick(c.name, idx)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -158,6 +182,15 @@ export function Customers() {
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         onAdd={handleAddCustomer}
+      />
+      <ConfirmationDialog
+        open={confirmationOpen}
+        onOpenChange={setConfirmationOpen}
+        title="Delete Customer"
+        description={`Are you sure you want to delete ${customerToDelete?.name}? This action cannot be undone.`}
+        confirmText="Delete Customer"
+        onConfirm={confirmDelete}
+        variant="destructive"
       />
     </div>
   );

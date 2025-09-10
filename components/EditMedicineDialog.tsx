@@ -15,6 +15,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useInventory } from '@/contexts/InventoryContext';
 import { useNotifications } from '@/contexts/NotificationContext';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 interface EditMedicineDialogProps {
   medicineId: string;
@@ -25,6 +27,18 @@ interface EditMedicineDialogProps {
 export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedicineDialogProps) {
   const { medicines, batches, updateMedicine } = useInventory();
   const { addNotification } = useNotifications();
+  const { toast } = useToast();
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState<{
+    name: string;
+    category: string;
+    manufacturer: string;
+    strength: string;
+    unit: string;
+    minStockLevel: number;
+    currentStock: number;
+    price: number;
+  } | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -72,7 +86,8 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    updateMedicine(medicineId, {
+    // Store the pending changes and show confirmation
+    setPendingChanges({
       name: formData.name,
       category: formData.category,
       manufacturer: formData.manufacturer,
@@ -82,13 +97,28 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
       currentStock: parseInt(formData.currentStock),
       price: parseFloat(formData.price),
     });
+    
+    setConfirmationOpen(true);
+  };
+
+  const confirmUpdate = () => {
+    if (!pendingChanges) return;
+
+    updateMedicine(medicineId, pendingChanges);
 
     addNotification({
       type: 'success',
       title: 'Medicine Updated',
-      message: `${formData.name} has been successfully updated`,
+      message: `${pendingChanges.name} has been successfully updated`,
+    });
+
+    toast({
+      title: "Medicine Updated Successfully",
+      description: `${pendingChanges.name} has been updated with the new details.`,
+      variant: "default",
     });
     
+    setConfirmationOpen(false);
     onOpenChange(false);
   };
 
@@ -268,6 +298,16 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
             <Button type="submit">Update Medicine</Button>
           </DialogFooter>
         </form>
+        
+        <ConfirmationDialog
+          open={confirmationOpen}
+          onOpenChange={setConfirmationOpen}
+          title="Confirm Medicine Update"
+          description={`Are you sure you want to update ${pendingChanges?.name}? This will save all the changes you've made.`}
+          confirmText="Save Changes"
+          onConfirm={confirmUpdate}
+          variant="edit"
+        />
       </DialogContent>
     </Dialog>
   );

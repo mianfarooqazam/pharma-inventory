@@ -17,7 +17,7 @@ import {
 import { Search, Receipt, Eye, CheckCircle, XCircle } from "lucide-react";
 import { InvoicePreviewDialog } from "./InvoicePreviewDialog";
 import { useToast } from "@/hooks/use-toast";
-import { ToastAction } from "@/components/ui/toast";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 interface InvoiceItem {
   id: string;
@@ -36,6 +36,12 @@ export function Invoices() {
   const [selectedPeriod, setSelectedPeriod] = useState<'all' | 'today' | 'week' | 'month' | 'year'>('month');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(null);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [confirmationData, setConfirmationData] = useState<{
+    invoiceId: string;
+    newStatus: "Paid" | "Unpaid";
+    invoiceNo: string;
+  } | null>(null);
   const { toast } = useToast();
   
   const [invoices, setInvoices] = useState<InvoiceItem[]>([
@@ -116,44 +122,29 @@ export function Invoices() {
     const invoice = invoices.find(inv => inv.id === invoiceId);
     if (!invoice) return;
 
-    const confirmationToast = toast({
-      title: "Confirm Status Change",
-      description: `Are you sure you want to mark invoice ${invoice.invoiceNo} as ${newStatus}?`,
+    setConfirmationData({
+      invoiceId,
+      newStatus,
+      invoiceNo: invoice.invoiceNo
+    });
+    setConfirmationOpen(true);
+  };
+
+  const confirmStatusChange = () => {
+    if (!confirmationData) return;
+
+    setInvoices(prev => 
+      prev.map(inv => 
+        inv.id === confirmationData.invoiceId 
+          ? { ...inv, status: confirmationData.newStatus }
+          : inv
+      )
+    );
+    
+    toast({
+      title: "Status Updated",
+      description: `Invoice ${confirmationData.invoiceNo} marked as ${confirmationData.newStatus}`,
       variant: "default",
-      action: (
-        <div className="flex gap-2">
-          <ToastAction
-            altText="Confirm"
-            onClick={() => {
-              confirmationToast.dismiss();
-              setInvoices(prev => 
-                prev.map(inv => 
-                  inv.id === invoiceId 
-                    ? { ...inv, status: newStatus }
-                    : inv
-                )
-              );
-              toast({
-                title: "Status Updated",
-                description: `Invoice ${invoice.invoiceNo} marked as ${newStatus}`,
-                variant: "default",
-              });
-            }}
-            className="bg-green-600 text-white hover:bg-green-700"
-          >
-            Confirm
-          </ToastAction>
-          <ToastAction
-            altText="Cancel"
-            onClick={() => {
-              confirmationToast.dismiss();
-            }}
-            className="bg-gray-600 text-white hover:bg-gray-700"
-          >
-            Cancel
-          </ToastAction>
-        </div>
-      ),
     });
   };
 
@@ -285,6 +276,15 @@ export function Invoices() {
             open={previewOpen}
             onOpenChange={setPreviewOpen}
             invoice={selectedInvoice}
+          />
+          <ConfirmationDialog
+            open={confirmationOpen}
+            onOpenChange={setConfirmationOpen}
+            title="Confirm Status Change"
+            description={`Are you sure you want to mark invoice ${confirmationData?.invoiceNo} as ${confirmationData?.newStatus}?`}
+            confirmText={confirmationData?.newStatus === "Paid" ? "Mark as Paid" : "Mark as Unpaid"}
+            onConfirm={confirmStatusChange}
+            variant={confirmationData?.newStatus === "Paid" ? "default" : "warning"}
           />
         </CardContent>
       </Card>

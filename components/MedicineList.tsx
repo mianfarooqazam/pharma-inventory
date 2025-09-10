@@ -22,6 +22,8 @@ import {
 import { Plus, Search, Edit2, Trash2, Package } from "lucide-react";
 import { useInventory } from "@/contexts/InventoryContext";
 import { AddMedicineDialog } from "./AddMedicineDialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { useToast } from "@/hooks/use-toast";
 import { EditMedicineDialog } from "./EditMedicineDialog";
 
 export function MedicineList() {
@@ -29,6 +31,9 @@ export function MedicineList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingMedicine, setEditingMedicine] = useState<string | null>(null);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [medicineToDelete, setMedicineToDelete] = useState<{ id: string; name: string } | null>(null);
+  const { toast } = useToast();
 
   const filteredMedicines = medicines.filter(
     (medicine) =>
@@ -36,6 +41,23 @@ export function MedicineList() {
       medicine.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
       medicine.manufacturer.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleDeleteClick = (medicineId: string, medicineName: string) => {
+    setMedicineToDelete({ id: medicineId, name: medicineName });
+    setConfirmationOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (!medicineToDelete) return;
+
+    deleteMedicine(medicineToDelete.id);
+    toast({
+      title: "Medicine Deleted",
+      description: `${medicineToDelete.name} has been deleted successfully.`,
+      variant: "default",
+    });
+  };
+
 
   return (
     <div className="space-y-6">
@@ -127,7 +149,7 @@ export function MedicineList() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => deleteMedicine(medicine.id)}
+                            onClick={() => handleDeleteClick(medicine.id, medicine.name)}
                             className="text-red-600 hover:text-red-700"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -162,6 +184,15 @@ export function MedicineList() {
           onOpenChange={() => setEditingMedicine(null)}
         />
       )}
+      <ConfirmationDialog
+        open={confirmationOpen}
+        onOpenChange={setConfirmationOpen}
+        title="Delete Medicine"
+        description={`Are you sure you want to delete ${medicineToDelete?.name}? This action cannot be undone.`}
+        confirmText="Delete Medicine"
+        onConfirm={confirmDelete}
+        variant="destructive"
+      />
     </div>
   );
 }
