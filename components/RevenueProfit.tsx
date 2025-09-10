@@ -34,15 +34,16 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/comp
 export function RevenueProfit() {
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const { toast } = useToast();
 
   // Mock data for revenue and profit in PKR
   const revenueData = [
-    { id: '1', date: '2024-01-15', invoiceNo: 'INV-1001', customerName: 'Ali Khan', city: 'Lahore', totalBill: 37500, profit: 18750, status: 'Paid' },
-    { id: '2', date: '2024-01-15', invoiceNo: 'INV-1002', customerName: 'Sara Ahmed', city: 'Karachi', totalBill: 40000, profit: 16000, status: 'Unpaid' },
-    { id: '3', date: '2024-01-14', invoiceNo: 'INV-1003', customerName: 'Usman Iqbal', city: 'Rawalpindi', totalBill: 60000, profit: 30000, status: 'Paid' },
-    { id: '4', date: '2024-01-14', invoiceNo: 'INV-1004', customerName: 'Ayesha Noor', city: 'Peshawar', totalBill: 51000, profit: 20400, status: 'Paid' },
-    { id: '5', date: '2024-01-13', invoiceNo: 'INV-1005', customerName: 'Bilal Hussain', city: 'Lahore', totalBill: 48000, profit: 19200, status: 'Unpaid' },
+    { id: '1', date: '15-Jan-24', invoiceNo: 'INV-1001', customerName: 'Ali Khan', city: 'Lahore', totalBill: 37500, profit: 18750, status: 'Paid' },
+    { id: '2', date: '15-Jan-24', invoiceNo: 'INV-1002', customerName: 'Sara Ahmed', city: 'Karachi', totalBill: 40000, profit: 16000, status: 'Unpaid' },
+    { id: '3', date: '14-Jan-24', invoiceNo: 'INV-1003', customerName: 'Usman Iqbal', city: 'Rawalpindi', totalBill: 60000, profit: 30000, status: 'Paid' },
+    { id: '4', date: '14-Jan-24', invoiceNo: 'INV-1004', customerName: 'Ayesha Noor', city: 'Peshawar', totalBill: 51000, profit: 20400, status: 'Paid' },
+    { id: '5', date: '13-Jan-24', invoiceNo: 'INV-1005', customerName: 'Bilal Hussain', city: 'Lahore', totalBill: 48000, profit: 19200, status: 'Unpaid' },
   ];
 
   // New metrics data
@@ -64,12 +65,16 @@ export function RevenueProfit() {
     }
   };
 
-  const filteredData = revenueData.filter(item =>
-    item.invoiceNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.date.includes(searchTerm)
-  );
+  const filteredData = revenueData.filter(item => {
+    const matchesSearch = item.invoiceNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.date.includes(searchTerm);
+    
+    const matchesStatus = statusFilter === 'all' || item.status.toLowerCase() === statusFilter.toLowerCase();
+    
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div className="space-y-6">
@@ -170,11 +175,31 @@ export function RevenueProfit() {
               <span>Revenue & Profit Analysis</span>
             </CardTitle>
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Export
+              <Button 
+                variant={statusFilter === 'all' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => setStatusFilter('all')}
+                className={statusFilter === 'all' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'border-blue-600 text-blue-600 hover:bg-blue-50'}
+              >
+                All
               </Button>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant={statusFilter === 'paid' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => setStatusFilter('paid')}
+                className={statusFilter === 'paid' ? 'bg-green-600 hover:bg-green-700 text-white' : 'border-green-600 text-green-600 hover:bg-green-50'}
+              >
+                Paid
+              </Button>
+              <Button 
+                variant={statusFilter === 'unpaid' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => setStatusFilter('unpaid')}
+                className={statusFilter === 'unpaid' ? 'bg-red-600 hover:bg-red-700 text-white' : 'border-red-600 text-red-600 hover:bg-red-50'}
+              >
+                Unpaid
+              </Button>
+              <Button variant="outline" size="sm" disabled>
                 <FileText className="h-4 w-4 mr-2" />
                 Report
               </Button>
@@ -203,7 +228,7 @@ export function RevenueProfit() {
                   <SelectItem value="year">This Year</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" disabled>
                 <Filter className="h-4 w-4 mr-2" />
                 Filter
               </Button>

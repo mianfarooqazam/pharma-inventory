@@ -16,6 +16,7 @@ import {
   Save,
   Camera
 } from 'lucide-react';
+import { formatDate } from '@/lib/utils';
 
 export function Settings() {
   const [companyInfo, setCompanyInfo] = useState({
@@ -218,16 +219,8 @@ export function Settings() {
               <div className="text-right">
                 <h2 className="text-2xl font-bold text-gray-900">INVOICE</h2>
                 <p className="text-sm text-gray-600">Invoice #: INV-2024-001</p>
-                <p className="text-sm text-gray-600">Date: {new Date().toLocaleDateString('en-GB', { 
-                  day: '2-digit', 
-                  month: 'short', 
-                  year: 'numeric' 
-                }).replace(/ /g, '-').toLowerCase()}</p>
-                <p className="text-sm text-gray-600">Due Date: {(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)).toLocaleDateString('en-GB', { 
-                  day: '2-digit', 
-                  month: 'short', 
-                  year: 'numeric' 
-                }).replace(/ /g, '-').toLowerCase()}</p>
+                <p className="text-sm text-gray-600">Date: {formatDate(new Date())}</p>
+                <p className="text-sm text-gray-600">Due Date: {formatDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))}</p>
               </div>
             </div>
 
