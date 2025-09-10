@@ -267,11 +267,10 @@ export function Settings() {
               <div>
                 <h4 className="text-sm font-semibold text-gray-700 mb-2">Bill To:</h4>
                 <div className="text-sm text-gray-600">
-                  <p className="font-medium">Dr. Ahmed Hassan</p>
-                  <p>Karachi Medical Center</p>
-                  <p>Block 6, PECHS</p>
-                  <p>Karachi, 75400</p>
-                  <p>Phone: +92-21-1234567</p>
+                  <p className="font-medium">Customer Name</p>
+                  <p>Customer Address</p>
+                  <p>City, Postal Code</p>
+                  <p>Phone: Customer Phone</p>
                 </div>
               </div>
             </div>
@@ -291,36 +290,12 @@ export function Settings() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">BCH-2024-001</td>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">Pantoprazole 40mg</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">Tablet</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">30</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 2.50</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 75.00</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">BCH-2024-002</td>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">Amoxicillin 500mg</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">Capsule</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">21</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 3.20</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 67.20</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">BCH-2024-003</td>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">Paracetamol 500mg</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">Tablet</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">100</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 0.80</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 80.00</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">BCH-2024-004</td>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">Metformin 500mg</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">Tablet</td>
-                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">60</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 1.50</td>
-                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 90.00</td>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">BCH-001</td>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600">Medicine Name</td>
+                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">Unit</td>
+                    <td className="border border-gray-200 px-4 py-3 text-center text-sm text-gray-600">Qty</td>
+                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 0.00</td>
+                    <td className="border border-gray-200 px-4 py-3 text-right text-sm text-gray-600">Rs. 0.00</td>
                   </tr>
                 </tbody>
               </table>
@@ -331,19 +306,19 @@ export function Settings() {
               <div className="w-64">
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="text-sm text-gray-600">Subtotal:</span>
-                  <span className="text-sm text-gray-900">Rs. 312.20</span>
+                  <span className="text-sm text-gray-900">Rs. 0.00</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="text-sm text-gray-600">Tax (17%):</span>
-                  <span className="text-sm text-gray-900">Rs. 53.07</span>
+                  <span className="text-sm text-gray-900">Rs. 0.00</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="text-sm text-gray-600">Discount (5%):</span>
-                  <span className="text-sm text-gray-900">-Rs. 15.61</span>
+                  <span className="text-sm text-gray-900">-Rs. 0.00</span>
                 </div>
                 <div className="flex justify-between py-3 bg-gray-50 px-3 rounded">
                   <span className="text-base font-semibold text-gray-900">Total:</span>
-                  <span className="text-base font-semibold text-gray-900">Rs. 349.66</span>
+                  <span className="text-base font-semibold text-gray-900">Rs. 0.00</span>
                 </div>
               </div>
             </div>

@@ -101,7 +101,9 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
             ) : (
               <Package className="h-8 w-8 text-blue-600" />
             )}
-            <span className="text-xl font-bold text-gray-900">{settings.companyName}</span>
+            <span className="text-xl font-bold text-gray-900">
+              {settings.companyName || 'MediStock'}
+            </span>
           </div>
 
           {/* Desktop Navigation */}

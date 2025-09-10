@@ -17,9 +17,9 @@ interface SettingsContextType {
 }
 
 const defaultSettings: SettingsData = {
-  companyName: 'MediStock Pharmacy',
-  phone: '+92-300-1234567',
-  address: '123 Medical Street, Health City, Karachi, Pakistan',
+  companyName: '',
+  phone: '',
+  address: '',
   logo: null,
   invoicePrefix: 'INV',
 };
