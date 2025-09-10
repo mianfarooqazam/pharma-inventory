@@ -11,10 +11,12 @@ import { useInventory } from '@/contexts/InventoryContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { formatDate } from '@/lib/utils';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { useSettings } from '@/contexts/SettingsContext';
 
 export function ReturnForm() {
   const { medicines, batches, transactions, addTransaction } = useInventory();
   const { addNotification } = useNotifications();
+  const { settings } = useSettings();
   const [formData, setFormData] = useState({
     invoiceId: '',
     itemId: '',
@@ -29,7 +31,7 @@ export function ReturnForm() {
   const [invoices] = useState([
     { 
       id: "1", 
-      invoiceNo: "INV-1001", 
+      invoiceNo: `${settings.invoicePrefix}-1001`, 
       customer: "Ali Khan", 
       date: "12-Jan-25", 
       amount: 4500, 
@@ -42,7 +44,7 @@ export function ReturnForm() {
     },
     { 
       id: "2", 
-      invoiceNo: "INV-1002", 
+      invoiceNo: `${settings.invoicePrefix}-1002`, 
       customer: "Sara Ahmed", 
       date: "12-Jan-25", 
       amount: 1250.5, 
@@ -54,7 +56,7 @@ export function ReturnForm() {
     },
     { 
       id: "3", 
-      invoiceNo: "INV-1003", 
+      invoiceNo: `${settings.invoicePrefix}-1003`, 
       customer: "Usman Iqbal", 
       date: "13-Jan-25", 
       amount: 300, 
@@ -65,7 +67,7 @@ export function ReturnForm() {
     },
     { 
       id: "4", 
-      invoiceNo: "INV-1004", 
+      invoiceNo: `${settings.invoicePrefix}-1004`, 
       customer: "Ayesha Noor", 
       date: "13-Jan-25", 
       amount: 980, 
@@ -77,7 +79,7 @@ export function ReturnForm() {
     },
     { 
       id: "5", 
-      invoiceNo: "INV-1005", 
+      invoiceNo: `${settings.invoicePrefix}-1005`, 
       customer: "Bilal Hussain", 
       date: "14-Jan-25", 
       amount: 950, 

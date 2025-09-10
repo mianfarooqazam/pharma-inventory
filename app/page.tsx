@@ -26,6 +26,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { InventoryProvider } from '@/contexts/InventoryContext';
 import { LoginForm } from '@/components/LoginForm';
 import { NotificationProvider } from '@/contexts/NotificationContext';
+import { SettingsProvider } from '@/contexts/SettingsContext';
 
 
 function AppContent() {
@@ -167,7 +168,9 @@ export default function Home() {
     <AuthProvider>
       <InventoryProvider>
         <NotificationProvider>
-          <AppContent />
+          <SettingsProvider>
+            <AppContent />
+          </SettingsProvider>
         </NotificationProvider>
       </InventoryProvider>
     </AuthProvider>

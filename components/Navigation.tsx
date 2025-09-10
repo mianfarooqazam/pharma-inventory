@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNotifications } from "@/contexts/NotificationContext";
+import { useSettings } from "@/contexts/SettingsContext";
 import { useState } from "react";
 import {
   DropdownMenu,
@@ -54,6 +55,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
   const { user, logout } = useAuth();
   const { unreadCount, notifications, markAsRead, markAllAsRead } =
     useNotifications();
+  const { settings } = useSettings();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const getNotificationIcon = (type: string) => {
@@ -90,8 +92,16 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <Package className="h-8 w-8 text-blue-600" />
-            <span className="text-xl font-bold text-gray-900">MediStock</span>
+            {settings.logo ? (
+              <img 
+                src={settings.logo} 
+                alt="Company Logo" 
+                className="h-8 w-8 object-contain"
+              />
+            ) : (
+              <Package className="h-8 w-8 text-blue-600" />
+            )}
+            <span className="text-xl font-bold text-gray-900">{settings.companyName}</span>
           </div>
 
           {/* Desktop Navigation */}

@@ -9,6 +9,7 @@ import { InvoicePreview, InvoiceData } from "./InvoicePreview";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { useRef } from "react";
+import { useSettings } from "@/contexts/SettingsContext";
 
 interface InvoicePreviewDialogProps {
   open: boolean;
@@ -19,6 +20,7 @@ interface InvoicePreviewDialogProps {
 }
 
 export function InvoicePreviewDialog({ open, onOpenChange, invoice, taxRate = 0, discountRate = 0 }: InvoicePreviewDialogProps) {
+  const { settings } = useSettings();
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   const handleDownload = () => {
@@ -51,7 +53,17 @@ export function InvoicePreviewDialog({ open, onOpenChange, invoice, taxRate = 0,
           </div>
         </DialogHeader>
         <div ref={contentRef}>
-          <InvoicePreview invoice={invoice} taxRate={taxRate} discountRate={discountRate} />
+          <InvoicePreview 
+            invoice={invoice} 
+            company={{
+              name: settings.companyName,
+              phone: settings.phone,
+              address: settings.address,
+              logo: settings.logo
+            }}
+            taxRate={taxRate} 
+            discountRate={discountRate} 
+          />
         </div>
       </DialogContent>
     </Dialog>

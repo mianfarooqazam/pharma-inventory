@@ -17,22 +17,14 @@ import {
   Camera
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { useSettings } from '@/contexts/SettingsContext';
 
 export function Settings() {
-  const [companyInfo, setCompanyInfo] = useState({
-    name: 'MediStock Pharmacy',
-    phone: '+92-300-1234567',
-    address: '123 Medical Street, Health City, Karachi, Pakistan',
-    logo: null as File | null
-  });
-
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const { settings, updateSettings, saveSettings } = useSettings();
+  const [logoPreview, setLogoPreview] = useState<string | null>(settings.logo);
 
   const handleInputChange = (field: string, value: string) => {
-    setCompanyInfo(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    updateSettings({ [field]: value });
   };
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,10 +42,7 @@ export function Settings() {
         return;
       }
 
-      setCompanyInfo(prev => ({
-        ...prev,
-        logo: file
-      }));
+      updateSettings({ logo: URL.createObjectURL(file) });
 
       // Create preview
       const reader = new FileReader();
@@ -65,8 +54,7 @@ export function Settings() {
   };
 
   const handleSave = () => {
-    // Here you would typically save to a backend or local storage
-    console.log('Saving company info:', companyInfo);
+    saveSettings();
     alert('Settings saved successfully!');
   };
 
@@ -93,8 +81,8 @@ export function Settings() {
               </Label>
               <Input
                 id="company-name"
-                value={companyInfo.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                value={settings.companyName}
+                onChange={(e) => handleInputChange('companyName', e.target.value)}
                 placeholder="Enter company name"
                 className="w-full"
               />
@@ -108,7 +96,7 @@ export function Settings() {
               </Label>
               <Input
                 id="phone"
-                value={companyInfo.phone}
+                value={settings.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
                 placeholder="Enter phone number"
                 className="w-full"
@@ -123,11 +111,30 @@ export function Settings() {
               </Label>
               <Textarea
                 id="address"
-                value={companyInfo.address}
+                value={settings.address}
                 onChange={(e) => handleInputChange('address', e.target.value)}
                 placeholder="Enter complete address"
                 className="w-full min-h-[100px]"
               />
+            </div>
+
+            {/* Invoice Prefix */}
+            <div className="space-y-2">
+              <Label htmlFor="invoice-prefix" className="flex items-center space-x-2">
+                <SettingsIcon className="h-4 w-4" />
+                <span>Invoice Prefix</span>
+              </Label>
+              <Input
+                id="invoice-prefix"
+                value={settings.invoicePrefix}
+                onChange={(e) => handleInputChange('invoicePrefix', e.target.value.toUpperCase())}
+                placeholder="Enter 3-letter prefix (e.g., MDP, ABC)"
+                className="w-full"
+                maxLength={3}
+              />
+              <p className="text-xs text-gray-500">
+                This will be used for all invoice numbers (e.g., {settings.invoicePrefix}-1001)
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -145,9 +152,9 @@ export function Settings() {
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
                 <Avatar className="h-32 w-32">
-                  <AvatarImage src={logoPreview || undefined} alt="Company Logo" />
+                  <AvatarImage src={logoPreview || settings.logo || undefined} alt="Company Logo" />
                   <AvatarFallback className="text-2xl">
-                    {companyInfo.name.split(' ').map(word => word[0]).join('').toUpperCase()}
+                    {settings.companyName.split(' ').map(word => word[0]).join('').toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -182,10 +189,10 @@ export function Settings() {
                 </Button>
               </div>
 
-              {companyInfo.logo && (
+              {settings.logo && (
                 <div className="text-center">
                   <p className="text-sm text-green-600">
-                    ✓ Logo uploaded: {companyInfo.logo.name}
+                    ✓ Logo uploaded successfully
                   </p>
                 </div>
               )}
@@ -205,20 +212,20 @@ export function Settings() {
             <div className="flex items-start justify-between mb-8">
               <div className="flex items-center space-x-4">
                 <Avatar className="h-16 w-16">
-                  <AvatarImage src={logoPreview || undefined} alt="Company Logo" />
+                  <AvatarImage src={logoPreview || settings.logo || undefined} alt="Company Logo" />
                   <AvatarFallback>
-                    {companyInfo.name.split(' ').map(word => word[0]).join('').toUpperCase()}
+                    {settings.companyName.split(' ').map(word => word[0]).join('').toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">{companyInfo.name}</h3>
-                  <p className="text-sm text-gray-600">{companyInfo.phone}</p>
-                  <p className="text-sm text-gray-600">{companyInfo.address}</p>
+                  <h3 className="text-lg font-bold text-gray-900">{settings.companyName}</h3>
+                  <p className="text-sm text-gray-600">{settings.phone}</p>
+                  <p className="text-sm text-gray-600">{settings.address}</p>
                 </div>
               </div>
               <div className="text-right">
                 <h2 className="text-2xl font-bold text-gray-900">INVOICE</h2>
-                <p className="text-sm text-gray-600">Invoice #: INV-2024-001</p>
+                <p className="text-sm text-gray-600">Invoice #: {settings.invoicePrefix}-2024-001</p>
                 <p className="text-sm text-gray-600">Date: {formatDate(new Date())}</p>
                 <p className="text-sm text-gray-600">Due Date: {formatDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))}</p>
               </div>
