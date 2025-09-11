@@ -86,7 +86,6 @@ export function Settings() {
     updateSettings(formData);
     saveSettings();
     setConfirmationOpen(false);
-    alert('Settings saved successfully!');
   };
 
   return (
