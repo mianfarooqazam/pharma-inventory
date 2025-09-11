@@ -45,14 +45,46 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const [inventorySummary, setInventorySummary] = useState<{ total_medicines: number; total_units_in_stock: number; total_stock_value_selling: number; total_stock_value_cost: number } | null>(null);
   const [monthlyKpis, setMonthlyKpis] = useState<{ month_start: string; month_end: string; sold_this_month: number; purchase_this_month: number; profit_this_month: number; units_sold_this_month: number } | null>(null);
 
+  const [monthlySalesSeries, setMonthlySalesSeries] = useState<Array<{ label: string; total: number }>>([]);
+
   useEffect(() => {
     const loadKpis = async () => {
-      const { data: inv, error: invErr } = await supabase.from('v_inventory_summary').select('*').maybeSingle();
-      if (!invErr) setInventorySummary(inv as any);
-      const { data: mon, error: monErr } = await supabase.from('v_monthly_kpis').select('*').maybeSingle();
-      if (!monErr) setMonthlyKpis(mon as any);
+      const { data: inv } = await supabase.from('v_inventory_summary').select('*').maybeSingle();
+      if (inv) setInventorySummary(inv as any);
+      const { data: mon } = await supabase.from('v_monthly_kpis').select('*').maybeSingle();
+      if (mon) setMonthlyKpis(mon as any);
     };
     loadKpis();
+  }, []);
+
+  useEffect(() => {
+    const loadMonthlySales = async () => {
+      const end = new Date();
+      const start = new Date(end.getFullYear(), end.getMonth() - 11, 1);
+      const { data } = await supabase
+        .from('invoices')
+        .select('date,total')
+        .gte('date', start.toISOString().slice(0,10));
+
+      // Build last 12 month buckets
+      const buckets: Array<{ key: string; label: string; total: number }> = [];
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(end.getFullYear(), end.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${d.getMonth()}`;
+        const label = `${d.toLocaleString('en-US', { month: 'short' })}-${String(d.getFullYear()).slice(-2)}`;
+        buckets.push({ key, label, total: 0 });
+      }
+
+      (data || []).forEach((row: any) => {
+        const d = new Date(row.date);
+        const key = `${d.getFullYear()}-${d.getMonth()}`;
+        const b = buckets.find(b => b.key === key);
+        if (b) b.total += Number(row.total || 0);
+      });
+
+      setMonthlySalesSeries(buckets.map(({ label, total }) => ({ label, total })));
+    };
+    loadMonthlySales();
   }, []);
 
   const getGradientClass = (title: string) => {
@@ -162,6 +194,25 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           );
         })}
       </div>
+
+      {/* Monthly Sales Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base font-semibold text-gray-700">Monthly Sales (last 12 months)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlySalesSeries}>
+                <XAxis dataKey="label" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="total" name="Sales" fill="#10B981" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Low stock and expiring batches and others remain as-is */}
     </div>
