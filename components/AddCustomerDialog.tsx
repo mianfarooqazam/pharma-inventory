@@ -35,7 +35,11 @@ export function AddCustomerDialog({ open, onOpenChange, onAdd }: AddCustomerDial
   });
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    let next = value;
+    if (field === "name" || field === "address" || field === "city") {
+      next = value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
+    }
+    setFormData((prev) => ({ ...prev, [field]: next }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {

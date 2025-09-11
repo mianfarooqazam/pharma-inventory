@@ -126,7 +126,14 @@ export function AddMedicineDialog({
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    let next = value;
+    if (field === "name" || field === "manufacturer") {
+      next = value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
+    }
+    if (field === "batchNumber") {
+      next = value.toUpperCase();
+    }
+    setFormData((prev) => ({ ...prev, [field]: next }));
   };
 
   return (
