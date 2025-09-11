@@ -98,70 +98,131 @@ export function RevenueProfit() {
     .reduce((sum, i) => sum + (i.amount || 0), 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4">
       {/* Monthly/Yearly KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
         {[
-         
           {
             title: "Purchase This Year",
             value: `₨ ${metricsData.purchaseThisYear.toLocaleString()}`,
+            description: "Total inventory purchases",
             icon: ShoppingCart,
             color: "text-blue-600",
-            gradient: "bg-blue-600"
+            gradient: "from-blue-500 to-blue-700",
+            bgGlow: "bg-blue-500/20",
+            accent: "bg-blue-500"
           },
           {
             title: "Sold This Year",
             value: `₨ ${metricsData.soldThisYear.toLocaleString()}`,
+            description: "Annual sales revenue",
             icon: TrendingUp,
             color: "text-green-600",
-            gradient: "bg-green-600"
+            gradient: "from-green-500 to-green-700",
+            bgGlow: "bg-green-500/20",
+            accent: "bg-green-500"
           },
           {
             title: "Profit This Year",
             value: `₨ ${Math.round(yearly?.profit_this_year ?? 0).toLocaleString()}`,
+            description: "Net profit generated",
             icon: BarChart3,
             color: "text-purple-600",
-            gradient: "bg-purple-600"
+            gradient: "from-purple-500 to-purple-700",
+            bgGlow: "bg-purple-500/20",
+            accent: "bg-purple-500"
           },
           {
             title: "Purchase This Month",
             value: `₨ ${metricsData.purchaseThisMonth.toLocaleString()}`,
-            icon: DollarSign,
-            color: "text-orange-600",
-            gradient: "bg-orange-600"
+            description: "Monthly procurement cost",
+            icon: ShoppingCart,
+            color: "text-blue-600",
+            gradient: "from-blue-500 to-blue-700",
+            bgGlow: "bg-blue-500/20",
+            accent: "bg-blue-500"
           },
           {
             title: "Sold This Month",
             value: `₨ ${metricsData.soldThisMonth.toLocaleString()}`,
+            description: "Current month sales",
             icon: TrendingUp,
-            color: "text-emerald-600",
-            gradient: "bg-emerald-600"
+            color: "text-green-600",
+            gradient: "from-green-500 to-green-700",
+            bgGlow: "bg-green-500/20",
+            accent: "bg-green-500"
           },
           {
             title: "Profit This Month",
             value: `₨ ${Math.round(monthly?.profit_this_month ?? 0).toLocaleString()}`,
+            description: "Monthly net earnings",
             icon: BarChart3,
-            color: "text-indigo-600",
-            gradient: "bg-indigo-600"
+            color: "text-purple-600",
+            gradient: "from-purple-500 to-purple-700",
+            bgGlow: "bg-purple-500/20",
+            accent: "bg-purple-500"
           },
           {
             title: "Outstanding Balance",
             value: `₨ ${Math.round(outstandingBalance).toLocaleString()}`,
+            description: "Pending customer dues",
             icon: DollarSign,
             color: "text-red-600",
-            gradient: "bg-red-600"
+            gradient: "from-red-500 to-red-700",
+            bgGlow: "bg-red-500/20",
+            accent: "bg-red-500"
           },
-        ].map((stat) => {
+        ].map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden relative">
-              <div className={`absolute inset-0 ${stat.gradient} opacity-10`} />
-              <div className="absolute top-4 right-4 p-3 rounded-full bg-white"><Icon className={`h-6 w-6 ${stat.color}`} /></div>
-              <CardHeader className="pb-2 relative z-10"><CardTitle className="text-base font-bold text-gray-700">{stat.title}</CardTitle></CardHeader>
-              <CardContent className="relative z-10">
-                <div className={`text-3xl font-bold ${stat.color}`}>{stat.value}</div>
-              </CardContent>
+              <Card 
+                key={stat.title} 
+                className="group relative overflow-hidden border-0 bg-white backdrop-blur-sm hover:bg-white/80 transition-all duration-500 scale-105 hover:scale-100 shadow-2xl hover:shadow-lg aspect-square h-48 w-full"
+                style={{
+                  animationDelay: `${index * 100}ms`,
+                  animation: `fadeInUp 0.6s ease-out forwards ${index * 100}ms`
+                }}
+              >
+              {/* Animated background gradient */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-10 group-hover:opacity-5 transition-opacity duration-500`} />
+              
+              {/* Glow effect */}
+              <div className={`absolute -inset-1 ${stat.bgGlow} rounded-lg blur-lg opacity-30 group-hover:opacity-0 transition-opacity duration-500`} />
+              
+              {/* Top accent bar */}
+              <div className={`absolute top-0 left-0 right-0 h-1 ${stat.accent} opacity-100 group-hover:opacity-60 transition-opacity duration-300`} />
+              
+              {/* Content */}
+              <div className="relative z-10 h-full flex flex-col justify-between p-6">
+                {/* Top: Title and Icon */}
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg  text-gray-800 group-hover:text-gray-600 transition-colors duration-300">
+                    {stat.title}
+                  </CardTitle>
+                  <div className={`p-2 rounded-lg bg-gradient-to-br ${stat.gradient} shadow-xl group-hover:shadow-lg transition-all duration-300 scale-110 group-hover:scale-100`}>
+                    <Icon className="h-4 w-4 text-white" />
+                  </div>
+                </div>
+                
+                {/* Center: Amount */}
+                <div className="flex-1 flex items-center justify-center">
+                  <div className={`text-2xl font-bold ${stat.color} scale-105 group-hover:scale-100 transition-transform duration-300 text-center`}>
+                    {stat.value}
+                  </div>
+                </div>
+                
+                {/* Bottom: Description */}
+                <div className="text-left">
+                  <p className="text-xs text-gray-500 group-hover:text-gray-400 transition-colors duration-300">
+                    {stat.description}
+                  </p>
+                </div>
+              </div>
+
+              {/* Corner decoration */}
+              <div className="absolute bottom-0 right-0 w-20 h-20 opacity-10 group-hover:opacity-5 transition-opacity duration-500">
+                <div className={`w-full h-full rounded-tl-full ${stat.accent}`} />
+              </div>
             </Card>
           );
         })}
