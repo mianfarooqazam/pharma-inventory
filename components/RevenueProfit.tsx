@@ -32,6 +32,17 @@ import { ToastAction } from '@/components/ui/toast';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { supabase } from '@/lib/supabase';
 
+interface InvoiceItemRow {
+  id: string;
+  invoice_no: string;
+  date_str: string;
+  customer: string;
+  city: string;
+  address: string;
+  amount: number;
+  status: 'Paid' | 'Unpaid';
+}
+
 export function RevenueProfit() {
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,6 +55,8 @@ export function RevenueProfit() {
 
   const [loading, setLoading] = useState(true);
 
+  const [invoices, setInvoices] = useState<InvoiceItemRow[]>([]);
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -53,6 +66,13 @@ export function RevenueProfit() {
       setRevProfit((rp as any) || { revenue: 0, cost_of_goods_sold: 0, profit: 0 });
       setMonthly((m as any) || { sold_this_month: 0, purchase_this_month: 0, profit_this_month: 0 });
       setYearly((y as any) || { sold_this_year: 0, purchase_this_year: 0, profit_this_year: 0 });
+
+      const { data: invs } = await supabase
+        .from('v_invoices_list')
+        .select('*')
+        .order('invoice_no', { ascending: false });
+      setInvoices((invs || []) as any);
+
       setLoading(false);
     };
     load();
@@ -67,21 +87,19 @@ export function RevenueProfit() {
     profitMarginThisMonth: monthly && monthly.sold_this_month > 0 ? `${Math.round(((monthly.profit_this_month ?? 0) / monthly.sold_this_month) * 100)}%` : '0%'
   };
 
-  const revenueData: any[] = [];
-
-  const filteredData = revenueData.filter(item => {
-    const matchesSearch = item.invoiceNo?.toLowerCase?.().includes(searchTerm.toLowerCase()) ||
-      item.customerName?.toLowerCase?.().includes(searchTerm.toLowerCase()) ||
-      item.city?.toLowerCase?.().includes(searchTerm.toLowerCase()) ||
-      item.date?.includes(searchTerm);
-    const matchesStatus = statusFilter === 'all' || item.status?.toLowerCase?.() === statusFilter.toLowerCase();
-    return matchesSearch && matchesStatus;
+  const filteredInvoices = invoices.filter((i) => {
+    const matchesText =
+      i.invoice_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      i.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      i.date_str.includes(searchTerm);
+    const matchesStatus = statusFilter === 'all' || i.status.toLowerCase() === statusFilter.toLowerCase();
+    return matchesText && matchesStatus;
   });
 
   return (
     <div className="space-y-6">
       {/* Headline KPIs */}
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[
           {
             title: "Revenue (All Time)",
@@ -124,10 +142,10 @@ export function RevenueProfit() {
             </Card>
           );
         })}
-      </div> */}
+      </div>
 
       {/* Monthly/Yearly KPI Cards */}
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[
           {
             title: "Purchase This Month",
@@ -184,9 +202,9 @@ export function RevenueProfit() {
             </Card>
           );
         })}
-      </div> */}
+      </div>
 
-      {/* Controls (kept for future detail table wiring) */}
+      {/* Controls and Invoice List (like Invoices) */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -227,37 +245,69 @@ export function RevenueProfit() {
           </div>
         </CardHeader>
         <CardContent>
-          {/* Placeholder table for future per-invoice analysis */}
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="flex-1">
+              <Input
+                placeholder="Search by invoice no, customer, or date..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="max-w-sm"
+              />
+            </div>
+          </div>
+
           <div className="border rounded-lg">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Sr. No</TableHead>
+                  <TableHead>Sr No</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Invoice No</TableHead>
-                  <TableHead>Customer Name</TableHead>
+                  <TableHead>Customer</TableHead>
                   <TableHead>City</TableHead>
                   <TableHead>Total Bill</TableHead>
-                  <TableHead>Profit</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredData.length === 0 ? (
-                  <TableRow><TableCell colSpan={9} className="text-center text-gray-500 py-6">No data</TableCell></TableRow>
+                {filteredInvoices.length === 0 ? (
+                  <TableRow><TableCell colSpan={8} className="text-center text-gray-500 py-6">No invoices</TableCell></TableRow>
                 ) : (
-                  filteredData.map((item, index) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium text-gray-600">{index + 1}</TableCell>
-                      <TableCell><div className="flex items-center space-x-2"><Calendar className="h-4 w-4 text-gray-400" /><span className="text-sm">{item.date}</span></div></TableCell>
-                      <TableCell className="font-medium">{item.invoiceNo}</TableCell>
-                      <TableCell className="font-medium">{item.customerName}</TableCell>
-                      <TableCell>{item.city}</TableCell>
-                      <TableCell className="font-semibold ">₨ {item.totalBill.toLocaleString()}</TableCell>
-                      <TableCell className={`font-semibold ${item.status === 'Paid' ? 'text-green-600' : 'text-red-600'}`}>₨ {item.profit.toLocaleString()}</TableCell>
-                      <TableCell><span className={`text-sm font-medium ${item.status === 'Paid' ? 'text-green-600' : 'text-red-600'}`}>{item.status}</span></TableCell>
-                      <TableCell></TableCell>
+                  filteredInvoices.map((inv, idx) => (
+                    <TableRow key={inv.id}>
+                      <TableCell className="text-center font-medium">{idx + 1}</TableCell>
+                      <TableCell>{inv.date_str}</TableCell>
+                      <TableCell className="font-medium">{inv.invoice_no}</TableCell>
+                      <TableCell>{inv.customer}</TableCell>
+                      <TableCell>{inv.city}</TableCell>
+                      <TableCell>₨ {inv.amount.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <span className={`text-sm font-medium ${inv.status === 'Paid' ? 'text-green-600' : 'text-red-600'}`}>
+                          {inv.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            const hash = `#invoices?customer=${encodeURIComponent(inv.customer)}`;
+                            window.location.hash = hash;
+                          }}
+                        >
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span><FileText className="h-4 w-4" /></span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                view invoices
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
