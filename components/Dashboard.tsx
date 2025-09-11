@@ -78,7 +78,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const expiringBatches = getExpiringBatches(30);
   
   const totalStock = inventorySummary?.total_units_in_stock ?? medicines.reduce((sum, med) => sum + med.currentStock, 0);
-  const totalValue = inventorySummary?.total_stock_value_selling ?? batches.reduce((sum, batch) => sum + (batch.quantity * batch.sellingPrice), 0);
+  const totalValue = inventorySummary?.total_stock_value_cost ?? batches.reduce((sum, batch) => sum + (batch.quantity * batch.costPrice), 0);
   const monthlySales = monthlyKpis?.sold_this_month ?? 0;
 
   const stats = [
@@ -104,9 +104,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       title: 'Stock Value',
       value: `PKR ${Math.round(totalValue).toLocaleString()}`,
       icon: DollarSign,
-      description: 'Total inventory value',
+      description: 'Total inventory value (cost basis)',
       color: 'text-purple-600',
-      change: 'Based on selling prices',
+      change: '',
       changeType: 'neutral'
     },
     {
