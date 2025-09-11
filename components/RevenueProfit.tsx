@@ -49,7 +49,6 @@ export function RevenueProfit() {
   const [statusFilter, setStatusFilter] = useState('all');
   const { toast } = useToast();
 
-  const [revProfit, setRevProfit] = useState<{ revenue: number; cost_of_goods_sold: number; profit: number } | null>(null);
   const [monthly, setMonthly] = useState<{ sold_this_month: number; purchase_this_month: number; profit_this_month: number } | null>(null);
   const [yearly, setYearly] = useState<{ sold_this_year: number; purchase_this_year: number; profit_this_year: number } | null>(null);
 
@@ -60,10 +59,8 @@ export function RevenueProfit() {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const { data: rp } = await supabase.from('v_revenue_profit').select('*').maybeSingle();
       const { data: m } = await supabase.from('v_monthly_kpis').select('*').maybeSingle();
       const { data: y } = await supabase.from('v_yearly_kpis').select('*').maybeSingle();
-      setRevProfit((rp as any) || { revenue: 0, cost_of_goods_sold: 0, profit: 0 });
       setMonthly((m as any) || { sold_this_month: 0, purchase_this_month: 0, profit_this_month: 0 });
       setYearly((y as any) || { sold_this_year: 0, purchase_this_year: 0, profit_this_year: 0 });
 
@@ -96,57 +93,37 @@ export function RevenueProfit() {
     return matchesText && matchesStatus;
   });
 
+  const outstandingBalance = invoices
+    .filter((i) => i.status === 'Unpaid')
+    .reduce((sum, i) => sum + (i.amount || 0), 0);
+
   return (
     <div className="space-y-6">
-      {/* Headline KPIs */}
+      {/* Monthly/Yearly KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[
+         
           {
-            title: "Revenue (All Time)",
-            value: `₨ ${Math.round(revProfit?.revenue ?? 0).toLocaleString()}`,
-            icon: TrendingUp,
-            color: "text-emerald-600",
-            gradient: "bg-emerald-600"
-          },
-          {
-            title: "COGS (All Time)",
-            value: `₨ ${Math.round(revProfit?.cost_of_goods_sold ?? 0).toLocaleString()}`,
-            icon: DollarSign,
+            title: "Purchase This Year",
+            value: `₨ ${metricsData.purchaseThisYear.toLocaleString()}`,
+            icon: ShoppingCart,
             color: "text-blue-600",
             gradient: "bg-blue-600"
           },
           {
-            title: "Profit (All Time)",
-            value: `₨ ${Math.round(revProfit?.profit ?? 0).toLocaleString()}`,
+            title: "Sold This Year",
+            value: `₨ ${metricsData.soldThisYear.toLocaleString()}`,
+            icon: TrendingUp,
+            color: "text-green-600",
+            gradient: "bg-green-600"
+          },
+          {
+            title: "Profit This Year",
+            value: `₨ ${Math.round(yearly?.profit_this_year ?? 0).toLocaleString()}`,
             icon: BarChart3,
             color: "text-purple-600",
             gradient: "bg-purple-600"
           },
-        ].map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Card
-              key={stat.title}
-              className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden relative"
-            >
-              <div className={`absolute inset-0 ${stat.gradient} opacity-10`} />
-              <div className="absolute top-4 right-4 p-3 rounded-full bg-white">
-                <Icon className={`h-6 w-6 ${stat.color}`} />
-              </div>
-              <CardHeader className="pb-2 relative z-10">
-                <CardTitle className="text-base font-bold text-gray-700">{stat.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className={`text-3xl font-bold ${stat.color}`}>{stat.value}</div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Monthly/Yearly KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[
           {
             title: "Purchase This Month",
             value: `₨ ${metricsData.purchaseThisMonth.toLocaleString()}`,
@@ -169,26 +146,12 @@ export function RevenueProfit() {
             gradient: "bg-indigo-600"
           },
           {
-            title: "Purchase This Year",
-            value: `₨ ${metricsData.purchaseThisYear.toLocaleString()}`,
-            icon: ShoppingCart,
-            color: "text-blue-600",
-            gradient: "bg-blue-600"
+            title: "Outstanding Balance",
+            value: `₨ ${Math.round(outstandingBalance).toLocaleString()}`,
+            icon: DollarSign,
+            color: "text-red-600",
+            gradient: "bg-red-600"
           },
-          {
-            title: "Sold This Year",
-            value: `₨ ${metricsData.soldThisYear.toLocaleString()}`,
-            icon: TrendingUp,
-            color: "text-green-600",
-            gradient: "bg-green-600"
-          },
-          {
-            title: "Profit This Year",
-            value: `₨ ${Math.round(yearly?.profit_this_year ?? 0).toLocaleString()}`,
-            icon: BarChart3,
-            color: "text-purple-600",
-            gradient: "bg-purple-600"
-          }
         ].map((stat) => {
           const Icon = stat.icon;
           return (
