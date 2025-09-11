@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { InvoiceData } from "./InvoicePreview";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,14 +19,15 @@ import { InvoicePreviewDialog } from "./InvoicePreviewDialog";
 import { useToast } from "@/hooks/use-toast";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { useSettings } from "@/contexts/SettingsContext";
+import { supabase } from "@/lib/supabase";
 
-interface InvoiceItem {
+interface InvoiceItemRow {
   id: string;
-  invoiceNo: string;
+  invoice_no: string;
+  date_str: string;
   customer: string;
   city: string;
   address: string;
-  date: string;
   amount: number;
   status: "Paid" | "Unpaid";
 }
@@ -46,9 +47,18 @@ export function Invoices() {
   } | null>(null);
   const { toast } = useToast();
   
-  const [invoices, setInvoices] = useState<InvoiceItem[]>([]);
+  const [invoices, setInvoices] = useState<InvoiceItemRow[]>([]);
 
-  const customerOptions = Array.from(new Set(invoices.map(i => i.customer)));
+  const customerOptions = useMemo(() => Array.from(new Set(invoices.map(i => i.customer))), [invoices]);
+
+  const loadInvoices = async () => {
+    const { data, error } = await supabase.from('v_invoices_list').select('*').order('invoice_no', { ascending: false });
+    if (error) {
+      console.error('Failed to load invoices:', error.message);
+      return;
+    }
+    setInvoices((data || []) as any);
+  };
 
   useEffect(() => {
     const applyHashFilter = () => {
@@ -66,6 +76,10 @@ export function Invoices() {
     applyHashFilter();
     window.addEventListener('hashchange', applyHashFilter);
     return () => window.removeEventListener('hashchange', applyHashFilter);
+  }, []);
+
+  useEffect(() => {
+    loadInvoices();
   }, []);
 
   const now = new Date();
@@ -99,13 +113,13 @@ export function Invoices() {
 
   const filtered = invoices.filter((i) => {
     const matchesText =
-      i.invoiceNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      i.invoice_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
       i.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      i.date.includes(searchTerm);
+      i.date_str.includes(searchTerm);
     const matchesCustomer = customerFilter
       ? i.customer.toLowerCase() === customerFilter.toLowerCase()
       : true;
-    const matchesPeriod = isInSelectedPeriod(i.date);
+    const matchesPeriod = isInSelectedPeriod(i.date_str);
     return matchesText && matchesCustomer && matchesPeriod;
   });
 
@@ -116,21 +130,81 @@ export function Invoices() {
     setConfirmationData({
       invoiceId,
       newStatus,
-      invoiceNo: invoice.invoiceNo
+      invoiceNo: invoice.invoice_no
     });
     setConfirmationOpen(true);
   };
 
-  const confirmStatusChange = () => {
+  const confirmStatusChange = async () => {
     if (!confirmationData) return;
 
-    setInvoices(prev => 
-      prev.map(inv => 
-        inv.id === confirmationData.invoiceId 
-          ? { ...inv, status: confirmationData.newStatus }
-          : inv
-      )
-    );
+    // Fetch invoice row to get amount and customer_id
+    const { data: invoiceRow, error: invErr } = await supabase
+      .from('invoices')
+      .select('id, total, customer_id, status')
+      .eq('id', confirmationData.invoiceId)
+      .maybeSingle();
+    if (invErr || !invoiceRow) {
+      console.error('Failed to load invoice before update:', invErr?.message);
+      return;
+    }
+
+    const prevStatus = invoiceRow.status as 'Paid' | 'Unpaid';
+
+    const { error } = await supabase.from('invoices').update({ status: confirmationData.newStatus }).eq('id', confirmationData.invoiceId);
+    if (error) {
+      console.error('Failed to update status:', error.message);
+      return;
+    }
+
+    // Adjust dues only if status changed across Paid/Unpaid boundary and customer exists
+    if (invoiceRow.customer_id && confirmationData.newStatus !== prevStatus) {
+      const delta = confirmationData.newStatus === 'Unpaid' ? +invoiceRow.total : -invoiceRow.total;
+      const { data: cust } = await supabase
+        .from('customers')
+        .select('outstanding_dues')
+        .eq('id', invoiceRow.customer_id)
+        .maybeSingle();
+      const currentDues = Number(cust?.outstanding_dues || 0);
+      await supabase
+        .from('customers')
+        .update({ outstanding_dues: currentDues + delta })
+        .eq('id', invoiceRow.customer_id);
+    }
+
+    setConfirmationOpen(false);
+    setConfirmationData(null);
+    await loadInvoices();
+  };
+
+  const previewInvoice = async (row: InvoiceItemRow) => {
+    const { data: items, error } = await supabase
+      .from('invoice_items')
+      .select('quantity, unit_price, batches(batch_number), medicines(name, strength, unit)')
+      .eq('invoice_id', row.id);
+    if (error) {
+      console.error('Failed to load invoice items:', error.message);
+      return;
+    }
+    const parsedItems = (items || []).map((it: any) => ({
+      batchNo: it.batches?.batch_number || '',
+      medicine: it.medicines ? `${it.medicines.name} ${it.medicines.strength}` : '',
+      unit: it.medicines?.unit || '',
+      quantity: it.quantity,
+      unitPrice: Number(it.unit_price || 0),
+    }));
+    const invoice: InvoiceData = {
+      invoiceNo: row.invoice_no,
+      customerName: row.customer,
+      customerAddress: row.address,
+      customerCity: row.city,
+      customerPhone: '',
+      date: row.date_str,
+      items: parsedItems,
+      status: row.status,
+    };
+    setSelectedInvoice(invoice);
+    setPreviewOpen(true);
   };
 
   return (
@@ -199,8 +273,8 @@ export function Invoices() {
                 {filtered.map((inv, idx) => (
                   <TableRow key={inv.id}>
                     <TableCell className="text-center font-medium">{idx + 1}</TableCell>
-                    <TableCell className="font-medium">{inv.invoiceNo}</TableCell>
-                    <TableCell>{inv.date}</TableCell>
+                    <TableCell className="font-medium">{inv.invoice_no}</TableCell>
+                    <TableCell>{inv.date_str}</TableCell>
                     <TableCell>{inv.customer}</TableCell>
                     <TableCell>{inv.city}</TableCell>
                     <TableCell>PKR {inv.amount.toFixed(2)}</TableCell>
@@ -234,19 +308,7 @@ export function Invoices() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => {
-                            setSelectedInvoice({
-                              invoiceNo: inv.invoiceNo,
-                              customerName: inv.customer,
-                              customerAddress: inv.address,
-                              customerCity: inv.city,
-                              customerPhone: "", // phone not available in invoice data
-                              date: inv.date,
-                              items: [],
-                              status: inv.status,
-                            });
-                            setPreviewOpen(true);
-                          }}
+                          onClick={() => previewInvoice(inv)}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>

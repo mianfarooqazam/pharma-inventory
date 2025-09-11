@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import { formatDate } from '@/lib/utils';
 import { Pencil, Trash2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export function SaleForm() {
   const { medicines, batches, addTransaction, getMedicineStock } = useInventory();
@@ -27,20 +28,20 @@ export function SaleForm() {
     notes: '',
   });
 
-  const customers = useMemo(() => [
-    { name: 'Ali Khan', address: '12 Mall Road', city: 'Lahore', phone: '03001234567' },
-    { name: 'Sara Ahmed', address: '45 Clifton Block 5', city: 'Karachi', phone: '03111234567' },
-    { name: 'Usman Iqbal', address: '88 Satellite Town', city: 'Rawalpindi', phone: '03211234567' },
-    { name: 'Ayesha Noor', address: '7 University Rd', city: 'Peshawar', phone: '03331234567' },
-    { name: 'Bilal Hussain', address: '19 Jail Road', city: 'Lahore', phone: '03011239876' },
-    { name: 'Hina Malik', address: '2 Jinnah Avenue', city: 'Islamabad', phone: '03451234567' },
-    { name: 'Faisal Raza', address: '55 Shahrah-e-Faisal', city: 'Karachi', phone: '03021234567' },
-    { name: 'Nida Shah', address: '101 MQ Road', city: 'Multan', phone: '03151234567' },
-    { name: 'Hamza Tariq', address: '6 Cantt Bazaar', city: 'Quetta', phone: '03301234567' },
-    { name: 'Maryam Zafar', address: '23 Civil Lines', city: 'Faisalabad', phone: '03251234567' },
-  ], []);
+  const [customers, setCustomers] = useState<Array<{ id: string; name: string; address: string; city: string; phone: string }>>([]);
 
-  const [customerName, setCustomerName] = useState('');
+  useEffect(() => {
+    const loadCustomers = async () => {
+      const { data, error } = await supabase.from('customers').select('id, name, address, city, phone').order('created_at', { ascending: false }).limit(200);
+      if (!error) {
+        setCustomers((data || []).map((c: any) => ({ id: c.id, name: c.name, address: c.address || '', city: c.city || '', phone: c.phone || '' })));
+      }
+    };
+    loadCustomers();
+  }, []);
+
+  const [customerId, setCustomerId] = useState('');
+  const [invoiceStatus, setInvoiceStatus] = useState<'Paid' | 'Unpaid'>('Paid');
   const [cartItems, setCartItems] = useState<Array<{
     medicineId: string;
     batchId: string;
@@ -58,7 +59,6 @@ export function SaleForm() {
   const selectedMedicine = medicines.find(m => m.id === formData.medicineId);
   const availableStock = selectedMedicine ? getMedicineStock(selectedMedicine.id) : 0;
 
-  // Get available batches for the selected medicine, sorted by expiry date (earliest first)
   const getAvailableBatches = (medicineId: string) => {
     return batches
       .filter(b => b.medicineId === medicineId && b.quantity > 0)
@@ -107,7 +107,6 @@ export function SaleForm() {
       }]);
     }
 
-    // Clear all item inputs for next entry, keep customer selection
     setFormData(prev => ({
       ...prev,
       medicineId: '',
@@ -134,7 +133,6 @@ export function SaleForm() {
   const handleRemoveItem = (index: number) => {
     setCartItems(prev => prev.filter((_, i) => i !== index));
     if (editingIndex === index) {
-      // If removing the item being edited, reset edit mode and clear inputs
       setEditingIndex(null);
       setFormData(prev => ({ ...prev, medicineId: '', batchId: '', quantity: '', actualSellingPrice: '' }));
     }
@@ -142,8 +140,8 @@ export function SaleForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!customerName) {
+
+    if (!customerId) {
       addNotification({ type: 'error', title: 'Missing Customer', message: 'Please select a customer' });
       return;
     }
@@ -164,11 +162,27 @@ export function SaleForm() {
           <ToastAction
             altText="Confirm"
             className="bg-green-600 text-white hover:bg-green-700"
-            onClick={() => {
+            onClick={async () => {
               confirmation.dismiss();
-              // Record each item as a sale transaction
-              cartItems.forEach(item => {
-                addTransaction({
+              const { data: inv, error: invErr } = await supabase
+                .from('invoices')
+                .insert([{ customer_id: customerId, date: new Date().toISOString().slice(0,10), tax: tax, discount: discount, status: invoiceStatus, subtotal, total }])
+                .select('id, invoice_no, status')
+                .single();
+              if (invErr || !inv) {
+                addNotification({ type: 'error', title: 'Invoice Error', message: invErr?.message || 'Failed to create invoice' });
+                return;
+              }
+
+              for (const item of cartItems) {
+                await supabase.from('invoice_items').insert([{
+                  invoice_id: inv.id,
+                  medicine_id: item.medicineId,
+                  batch_id: item.batchId,
+                  quantity: item.quantity,
+                  unit_price: item.unitPrice,
+                }]);
+                await addTransaction({
                   medicineId: item.medicineId,
                   batchId: item.batchId,
                   type: 'sale',
@@ -176,9 +190,23 @@ export function SaleForm() {
                   unitPrice: item.unitPrice,
                   totalAmount: item.quantity * item.unitPrice,
                   notes: formData.notes,
-                  createdBy: 'current-user',
+                  createdBy: null,
                 });
-              });
+              }
+
+              if (invoiceStatus === 'Unpaid') {
+                // Increment customer's outstanding dues by invoice total
+                const { data: cust } = await supabase
+                  .from('customers')
+                  .select('outstanding_dues')
+                  .eq('id', customerId)
+                  .maybeSingle();
+                const currentDues = Number(cust?.outstanding_dues || 0);
+                await supabase
+                  .from('customers')
+                  .update({ outstanding_dues: currentDues + total })
+                  .eq('id', customerId);
+              }
 
               const itemsForInvoice = cartItems.map(ci => {
                 const med = medicines.find(m => m.id === ci.medicineId);
@@ -192,16 +220,16 @@ export function SaleForm() {
                 };
               });
 
-              const customer = customers.find(c => c.name === customerName);
+              const customer = customers.find(c => c.id === customerId);
               const invoice: InvoiceData = {
-                invoiceNo: `INV-${Date.now()}`,
-                customerName,
+                invoiceNo: inv.invoice_no,
+                customerName: customer?.name || '',
                 customerAddress: customer?.address || '',
                 customerCity: customer?.city || '',
                 customerPhone: customer?.phone || '',
                 date: formatDate(new Date()),
                 items: itemsForInvoice,
-                status: 'Paid',
+                status: invoiceStatus,
               };
 
               setInvoiceData(invoice);
@@ -210,10 +238,9 @@ export function SaleForm() {
               addNotification({
                 type: 'success',
                 title: 'Sale Recorded',
-                message: `Successfully recorded ${cartItems.length} item(s) for ${customerName}`,
+                message: `Successfully recorded ${cartItems.length} item(s)`,
               });
 
-              // Reset item fields and cart
               setFormData({
                 medicineId: '',
                 batchId: '',
@@ -222,6 +249,7 @@ export function SaleForm() {
                 notes: '',
               });
               setCartItems([]);
+              setInvoiceStatus('Paid');
             }}
           >
             Confirm
@@ -246,18 +274,17 @@ export function SaleForm() {
     <div>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-6">
-          {/* Sale Information */}
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="customer">Customer Name</Label>
-                <Select value={customerName} onValueChange={(value) => setCustomerName(value)}>
+                <Select value={customerId} onValueChange={(value) => setCustomerId(value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select customer" />
                   </SelectTrigger>
                   <SelectContent>
                     {customers.map((c) => (
-                      <SelectItem key={c.name} value={c.name}>
+                      <SelectItem key={c.id} value={c.id}>
                         <div className="flex items-center justify-between w-full">
                           <span>{c.name}</span>
                           <span className="text-sm text-gray-500 ml-2">{c.city}</span>
@@ -267,6 +294,20 @@ export function SaleForm() {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="status">Invoice Status</Label>
+                <Select value={invoiceStatus} onValueChange={(v) => setInvoiceStatus(v as 'Paid' | 'Unpaid')}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Paid">Paid</SelectItem>
+                    <SelectItem value="Unpaid">Unpaid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="medicine">Medicine Name</Label>
                 <Select value={formData.medicineId} onValueChange={(value) => handleInputChange('medicineId', value)}>
@@ -360,8 +401,6 @@ export function SaleForm() {
               </div>
             </div>
           </div>
-
-          {/* Per-item total preview removed; totals shown in Cart Items below */}
 
           {cartItems.length > 0 && (
             <div className="space-y-3">
@@ -474,7 +513,7 @@ export function SaleForm() {
         </div>
 
         <div className="flex justify-end space-x-2">
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={!customerName || cartItems.length === 0}>
+          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={!customerId || cartItems.length === 0}>
             Record Sale
           </Button>
         </div>

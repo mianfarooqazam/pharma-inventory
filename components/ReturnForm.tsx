@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +12,7 @@ import { useNotifications } from '@/contexts/NotificationContext';
 import { formatDate } from '@/lib/utils';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useSettings } from '@/contexts/SettingsContext';
+import { supabase } from '@/lib/supabase';
 
 export function ReturnForm() {
   const { medicines, batches, transactions, addTransaction } = useInventory();
@@ -27,8 +28,28 @@ export function ReturnForm() {
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmationOpen, setConfirmationOpen] = useState(false);
 
-  // Invoice data - in a real app this would come from a context or API
-  const [invoices] = useState<any[]>([]);
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [invoiceItems, setInvoiceItems] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadInvoices = async () => {
+      const { data, error } = await supabase.from('v_invoices_list').select('*').order('invoice_no', { ascending: false }).limit(200);
+      if (!error) setInvoices(data || []);
+    };
+    loadInvoices();
+  }, []);
+
+  useEffect(() => {
+    const loadItems = async () => {
+      if (!formData.invoiceId) { setInvoiceItems([]); return; }
+      const { data, error } = await supabase
+        .from('invoice_items')
+        .select('id, quantity, unit_price, batches(batch_number, id), medicines(name, strength, unit, id)')
+        .eq('invoice_id', formData.invoiceId);
+      if (!error) setInvoiceItems(data || []);
+    };
+    loadItems();
+  }, [formData.invoiceId]);
 
   const reasons = [
     'Near Expiry',
@@ -39,311 +60,109 @@ export function ReturnForm() {
     'Other'
   ];
 
-  // Filter invoices based on search term - only show when user has searched
-  const filteredInvoices = searchTerm ? invoices.filter(invoice => {
+  const filteredInvoices = useMemo(() => {
     const searchLower = searchTerm.toLowerCase();
-    return (
-      invoice.invoiceNo.toLowerCase().includes(searchLower) ||
-      invoice.customer.toLowerCase().includes(searchLower) ||
-      invoice.date.toLowerCase().includes(searchLower)
+    return (invoices || []).filter((invoice: any) =>
+      invoice.invoice_no.toLowerCase().includes(searchLower) ||
+      (invoice.customer || '').toLowerCase().includes(searchLower) ||
+      (invoice.date_str || '').toLowerCase().includes(searchLower)
     );
-  }) : [];
+  }, [invoices, searchTerm]);
 
   const selectedInvoice = invoices.find((inv: any) => inv.id === formData.invoiceId);
-  const selectedItem = selectedInvoice?.items.find((item: any) => item.id === formData.itemId);
+  const selectedItem = invoiceItems.find((it: any) => it.id === formData.itemId);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!selectedInvoice || !selectedItem) {
-      addNotification({
-        type: 'error',
-        title: 'No Item Selected',
-        message: 'Please select an invoice and medicine item to process the return',
-      });
+    if (!selectedItem) return;
+    const qty = parseInt(formData.quantity || '0');
+    if (qty <= 0 || qty > selectedItem.quantity) {
+      addNotification({ type: 'error', title: 'Invalid Quantity', message: `Max returnable is ${selectedItem.quantity}` });
       return;
     }
 
-    const returnQuantity = parseInt(formData.quantity);
-    
-    if (returnQuantity <= 0) {
-      addNotification({
-        type: 'error',
-        title: 'Invalid Return Quantity',
-        message: 'Please enter a valid quantity to return',
-      });
-      return;
-    }
-
-    if (returnQuantity > selectedItem.quantity) {
-      addNotification({
-        type: 'error',
-        title: 'Invalid Return Quantity',
-        message: `Cannot return more than ${selectedItem.quantity} units (available in invoice)`,
-      });
-      return;
-    }
-
-    // Show confirmation dialog instead of directly processing
-    setConfirmationOpen(true);
-  };
-
-  const confirmReturn = () => {
-    if (!selectedInvoice || !selectedItem) return;
-
-    const returnQuantity = parseInt(formData.quantity);
-    const refundAmount = returnQuantity * selectedItem.unitPrice;
-
-    // Record return transaction
-    addTransaction({
-      medicineId: '', // No specific medicine ID for invoice-based returns
-      batchId: '', // No specific batch ID for invoice-based returns
+    await addTransaction({
+      medicineId: selectedItem.medicines.id,
+      batchId: selectedItem.batches.id,
       type: 'return',
-      quantity: returnQuantity,
-      unitPrice: selectedItem.unitPrice,
-      totalAmount: refundAmount,
-      notes: `Invoice ${selectedInvoice.invoiceNo} - ${selectedItem.medicineName} ${selectedItem.strength} - ${formData.reason}: ${formData.notes}`,
-      createdBy: 'current-user',
+      quantity: qty,
+      unitPrice: Number(selectedItem.unit_price || 0),
+      totalAmount: qty * Number(selectedItem.unit_price || 0),
+      notes: formData.notes || formData.reason,
+      createdBy: null,
     });
 
-    addNotification({
-      type: 'success',
-      title: 'Return Processed',
-      message: `Successfully recorded return for invoice ${selectedInvoice.invoiceNo} - ${returnQuantity} units of ${selectedItem.medicineName} ${selectedItem.strength}`,
-    });
-
-    // Reset form
-    setFormData({
-      invoiceId: '',
-      itemId: '',
-      quantity: '',
-      reason: '',
-      notes: '',
-    });
-
-    // Close confirmation dialog
-    setConfirmationOpen(false);
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    addNotification({ type: 'success', title: 'Return Recorded', message: 'Stock updated.' });
+    setFormData({ invoiceId: '', itemId: '', quantity: '', reason: '', notes: '' });
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-6">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search invoices for return..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Input
+          placeholder="Search invoice by number, customer, or date..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
+      </div>
 
-          {/* Available Invoices for Return */}
-          <div className="space-y-4">
-            {!searchTerm ? (
-              <div className="text-center py-8 text-gray-500">
-                <p>Search for an invoice number to view available invoices for return</p>
-              </div>
-            ) : filteredInvoices.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <p>No invoices found matching "{searchTerm}"</p>
-              </div>
-            ) : (
-              <div className="border rounded-lg">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>S.No</TableHead>
-                      <TableHead>Invoice No</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredInvoices.map((invoice, index) => (
-                      <TableRow key={invoice.id}>
-                        <TableCell>{index + 1}</TableCell>
-                        <TableCell className="font-medium">{invoice.invoiceNo}</TableCell>
-                        <TableCell>{invoice.date}</TableCell>
-                        <TableCell>{invoice.customer}</TableCell>
-                        <TableCell>PKR {invoice.amount.toFixed(2)}</TableCell>
-                        <TableCell>
-                          <span className={`text-sm font-medium ${invoice.status === 'Paid' ? 'text-green-600' : 'text-red-600'}`}>
-                            {invoice.status}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            type="button"
-                            variant={selectedInvoice?.id === invoice.id ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => {
-                              handleInputChange('invoiceId', invoice.id);
-                              handleInputChange('itemId', ''); // Reset item selection when changing invoice
-                            }}
-                          >
-                            {selectedInvoice?.id === invoice.id ? 'Selected' : 'Select'}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </div>
-
-          {/* Invoice Items Selection */}
-          {selectedInvoice && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Select Medicine to Return from Invoice {selectedInvoice.invoiceNo}</h3>
-              <div className="border rounded-lg">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>S.No</TableHead>
-                      <TableHead>Medicine Name</TableHead>
-                      <TableHead>Strength</TableHead>
-                      <TableHead>Quantity</TableHead>
-                      <TableHead>Unit Price</TableHead>
-                      <TableHead>Total Price</TableHead>
-                      <TableHead>Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {selectedInvoice.items.map((item: any, index: number) => (
-                      <TableRow key={item.id}>
-                        <TableCell>{index + 1}</TableCell>
-                        <TableCell className="font-medium">{item.medicineName}</TableCell>
-                        <TableCell>{item.strength}</TableCell>
-                        <TableCell>{item.quantity}</TableCell>
-                        <TableCell>PKR {item.unitPrice.toFixed(2)}</TableCell>
-                        <TableCell>PKR {item.totalPrice.toFixed(2)}</TableCell>
-                        <TableCell>
-                          <Button
-                            type="button"
-                            variant={selectedItem?.id === item.id ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => handleInputChange('itemId', item.id)}
-                          >
-                            {selectedItem?.id === item.id ? 'Selected' : 'Select'}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          )}
-
-          {/* Return Form */}
-          {selectedItem && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Return Details for {selectedItem.medicineName} {selectedItem.strength}</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="quantity">Return Quantity *</Label>
-                  <Input
-                    id="quantity"
-                    type="number"
-                    value={formData.quantity}
-                    onChange={(e) => handleInputChange('quantity', e.target.value)}
-                    placeholder="Enter quantity to return"
-                    max={selectedItem.quantity}
-                    required
-                    className={formData.quantity && parseInt(formData.quantity) > selectedItem.quantity ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}
-                  />
-                  <p className={`text-sm ${formData.quantity && parseInt(formData.quantity) > selectedItem.quantity ? 'text-red-500' : 'text-gray-500'}`}>
-                    Maximum: {selectedItem.quantity} units available
-                    {formData.quantity && parseInt(formData.quantity) > selectedItem.quantity && (
-                      <span className="block text-red-500 font-medium">
-                        Cannot return more than {selectedItem.quantity} units
-                      </span>
-                    )}
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="reason">Return Reason *</Label>
-                  <Select value={formData.reason} onValueChange={(value) => handleInputChange('reason', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select reason" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {reasons.map((reason) => (
-                        <SelectItem key={reason} value={reason}>
-                          {reason}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2 col-span-2">
-                  <Label htmlFor="notes">Description</Label>
-                  <Input
-                    id="notes"
-                    value={formData.notes}
-                    onChange={(e) => handleInputChange('notes', e.target.value)}
-                    placeholder="Optional description"
-                  />
-                </div>
-              </div>
-
-              {formData.quantity && (
-                <div className="bg-blue-600 border-blue-600 rounded-lg p-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-white font-medium">Refund Amount:</span>
-                    <span className="font-bold text-lg text-white">
-                      PKR {(parseInt(formData.quantity) * selectedItem.unitPrice).toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Invoice</Label>
+          <Select value={formData.invoiceId} onValueChange={(v) => setFormData(prev => ({ ...prev, invoiceId: v, itemId: '' }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select invoice" />
+            </SelectTrigger>
+            <SelectContent>
+              {filteredInvoices.map((inv: any) => (
+                <SelectItem key={inv.id} value={inv.id}>
+                  {inv.invoice_no} — {inv.customer} ({inv.date_str})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-
-        <div className="flex justify-end space-x-2">
-          <Button 
-            type="submit" 
-            disabled={
-              !formData.invoiceId || 
-              !formData.itemId || 
-              !formData.quantity || 
-              !formData.reason ||
-              (formData.quantity ? parseInt(formData.quantity) > (selectedItem?.quantity || 0) : false)
-            }
-          >
-            Process Return
-          </Button>
+        <div className="space-y-2">
+          <Label>Item</Label>
+          <Select value={formData.itemId} onValueChange={(v) => setFormData(prev => ({ ...prev, itemId: v }))} disabled={!formData.invoiceId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select item" />
+            </SelectTrigger>
+            <SelectContent>
+              {invoiceItems.map((it: any) => (
+                <SelectItem key={it.id} value={it.id}>
+                  {it.batches?.batch_number} — {it.medicines?.name} {it.medicines?.strength} ({it.quantity} units)
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </form>
+        <div className="space-y-2">
+          <Label>Quantity</Label>
+          <Input value={formData.quantity} onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))} type="number" />
+        </div>
+        <div className="space-y-2">
+          <Label>Reason</Label>
+          <Select value={formData.reason} onValueChange={(v) => setFormData(prev => ({ ...prev, reason: v }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select reason" />
+            </SelectTrigger>
+            <SelectContent>
+              {reasons.map(r => (<SelectItem key={r} value={r}>{r}</SelectItem>))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2 col-span-2">
+          <Label>Notes</Label>
+          <Input value={formData.notes} onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))} />
+        </div>
+      </div>
 
-      {/* Confirmation Dialog */}
-      <ConfirmationDialog
-        open={confirmationOpen}
-        onOpenChange={setConfirmationOpen}
-        title="Confirm Return"
-        description={
-          selectedItem ? 
-            `Are you sure you want to return ${formData.quantity} units of ${selectedItem.medicineName} ${selectedItem.strength} from invoice ${selectedInvoice?.invoiceNo}?` :
-            'Please select an item to return.'
-        }
-        confirmText="Process Return"
-        onConfirm={confirmReturn}
-        variant="default"
-      />
-    </div>
+      <div className="flex justify-end">
+        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={!formData.itemId || !formData.quantity}>Record Return</Button>
+      </div>
+    </form>
   );
 }

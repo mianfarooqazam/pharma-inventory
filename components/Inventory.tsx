@@ -231,8 +231,9 @@ export function Inventory() {
                   const medicineBatches = batches.filter(
                     (batch) => batch.medicineId === medicine.id
                   );
-                  const latestBatch =
-                    medicineBatches.length > 0 ? medicineBatches[0] : null;
+                  const latestBatch = medicineBatches.length > 0
+                    ? medicineBatches.slice().sort((a, b) => a.expiryDate.getTime() - b.expiryDate.getTime())[0]
+                    : null;
                   const stockBreakdown = getStockBreakdown(medicine.id);
                   const isExpanded = expandedRows.has(medicine.id);
 

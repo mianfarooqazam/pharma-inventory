@@ -10,6 +10,6 @@ export function formatDate(date: Date | string): string {
   const day = d.getDate().toString().padStart(2, '0');
   const month = d.toLocaleDateString('en-US', { month: 'short' }).toLowerCase();
   const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
-  const year = d.getFullYear().toString().slice(-2); // Get last 2 digits of year
+  const year = d.getFullYear().toString();
   return `${day}-${capitalizedMonth}-${year}`;
 }

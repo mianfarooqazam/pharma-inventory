@@ -104,8 +104,9 @@ export function MedicineList() {
                   const medicineBatches = batches.filter(
                     (batch) => batch.medicineId === medicine.id
                   );
-                  const latestBatch =
-                    medicineBatches.length > 0 ? medicineBatches[0] : null;
+                  const latestBatch = medicineBatches
+                    .slice()
+                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0] || null;
 
                   return (
                     <TableRow key={medicine.id}>

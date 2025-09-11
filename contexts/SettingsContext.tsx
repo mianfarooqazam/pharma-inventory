@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 
 interface SettingsData {
   companyName: string;
@@ -13,7 +14,8 @@ interface SettingsData {
 interface SettingsContextType {
   settings: SettingsData;
   updateSettings: (newSettings: Partial<SettingsData>) => void;
-  saveSettings: () => void;
+  saveSettings: () => Promise<void>;
+  reloadSettings: () => Promise<void>;
 }
 
 const defaultSettings: SettingsData = {
@@ -29,29 +31,86 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<SettingsData>(defaultSettings);
 
-  // Load settings from localStorage on mount
-  useEffect(() => {
-    const savedSettings = localStorage.getItem('pharma-settings');
-    if (savedSettings) {
-      try {
-        const parsedSettings = JSON.parse(savedSettings);
-        setSettings({ ...defaultSettings, ...parsedSettings });
-      } catch (error) {
-        console.error('Error loading settings:', error);
-      }
+  const mapFromRow = (row: any): SettingsData => ({
+    companyName: row?.company_name || '',
+    phone: row?.phone || '',
+    address: row?.address || '',
+    logo: row?.logo || null,
+    invoicePrefix: row?.invoice_prefix || 'INV',
+  });
+
+  const reloadSettings = async () => {
+    const { data, error } = await supabase
+      .from('settings')
+      .select('*')
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Failed to load settings:', error.message);
+      return;
     }
+
+    if (!data) {
+      const { data: inserted, error: insertError } = await supabase
+        .from('settings')
+        .insert([{ company_name: '', phone: '', address: '', logo: null, invoice_prefix: 'INV' }])
+        .select('*')
+        .single();
+
+      if (insertError) {
+        console.error('Failed to initialize settings:', insertError.message);
+        return;
+      }
+      setSettings(mapFromRow(inserted));
+      return;
+    }
+
+    setSettings(mapFromRow(data));
+  };
+
+  useEffect(() => {
+    reloadSettings();
   }, []);
 
   const updateSettings = (newSettings: Partial<SettingsData>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
   };
 
-  const saveSettings = () => {
-    localStorage.setItem('pharma-settings', JSON.stringify(settings));
+  const saveSettings = async () => {
+    const { data: existing } = await supabase
+      .from('settings')
+      .select('id')
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    const payload = {
+      company_name: settings.companyName,
+      phone: settings.phone,
+      address: settings.address,
+      logo: settings.logo,
+      invoice_prefix: settings.invoicePrefix,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (existing?.id) {
+      const { error } = await supabase
+        .from('settings')
+        .update(payload)
+        .eq('id', existing.id);
+      if (error) console.error('Failed to save settings:', error.message);
+    } else {
+      const { error } = await supabase
+        .from('settings')
+        .insert([payload]);
+      if (error) console.error('Failed to insert settings:', error.message);
+    }
   };
 
   return (
-    <SettingsContext.Provider value={{ settings, updateSettings, saveSettings }}>
+    <SettingsContext.Provider value={{ settings, updateSettings, saveSettings, reloadSettings }}>
       {children}
     </SettingsContext.Provider>
   );

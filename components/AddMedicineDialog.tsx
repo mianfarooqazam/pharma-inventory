@@ -70,29 +70,34 @@ export function AddMedicineDialog({
     "Spray",
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newMedicine = addMedicine({
+    const createdMed = await addMedicine({
       name: formData.name,
       category: formData.category,
       manufacturer: formData.manufacturer,
       strength: formData.strength,
       unit: formData.unit,
-      minStockLevel: parseInt(formData.minStockLevel),
-      currentStock: parseInt(formData.currentStock),
-      price: parseFloat(formData.price),
+      description: undefined,
+      minStockLevel: parseInt(formData.minStockLevel || "0"),
+      price: parseFloat(formData.price || "0"),
     });
 
-    // Add batch if batch information is provided
+    if (!createdMed) {
+      addNotification({ type: "error", title: "Failed", message: "Could not add medicine" });
+      return;
+    }
+
+    // Add initial batch
     if (formData.batchNumber && formData.purchasePrice && formData.expiryDate) {
-      addBatch({
-        medicineId: newMedicine.id,
+      await addBatch({
+        medicineId: createdMed.id,
         batchNumber: formData.batchNumber,
         expiryDate: new Date(formData.expiryDate),
-        quantity: parseInt(formData.currentStock) || 0,
-        costPrice: parseFloat(formData.purchasePrice),
-        sellingPrice: parseFloat(formData.price),
+        quantity: parseInt(formData.currentStock || "0"),
+        costPrice: parseFloat(formData.purchasePrice || "0"),
+        sellingPrice: parseFloat(formData.price || "0"),
       });
     }
 

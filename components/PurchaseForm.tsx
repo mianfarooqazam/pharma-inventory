@@ -48,7 +48,6 @@ export function PurchaseForm({ initialType = 'new', hideTypeSwitcher = false }: 
     setSelectedMedicineId(medicineId);
     const medicine = medicines.find(m => m.id === medicineId);
     if (medicine) {
-      // Find the most recent batch for this medicine
       const medicineBatches = batches.filter(batch => batch.medicineId === medicineId);
       const mostRecentBatch = medicineBatches.sort((a, b) => 
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -69,14 +68,13 @@ export function PurchaseForm({ initialType = 'new', hideTypeSwitcher = false }: 
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     let medicineId: string;
     
     if (purchaseType === 'new') {
-      // Add new medicine first
-      const newMedicine = {
+      const newMedicineInput = {
         name: formData.name,
         category: formData.category,
         manufacturer: formData.manufacturer,
@@ -84,20 +82,16 @@ export function PurchaseForm({ initialType = 'new', hideTypeSwitcher = false }: 
         unit: formData.unit,
         description: formData.description,
         minStockLevel: parseInt(formData.minStockLevel),
-        currentStock: parseInt(formData.currentStock) || 0,
         price: parseFloat(formData.price),
-      };
-      
-      // Add the new medicine and get its ID
-      const addedMedicine = addMedicine(newMedicine);
+      } as const;
+      const addedMedicine = await addMedicine(newMedicineInput);
+      if (!addedMedicine) return;
       medicineId = addedMedicine.id;
     } else {
-      // Restock existing medicine
       medicineId = selectedMedicineId;
     }
     
-    // Add new batch for the medicine
-    addBatch({
+    const createdBatch = await addBatch({
       medicineId: medicineId,
       batchNumber: formData.batchNumber,
       expiryDate: new Date(formData.expiryDate),
@@ -106,17 +100,18 @@ export function PurchaseForm({ initialType = 'new', hideTypeSwitcher = false }: 
       sellingPrice: parseFloat(formData.price),
     });
 
-    // Add transaction record
-    addTransaction({
-      medicineId: medicineId,
-      batchId: '', // Will be set by addBatch
-      type: 'purchase',
-      quantity: parseInt(formData.currentStock) || 0,
-      unitPrice: parseFloat(formData.purchasePrice),
-      totalAmount: (parseInt(formData.currentStock) || 0) * parseFloat(formData.purchasePrice),
-      notes: purchaseType === 'new' ? 'New medicine purchase' : 'Medicine restock',
-      createdBy: 'current-user',
-    });
+    if (createdBatch) {
+      await addTransaction({
+        medicineId: medicineId,
+        batchId: createdBatch.id,
+        type: 'purchase',
+        quantity: parseInt(formData.currentStock) || 0,
+        unitPrice: parseFloat(formData.purchasePrice),
+        totalAmount: (parseInt(formData.currentStock) || 0) * parseFloat(formData.purchasePrice),
+        notes: purchaseType === 'new' ? 'New medicine purchase' : 'Medicine restock',
+        createdBy: null,
+      });
+    }
 
     addNotification({
       type: 'success',
@@ -124,7 +119,6 @@ export function PurchaseForm({ initialType = 'new', hideTypeSwitcher = false }: 
       message: `Successfully ${purchaseType === 'new' ? 'added' : 'restocked'} ${formData.name} with ${formData.currentStock || 0} units`,
     });
 
-    // Reset form
     setFormData({
       name: '',
       category: '',
@@ -152,7 +146,6 @@ export function PurchaseForm({ initialType = 'new', hideTypeSwitcher = false }: 
       
       <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-6">
-            {/* Purchase Type Selection */}
             {!hideTypeSwitcher && (
               <div className="space-y-4">
                 <RadioGroup value={purchaseType} onValueChange={(value: 'new' | 'restock') => setPurchaseType(value)}>
@@ -168,7 +161,6 @@ export function PurchaseForm({ initialType = 'new', hideTypeSwitcher = false }: 
               </div>
             )}
 
-            {/* Basic Medicine Information */}
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -280,7 +272,6 @@ export function PurchaseForm({ initialType = 'new', hideTypeSwitcher = false }: 
               </div>
             </div>
 
-            {/* Pricing Information */}
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -322,11 +313,9 @@ export function PurchaseForm({ initialType = 'new', hideTypeSwitcher = false }: 
               </div>
             )}
 
-            {/* Stock & Batch Information */}
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-4">
                
-
                 <div className="space-y-2">
                   <Label htmlFor="currentStock">Quantity</Label>
                   <Input

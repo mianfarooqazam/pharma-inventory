@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,38 +17,92 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/comp
 import { AddCustomerDialog, NewCustomer } from "./AddCustomerDialog";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
-interface Customer extends NewCustomer {}
+interface Customer extends NewCustomer {
+  id: string;
+  created_at: string;
+}
 
 export function Customers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [confirmationOpen, setConfirmationOpen] = useState(false);
-  const [customerToDelete, setCustomerToDelete] = useState<{ name: string; index: number } | null>(null);
+  const [customerToDelete, setCustomerToDelete] = useState<{ id: string; name: string } | null>(null);
   const { toast } = useToast();
 
-  const handleAddCustomer = (customer: NewCustomer) => {
-    setCustomers((prev) => [...prev, customer]);
+  const loadCustomers = async () => {
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) {
+      console.error('Failed to fetch customers:', error.message);
+      return;
+    }
+    const mapped = (data || []).map((c: any) => ({
+      id: c.id,
+      name: c.name,
+      address: c.address || '',
+      city: c.city || '',
+      phone: c.phone || '',
+      outstandingDues: Number(c.outstanding_dues || 0),
+      created_at: c.created_at,
+    }));
+    setCustomers(mapped);
   };
 
-  const handleDeleteClick = (customerName: string, index: number) => {
-    setCustomerToDelete({ name: customerName, index });
+  useEffect(() => {
+    loadCustomers();
+  }, []);
+
+  const handleAddCustomer = async (customer: NewCustomer) => {
+    const payload = {
+      name: customer.name,
+      address: customer.address,
+      city: customer.city,
+      phone: customer.phone,
+      outstanding_dues: customer.outstandingDues || 0,
+    };
+    const { data, error } = await supabase.from('customers').insert([payload]).select('*').single();
+    if (error) {
+      console.error('Failed to add customer:', error.message);
+      toast({ title: 'Failed to add customer' });
+      return;
+    }
+    setShowAddDialog(false);
+    await loadCustomers();
+  };
+
+  const handleDeleteClick = (id: string, name: string) => {
+    setCustomerToDelete({ id, name });
     setConfirmationOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!customerToDelete) return;
 
-    setCustomers((prev) => prev.filter((_, i) => i !== customerToDelete.index));
+    // Delete all invoices for this customer (invoice_items cascade automatically)
+    await supabase.from('invoices').delete().eq('customer_id', customerToDelete.id);
+
+    const { error } = await supabase.from('customers').delete().eq('id', customerToDelete.id);
+    if (error) {
+      console.error('Failed to delete customer:', error.message);
+      toast({ title: 'Failed to delete customer' });
+      return;
+    }
+    setConfirmationOpen(false);
+    setCustomerToDelete(null);
+    await loadCustomers();
   };
 
   const filteredCustomers = customers.filter((c) => {
     const query = searchTerm.toLowerCase();
     return (
       c.name.toLowerCase().includes(query) ||
-      c.city.toLowerCase().includes(query) ||
-      c.phone.toLowerCase().includes(query)
+      (c.city || '').toLowerCase().includes(query) ||
+      (c.phone || '').toLowerCase().includes(query)
     );
   });
 
@@ -95,12 +149,11 @@ export function Customers() {
               </TableHeader>
               <TableBody>
                 {filteredCustomers.map((c, idx) => (
-                  <TableRow key={`${c.name}-${idx}`}>
+                  <TableRow key={c.id}>
                     <TableCell className="text-center font-medium">{idx + 1}</TableCell>
                     <TableCell>
                       <div>
                         <p className="font-medium">{c.name}</p>
-                      
                       </div>
                     </TableCell>
                     <TableCell>{c.address}</TableCell>
@@ -127,13 +180,12 @@ export function Customers() {
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
-
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
                           className="text-red-600 hover:text-red-700"
-                          onClick={() => handleDeleteClick(c.name, idx)}
+                          onClick={() => handleDeleteClick(c.id, c.name)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -165,7 +217,7 @@ export function Customers() {
         open={confirmationOpen}
         onOpenChange={setConfirmationOpen}
         title="Delete Customer"
-        description={`Are you sure you want to delete ${customerToDelete?.name}? This action cannot be undone.`}
+        description={`Deleting ${customerToDelete?.name} will permanently delete all invoices associated with this customer. This action cannot be undone.`}
         confirmText="Delete Customer"
         onConfirm={confirmDelete}
         variant="destructive"
