@@ -82,7 +82,7 @@ export function ConfirmationDialog({
               {getIcon()}
             </div>
           </div>
-          <AlertDialogTitle className="text-xl font-semibold text-gray-900">
+          <AlertDialogTitle className="text-xl font-semibold text-gray-900 text-center">
             {title}
           </AlertDialogTitle>
           <AlertDialogDescription className="text-gray-600 mt-2">
