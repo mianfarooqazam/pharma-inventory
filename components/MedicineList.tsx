@@ -47,6 +47,15 @@ export function MedicineList() {
     setConfirmationOpen(true);
   };
 
+  const getAssociatedDataCount = (medicineId: string) => {
+    const associatedBatches = batches.filter(b => b.medicineId === medicineId);
+    const totalStock = associatedBatches.reduce((sum, batch) => sum + batch.quantity, 0);
+    return {
+      totalStock,
+      hasStock: totalStock > 0
+    };
+  };
+
   const confirmDelete = () => {
     if (!medicineToDelete) return;
 
@@ -184,7 +193,14 @@ export function MedicineList() {
         open={confirmationOpen}
         onOpenChange={setConfirmationOpen}
         title="Delete Medicine"
-        description={`Are you sure you want to delete ${medicineToDelete?.name}? This action cannot be undone.`}
+        description={
+          medicineToDelete ? 
+            (() => {
+              const { totalStock, hasStock } = getAssociatedDataCount(medicineToDelete.id);
+              return `Deleting "${medicineToDelete.name}" will permanently delete ${totalStock} units of stock${hasStock ? ' and may delete associated invoices' : ''}. This action cannot be undone.`;
+            })() :
+            ''
+        }
         confirmText="Delete Medicine"
         onConfirm={confirmDelete}
         variant="destructive"
