@@ -37,7 +37,8 @@ export function Inventory() {
     (medicine) =>
       medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       medicine.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      medicine.manufacturer.toLowerCase().includes(searchTerm.toLowerCase())
+      medicine.manufacturer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      medicine.unit.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStockStatus = (medicine: any) => {
@@ -185,7 +186,7 @@ export function Inventory() {
           <div className="relative mb-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search medicines by name, category, or manufacturer..."
+              placeholder="Search medicines by name, category, manufacturer, or unit..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"

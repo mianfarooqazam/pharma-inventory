@@ -40,11 +40,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   });
 
   const reloadSettings = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
     const { data, error } = await supabase
       .from('settings')
       .select('*')
-      .order('created_at', { ascending: true })
-      .limit(1)
+      .eq('owner_id', user.id)
       .maybeSingle();
 
     if (error) {
@@ -55,7 +57,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (!data) {
       const { data: inserted, error: insertError } = await supabase
         .from('settings')
-        .insert([{ company_name: '', phone: '', address: '', logo: null, invoice_prefix: 'INV' }])
+        .insert([{ 
+          company_name: '', 
+          phone: '', 
+          address: '', 
+          logo: null, 
+          invoice_prefix: 'INV',
+          owner_id: user.id 
+        }])
         .select('*')
         .single();
 
@@ -79,11 +88,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   };
 
   const saveSettings = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
     const { data: existing } = await supabase
       .from('settings')
       .select('id')
-      .order('created_at', { ascending: true })
-      .limit(1)
+      .eq('owner_id', user.id)
       .maybeSingle();
 
     const payload = {
@@ -92,20 +103,35 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       address: settings.address,
       logo: settings.logo,
       invoice_prefix: settings.invoicePrefix,
+      owner_id: user.id,
       updated_at: new Date().toISOString(),
     };
 
-    if (existing?.id) {
-      const { error } = await supabase
-        .from('settings')
-        .update(payload)
-        .eq('id', existing.id);
-      if (error) console.error('Failed to save settings:', error.message);
-    } else {
-      const { error } = await supabase
-        .from('settings')
-        .insert([payload]);
-      if (error) console.error('Failed to insert settings:', error.message);
+    try {
+      if (existing?.id) {
+        const { error } = await supabase
+          .from('settings')
+          .update(payload)
+          .eq('id', existing.id);
+        if (error) {
+          console.error('Failed to update settings:', error.message);
+          throw error;
+        }
+      } else {
+        const { error } = await supabase
+          .from('settings')
+          .insert([payload]);
+        if (error) {
+          console.error('Failed to insert settings:', error.message);
+          throw error;
+        }
+      }
+      
+      // Reload settings after successful save
+      await reloadSettings();
+      console.log('Settings saved successfully');
+    } catch (error) {
+      console.error('Error saving settings:', error);
     }
   };
 

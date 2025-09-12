@@ -68,6 +68,7 @@ export function AddMedicineDialog({
     "Cream",
     "Drops",
     "Spray",
+    "Solution"
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
