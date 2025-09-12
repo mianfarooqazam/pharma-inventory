@@ -18,6 +18,7 @@ import { Invoices } from '@/components/Invoices';
 import { PurchaseForm } from '@/components/PurchaseForm';
 import { SaleForm } from '@/components/SaleForm';
 import { ReturnForm } from '@/components/ReturnForm';
+import { PurchaseHistory } from '@/components/PurchaseHistory';
 
 import { RevenueProfit } from '@/components/RevenueProfit';
 import { Settings } from '@/components/Settings';
@@ -146,6 +147,9 @@ function AppContent() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+          <TabsContent value="transactions-history">
+            <PurchaseHistory />
           </TabsContent>
           
 

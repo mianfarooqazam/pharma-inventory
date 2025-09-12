@@ -33,6 +33,7 @@ import {
   CreditCard,
   Package2,
   Undo2,
+  History,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNotifications } from "@/contexts/NotificationContext";
@@ -130,7 +131,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant={
-                            ["transactions-purchase","transactions-sell","transactions-restock","transactions-return"].includes(activeTab)
+                            ["transactions-purchase","transactions-sell","transactions-restock","transactions-return","transactions-history"].includes(activeTab)
                               ? "default"
                               : "ghost"
                           }
@@ -164,6 +165,12 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
                           <div className="flex items-center space-x-2">
                             <Undo2 className="h-4 w-4" />
                             <span>Return</span>
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setActiveTab("transactions-history")}>
+                          <div className="flex items-center space-x-2">
+                            <History className="h-4 w-4" />
+                            <span>Purchase History</span>
                           </div>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -421,6 +428,19 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
                             <div className="flex items-center space-x-2">
                               <Undo2 className="h-4 w-4" />
                               <span>Return</span>
+                            </div>
+                          </Button>
+                          <Button
+                            variant={activeTab === "transactions-history" ? "default" : "ghost"}
+                            onClick={() => {
+                              setActiveTab("transactions-history");
+                              setIsMobileMenuOpen(false);
+                            }}
+                            className="w-full justify-start"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <History className="h-4 w-4" />
+                              <span>Purchase History</span>
                             </div>
                           </Button>
                         </div>
