@@ -135,7 +135,7 @@ export function RevenueProfit() {
           {
             title: "Purchase This Month",
             value: `Rs. ${metricsData.purchaseThisMonth.toLocaleString()}`,
-            description: "Monthly procurement cost",
+            description: new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' }),
             icon: ShoppingCart,
             color: "text-blue-600",
             gradient: "from-blue-500 to-blue-700",
@@ -145,7 +145,7 @@ export function RevenueProfit() {
           {
             title: "Sold This Month",
             value: `Rs. ${metricsData.soldThisMonth.toLocaleString()}`,
-            description: "Current month sales",
+            description: new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' }),
             icon: TrendingUp,
             color: "text-green-600",
             gradient: "from-green-500 to-green-700",
@@ -155,7 +155,7 @@ export function RevenueProfit() {
           {
             title: "Profit This Month",
             value: `Rs. ${Math.round(monthly?.profit_this_month ?? 0).toLocaleString()}`,
-            description: "Monthly net earnings",
+            description: new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' }),
             icon: BarChart3,
             color: "text-purple-600",
             gradient: "from-purple-500 to-purple-700",

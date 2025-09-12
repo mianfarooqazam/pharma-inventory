@@ -139,7 +139,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       title: 'Monthly Sales',
       value: `Rs. ${Math.round(monthlySales).toLocaleString()}`,
       icon: ShoppingCart,
-      description: 'Current month sales',
+      description: new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' }),
       color: 'text-emerald-600',
       gradient: 'from-emerald-500 to-emerald-700',
       bgGlow: 'bg-emerald-500/20',
