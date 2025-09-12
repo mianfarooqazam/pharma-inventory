@@ -199,9 +199,9 @@ export function RevenueProfit() {
                   <CardTitle className="text-lg  text-gray-800 group-hover:text-gray-600 transition-colors duration-300">
                     {stat.title}
                   </CardTitle>
-                  <div className={`p-2 rounded-lg bg-gradient-to-br ${stat.gradient} shadow-xl group-hover:shadow-lg transition-all duration-300 scale-110 group-hover:scale-100`}>
-                    <Icon className="h-4 w-4 text-white" />
-                  </div>
+                  <div className="p-2 rounded-lg bg-white shadow-xl group-hover:shadow-lg transition-all duration-300 scale-110 group-hover:scale-100">
+                      <Icon className={`h-4 w-4 ${stat.color}`} />
+                    </div>
                 </div>
                 
                 {/* Center: Amount */}

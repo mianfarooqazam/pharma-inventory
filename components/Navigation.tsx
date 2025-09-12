@@ -180,8 +180,8 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
           <div className="relative">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="sm" className="relative p-2">
-                    <Bell className="h-5 w-5" />
+                  <div className="relative p-2 rounded-lg bg-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer">
+                    <Bell className="h-5 w-5 text-gray-600" />
                     {unreadCount > 0 && (
                       <Badge
                         variant="destructive"
@@ -190,7 +190,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
                         {unreadCount > 9 ? "9+" : unreadCount}
                       </Badge>
                     )}
-                  </Button>
+                  </div>
                 </PopoverTrigger>
                 <PopoverContent className="w-80" align="end">
                   <div className="space-y-4">
@@ -250,7 +250,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
             <div className="flex items-center space-x-2">
               <Popover>
                 <PopoverTrigger asChild>
-                  <div className="p-2 rounded-full bg-blue-100 cursor-pointer hover:bg-blue-200 transition-colors">
+                  <div className="p-2 rounded-lg bg-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer">
                     <User className="h-5 w-5 text-blue-600" />
                   </div>
                 </PopoverTrigger>
