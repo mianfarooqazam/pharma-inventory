@@ -296,16 +296,37 @@ export function SaleForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="status">Invoice Status</Label>
-                <Select value={invoiceStatus} onValueChange={(v) => setInvoiceStatus(v as 'Paid' | 'Unpaid')}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Paid">Paid</SelectItem>
-                    <SelectItem value="Unpaid">Unpaid</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label>Invoice Status</Label>
+                <div className="flex space-x-6">
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="paid"
+                      name="invoiceStatus"
+                      value="Paid"
+                      checked={invoiceStatus === 'Paid'}
+                      onChange={(e) => setInvoiceStatus(e.target.value as 'Paid' | 'Unpaid')}
+                      className="h-4 w-4 accent-green-600"
+                    />
+                    <label htmlFor="paid" className="ml-2 text-sm font-medium text-green-600 cursor-pointer">
+                      Paid
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="unpaid"
+                      name="invoiceStatus"
+                      value="Unpaid"
+                      checked={invoiceStatus === 'Unpaid'}
+                      onChange={(e) => setInvoiceStatus(e.target.value as 'Paid' | 'Unpaid')}
+                      className="h-4 w-4 accent-red-600  "
+                    />
+                    <label htmlFor="unpaid" className="ml-2 text-sm font-medium text-red-600 cursor-pointer">
+                      Unpaid
+                    </label>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2">
