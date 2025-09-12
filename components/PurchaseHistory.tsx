@@ -16,10 +16,7 @@ import {
 import { 
   Search, 
   Package, 
-  Calendar,
   Download,
-  Filter,
-  ShoppingCart,
   RefreshCw,
   Eye
 } from 'lucide-react';
@@ -132,50 +129,9 @@ export function PurchaseHistory() {
     return matchesSearch && matchesType;
   });
 
-  const totalPurchaseValue = filteredHistory.reduce((sum, item) => sum + item.total_amount, 0);
-  const totalQuantity = filteredHistory.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <div className="space-y-6">
-      {/* Header Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Transactions</p>
-                <p className="text-2xl font-bold text-blue-600">{filteredHistory.length}</p>
-              </div>
-              <ShoppingCart className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Quantity</p>
-                <p className="text-2xl font-bold text-green-600">{totalQuantity.toLocaleString()}</p>
-              </div>
-              <Package className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Value</p>
-                <p className="text-2xl font-bold text-purple-600">Rs. {totalPurchaseValue.toLocaleString()}</p>
-              </div>
-              <Calendar className="h-8 w-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Main Table */}
       <Card>
         <CardHeader>
