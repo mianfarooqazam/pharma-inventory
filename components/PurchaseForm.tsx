@@ -40,7 +40,7 @@ export function PurchaseForm({ initialType = 'new', hideTypeSwitcher = false }: 
     'Antiseptic', 'Cough Syrup', 'Cardiovascular', 'Diabetes', 'Other'
   ];
 
-  const units = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Spray'];
+  const units = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Spray', 'Solution'];
 
   const selectedMedicine = medicines.find(m => m.id === selectedMedicineId);
 
@@ -64,6 +64,7 @@ export function PurchaseForm({ initialType = 'new', hideTypeSwitcher = false }: 
         minStockLevel: medicine.minStockLevel.toString(),
         price: medicine.price.toString(),
         batchNumber: mostRecentBatch?.batchNumber || '',
+        purchasePrice: mostRecentBatch?.costPrice?.toString() || '',
       }));
     }
   };
