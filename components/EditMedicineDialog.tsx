@@ -226,7 +226,7 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="purchasePrice">Purchase Price (PKR)</Label>
+                <Label htmlFor="purchasePrice">Purchase Price (Rs.)</Label>
                 <Input
                   id="purchasePrice"
                   type="number"
@@ -239,7 +239,7 @@ export function EditMedicineDialog({ medicineId, open, onOpenChange }: EditMedic
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="price">Expected Selling Price (PKR)</Label>
+                <Label htmlFor="price">Expected Selling Price (Rs.)</Label>
                 <Input
                   id="price"
                   type="number"

@@ -275,7 +275,7 @@ export function PurchaseForm({ initialType = 'new', hideTypeSwitcher = false }: 
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="purchasePrice">Purchase Price per Unit (PKR)</Label>
+                  <Label htmlFor="purchasePrice">Purchase Price per Unit (Rs.)</Label>
                   <Input
                     id="purchasePrice"
                     type="number"
@@ -288,7 +288,7 @@ export function PurchaseForm({ initialType = 'new', hideTypeSwitcher = false }: 
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="price">Expected Selling Price per Unit (PKR)</Label>
+                  <Label htmlFor="price">Expected Selling Price per Unit (Rs.)</Label>
                   <Input
                     id="price"
                     type="number"
@@ -307,7 +307,7 @@ export function PurchaseForm({ initialType = 'new', hideTypeSwitcher = false }: 
                 <div className="flex justify-between items-center">
                   <span className="text-white font-medium">Total Purchase Amount:</span>
                   <span className="font-bold text-lg text-white">
-                    PKR {(parseInt(formData.currentStock) * parseFloat(formData.purchasePrice)).toFixed(2)}
+                    Rs. {(parseInt(formData.currentStock) * parseFloat(formData.purchasePrice)).toFixed(2)}
                   </span>
                 </div>
               </div>

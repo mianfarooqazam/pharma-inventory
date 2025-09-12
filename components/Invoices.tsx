@@ -277,7 +277,7 @@ export function Invoices() {
                     <TableCell>{inv.date_str}</TableCell>
                     <TableCell>{inv.customer}</TableCell>
                     <TableCell>{inv.city}</TableCell>
-                    <TableCell>PKR {inv.amount.toFixed(2)}</TableCell>
+                    <TableCell>Rs. {inv.amount.toFixed(2)}</TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
                         <span className={`text-sm font-medium ${inv.status === 'Paid' ? 'text-green-600' : 'text-red-600'}`}>

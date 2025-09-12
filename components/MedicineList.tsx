@@ -129,10 +129,10 @@ export function MedicineList() {
                       </TableCell>
                       <TableCell>
                         {latestBatch
-                          ? `PKR ${latestBatch.costPrice.toFixed(2)}`
+                          ? `Rs. ${latestBatch.costPrice.toFixed(2)}`
                           : "N/A"}
                       </TableCell>
-                      <TableCell>PKR {medicine.price.toFixed(2)}</TableCell>
+                      <TableCell>Rs. {medicine.price.toFixed(2)}</TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
                           <Button

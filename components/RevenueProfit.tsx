@@ -104,7 +104,7 @@ export function RevenueProfit() {
         {[
           {
             title: "Purchase This Year",
-            value: `₨ ${metricsData.purchaseThisYear.toLocaleString()}`,
+            value: `Rs. ${metricsData.purchaseThisYear.toLocaleString()}`,
             description: "Total inventory purchases",
             icon: ShoppingCart,
             color: "text-blue-600",
@@ -114,7 +114,7 @@ export function RevenueProfit() {
           },
           {
             title: "Sold This Year",
-            value: `₨ ${metricsData.soldThisYear.toLocaleString()}`,
+            value: `Rs. ${metricsData.soldThisYear.toLocaleString()}`,
             description: "Annual sales revenue",
             icon: TrendingUp,
             color: "text-green-600",
@@ -124,7 +124,7 @@ export function RevenueProfit() {
           },
           {
             title: "Profit This Year",
-            value: `₨ ${Math.round(yearly?.profit_this_year ?? 0).toLocaleString()}`,
+            value: `Rs. ${Math.round(yearly?.profit_this_year ?? 0).toLocaleString()}`,
             description: "Net profit generated",
             icon: BarChart3,
             color: "text-purple-600",
@@ -134,7 +134,7 @@ export function RevenueProfit() {
           },
           {
             title: "Purchase This Month",
-            value: `₨ ${metricsData.purchaseThisMonth.toLocaleString()}`,
+            value: `Rs. ${metricsData.purchaseThisMonth.toLocaleString()}`,
             description: "Monthly procurement cost",
             icon: ShoppingCart,
             color: "text-blue-600",
@@ -144,7 +144,7 @@ export function RevenueProfit() {
           },
           {
             title: "Sold This Month",
-            value: `₨ ${metricsData.soldThisMonth.toLocaleString()}`,
+            value: `Rs. ${metricsData.soldThisMonth.toLocaleString()}`,
             description: "Current month sales",
             icon: TrendingUp,
             color: "text-green-600",
@@ -154,7 +154,7 @@ export function RevenueProfit() {
           },
           {
             title: "Profit This Month",
-            value: `₨ ${Math.round(monthly?.profit_this_month ?? 0).toLocaleString()}`,
+            value: `Rs. ${Math.round(monthly?.profit_this_month ?? 0).toLocaleString()}`,
             description: "Monthly net earnings",
             icon: BarChart3,
             color: "text-purple-600",
@@ -164,7 +164,7 @@ export function RevenueProfit() {
           },
           {
             title: "Outstanding Balance",
-            value: `₨ ${Math.round(outstandingBalance).toLocaleString()}`,
+            value: `Rs. ${Math.round(outstandingBalance).toLocaleString()}`,
             description: "Pending customer dues",
             icon: DollarSign,
             color: "text-red-600",
@@ -305,7 +305,7 @@ export function RevenueProfit() {
                       <TableCell className="font-medium">{inv.invoice_no}</TableCell>
                       <TableCell>{inv.customer}</TableCell>
                       <TableCell>{inv.city}</TableCell>
-                      <TableCell>₨ {inv.amount.toFixed(2)}</TableCell>
+                      <TableCell>Rs. {inv.amount.toFixed(2)}</TableCell>
                       <TableCell>
                         <span className={`text-sm font-medium ${inv.status === 'Paid' ? 'text-green-600' : 'text-red-600'}`}>
                           {inv.status}

@@ -374,7 +374,7 @@ export function SaleForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="actualSellingPrice">Actual Selling Price (PKR)</Label>
+                <Label htmlFor="actualSellingPrice">Actual Selling Price (Rs.)</Label>
                 <Input
                   id="actualSellingPrice"
                   type="number"
@@ -387,11 +387,11 @@ export function SaleForm() {
                   <div className="space-y-1">
                     {selectedBatch && (
                       <p className="text-sm text-blue-500">
-                        Purchase price: PKR {selectedBatch.costPrice.toFixed(2)}
+                        Purchase price: Rs. {selectedBatch.costPrice.toFixed(2)}
                       </p>
                     )}
                     <p className="text-sm text-blue-500">
-                      Expected selling price: PKR {selectedMedicine.price.toFixed(2)}
+                      Expected selling price: Rs. {selectedMedicine.price.toFixed(2)}
                     </p>
                   </div>
                 )}
@@ -426,8 +426,8 @@ export function SaleForm() {
                           <td className="border border-gray-200 px-3 py-2 text-sm">{batch?.batchNumber}</td>
                           <td className="border border-gray-200 px-3 py-2 text-sm">{med ? `${med.name} ${med.strength}` : ''}</td>
                           <td className="border border-gray-200 px-3 py-2 text-center text-sm">{ci.quantity}</td>
-                          <td className="border border-gray-200 px-3 py-2 text-right text-sm">PKR {ci.unitPrice.toFixed(2)}</td>
-                          <td className="border border-gray-200 px-3 py-2 text-right text-sm">PKR {(ci.quantity * ci.unitPrice).toFixed(2)}</td>
+                          <td className="border border-gray-200 px-3 py-2 text-right text-sm">Rs. {ci.unitPrice.toFixed(2)}</td>
+                          <td className="border border-gray-200 px-3 py-2 text-right text-sm">Rs. {(ci.quantity * ci.unitPrice).toFixed(2)}</td>
                           <td className="border border-gray-200 px-3 py-2 text-right text-sm">
                             <div className="flex items-center justify-end gap-1">
                               <Button type="button" variant="ghost" size="icon" onClick={() => handleEditItem(idx)} title="Edit">
@@ -448,7 +448,7 @@ export function SaleForm() {
                 <div className="w-full sm:w-64 space-y-3">
                   <div className="flex justify-between py-2">
                     <span className="text-sm text-gray-600">Subtotal:</span>
-                    <span className="text-sm font-semibold">PKR {cartItems.reduce((sum, it) => sum + it.quantity * it.unitPrice, 0).toFixed(2)}</span>
+                    <span className="text-sm font-semibold">Rs. {cartItems.reduce((sum, it) => sum + it.quantity * it.unitPrice, 0).toFixed(2)}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <label htmlFor="taxPercent" className="text-gray-600">Tax (%)</label>
@@ -483,15 +483,15 @@ export function SaleForm() {
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600">Tax</span>
-                          <span className="font-medium">PKR {tax.toFixed(2)}</span>
+                          <span className="font-medium">Rs. {tax.toFixed(2)}</span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600">Discount</span>
-                          <span className="font-medium">- PKR {discount.toFixed(2)}</span>
+                          <span className="font-medium">- Rs. {discount.toFixed(2)}</span>
                         </div>
                         <div className="flex items-center justify-between pt-2 border-t">
                           <span className="font-semibold">Total</span>
-                          <span className="font-semibold">PKR {total.toFixed(2)}</span>
+                          <span className="font-semibold">Rs. {total.toFixed(2)}</span>
                         </div>
                       </div>
                     );

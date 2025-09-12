@@ -159,7 +159,7 @@ export function Customers() {
                     <TableCell>{c.address}</TableCell>
                     <TableCell>{c.city}</TableCell>
                     <TableCell>{c.phone}</TableCell>
-                    <TableCell>PKR {c.outstandingDues.toFixed(2)}</TableCell>
+                    <TableCell>Rs. {c.outstandingDues.toFixed(2)}</TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
                         <Button

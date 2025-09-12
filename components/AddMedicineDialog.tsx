@@ -246,7 +246,7 @@ export function AddMedicineDialog({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="purchasePrice">Purchase Price per Unit (PKR)</Label>
+                <Label htmlFor="purchasePrice">Purchase Price per Unit (Rs.)</Label>
                 <Input
                   id="purchasePrice"
                   type="number"
@@ -261,7 +261,7 @@ export function AddMedicineDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="price">Expected Selling Price per Unit (PKR)</Label>
+                <Label htmlFor="price">Expected Selling Price per Unit (Rs.)</Label>
                 <Input
                   id="price"
                   type="number"

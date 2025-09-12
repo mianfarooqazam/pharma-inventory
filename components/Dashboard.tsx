@@ -123,7 +123,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     },
     {
       title: 'Stock Value',
-      value: `PKR ${Math.round(totalValue).toLocaleString()}`,
+      value: `Rs. ${Math.round(totalValue).toLocaleString()}`,
       icon: DollarSign,
       description: 'Total inventory value (cost basis)',
       color: 'text-purple-600',
@@ -133,7 +133,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     },
     {
       title: 'Monthly Sales',
-      value: `PKR ${Math.round(monthlySales).toLocaleString()}`,
+      value: `Rs. ${Math.round(monthlySales).toLocaleString()}`,
       icon: ShoppingCart,
       description: 'Current month sales',
       color: 'text-emerald-600',
