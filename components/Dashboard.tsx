@@ -44,6 +44,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
   const [inventorySummary, setInventorySummary] = useState<{ total_medicines: number; total_units_in_stock: number; total_stock_value_selling: number; total_stock_value_cost: number } | null>(null);
   const [monthlyKpis, setMonthlyKpis] = useState<{ month_start: string; month_end: string; sold_this_month: number; purchase_this_month: number; profit_this_month: number; units_sold_this_month: number } | null>(null);
+  const [totalCustomers, setTotalCustomers] = useState<number>(0);
 
   const [monthlySalesSeries, setMonthlySalesSeries] = useState<Array<{ label: string; total: number }>>([]);
 
@@ -53,6 +54,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       if (inv) setInventorySummary(inv as any);
       const { data: mon } = await supabase.from('v_monthly_kpis').select('*').maybeSingle();
       if (mon) setMonthlyKpis(mon as any);
+      
+      // Load total customers count
+      const { count } = await supabase.from('customers').select('*', { count: 'exact', head: true });
+      setTotalCustomers(count || 0);
     };
     loadKpis();
   }, []);
@@ -136,12 +141,22 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       bgGlow: 'bg-emerald-500/20',
       accent: 'bg-emerald-500'
     },
+    {
+      title: 'Total Customers',
+      value: totalCustomers.toString(),
+      icon: Users,
+      description: 'Registered customers',
+      color: 'text-indigo-600',
+      gradient: 'from-indigo-500 to-indigo-700',
+      bgGlow: 'bg-indigo-500/20',
+      accent: 'bg-indigo-500'
+    },
   ];
 
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (

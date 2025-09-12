@@ -75,109 +75,93 @@ export function Inventory() {
     (med) => getMedicineStock(med.id) <= med.minStockLevel
   ).length;
 
-  // Helper functions for card styling
-  const getGradientClass = (title: string) => {
-    switch (title) {
-      case "Total Medicines":
-        return "bg-blue-600";
-      case "Total Stock":
-        return "bg-green-600";
-      case "Low Stock Items":
-        return "bg-orange-600";
-      default:
-        return "bg-gray-600";
-    }
-  };
-
-  const getIconBgClass = (title: string) => {
-    switch (title) {
-      case "Total Medicines":
-        return "bg-white";
-      case "Total Stock":
-        return "bg-white";
-      case "Low Stock Items":
-        return "bg-white";
-      default:
-        return "bg-white";
-    }
-  };
-
-  const getIconColor = (title: string) => {
-    switch (title) {
-      case "Total Medicines":
-        return "text-blue-600";
-      case "Total Stock":
-        return "text-green-600";
-      case "Low Stock Items":
-        return "text-orange-600";
-      default:
-        return "text-gray-600";
-    }
-  };
 
   return (
     <div className="space-y-6">
       {/* Header Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
         {[
           {
             title: "Total Medicines",
             value: medicines.length.toString(),
             icon: Package,
             description: "Active medicines",
+            color: "text-blue-600",
+            gradient: "from-blue-500 to-blue-700",
+            bgGlow: "bg-blue-500/20",
+            accent: "bg-blue-500"
           },
           {
             title: "Total Stock",
             value: totalStock.toLocaleString(),
             icon: Activity,
             description: "Units in inventory",
+            color: "text-green-600",
+            gradient: "from-green-500 to-green-700",
+            bgGlow: "bg-green-500/20",
+            accent: "bg-green-500"
           },
           {
             title: "Low Stock Items",
             value: lowStockCount.toString(),
             icon: Package,
             description: "Need attention",
+            color: "text-orange-600",
+            gradient: "from-orange-500 to-orange-700",
+            bgGlow: "bg-orange-500/20",
+            accent: "bg-orange-500"
           },
-        ].map((stat) => {
+        ].map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Card
-              key={stat.title}
-              className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden relative"
+            <Card 
+              key={stat.title} 
+              className="group relative overflow-hidden border-0 bg-white backdrop-blur-sm hover:bg-white/80 transition-all duration-500 scale-105 hover:scale-100 shadow-2xl hover:shadow-lg aspect-square h-48 w-full"
+              style={{
+                animationDelay: `${index * 100}ms`,
+                animation: `fadeInUp 0.6s ease-out forwards ${index * 100}ms`
+              }}
             >
-              {/* Background Color */}
-              <div
-                className={`absolute inset-0 ${getGradientClass(
-                  stat.title
-                )} opacity-10 transition-all duration-300`}
-              />
-
-              {/* Icon Background */}
-              <div
-                className={`absolute top-4 right-4 p-3 rounded-full ${getIconBgClass(
-                  stat.title
-                )} transition-all duration-300`}
-              >
-                <Icon className={`h-6 w-6 ${getIconColor(stat.title)}`} />
+              {/* Animated background gradient */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-10 group-hover:opacity-5 transition-opacity duration-500`} />
+              
+              {/* Glow effect */}
+              <div className={`absolute -inset-1 ${stat.bgGlow} rounded-lg blur-lg opacity-30 group-hover:opacity-0 transition-opacity duration-500`} />
+              
+              {/* Top accent bar */}
+              <div className={`absolute top-0 left-0 right-0 h-1 ${stat.accent} opacity-100 group-hover:opacity-60 transition-opacity duration-300`} />
+              
+              {/* Content */}
+              <div className="relative z-10 h-full flex flex-col justify-between p-6">
+                {/* Top: Title and Icon */}
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg text-gray-800 group-hover:text-gray-600 transition-colors duration-300">
+                    {stat.title}
+                  </CardTitle>
+                  <div className="p-2 rounded-lg bg-white shadow-xl group-hover:shadow-lg transition-all duration-300 scale-110 group-hover:scale-100">
+                    <Icon className={`h-4 w-4 ${stat.color}`} />
+                  </div>
+                </div>
+                
+                {/* Center: Amount */}
+                <div className="flex-1 flex items-center justify-center">
+                  <div className={`text-2xl font-bold ${stat.color} scale-105 group-hover:scale-100 transition-transform duration-300 text-center`}>
+                    {stat.value}
+                  </div>
+                </div>
+                
+                {/* Bottom: Description */}
+                <div className="text-left">
+                  <p className="text-xs text-gray-500 group-hover:text-gray-400 transition-colors duration-300">
+                    {stat.description}
+                  </p>
+                </div>
               </div>
 
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-base font-bold text-gray-700">
-                  {stat.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div
-                  className={`text-3xl font-bold ${getIconColor(
-                    stat.title
-                  )} mb-2`}
-                >
-                  {stat.value}
-                </div>
-                <p className="text-xs text-gray-600 font-medium">
-                  {stat.description}
-                </p>
-              </CardContent>
+              {/* Corner decoration */}
+              <div className="absolute bottom-0 right-0 w-20 h-20 opacity-10 group-hover:opacity-5 transition-opacity duration-500">
+                <div className={`w-full h-full rounded-tl-full ${stat.accent}`} />
+              </div>
             </Card>
           );
         })}
