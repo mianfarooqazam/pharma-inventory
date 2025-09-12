@@ -17,7 +17,11 @@ import {
   Clock,
   ArrowUpRight,
   ArrowDownRight,
-  Eye
+  Eye,
+  ShoppingBag,
+  RotateCcw,
+  ScanLine,
+  Plus
 } from 'lucide-react';
 import { useInventory } from '@/contexts/InventoryContext';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -211,6 +215,44 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             </Card>
           );
         })}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="space-y-4">
+        <h3 className="text-base font-semibold text-gray-700">Quick Actions</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Button 
+            onClick={() => onNavigate?.('transactions-sell')}
+            className="h-16 flex flex-col items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+          >
+            <ShoppingBag className="h-5 w-5" />
+            <span className="text-sm font-medium">Sell Stock</span>
+          </Button>
+          
+          <Button 
+            onClick={() => onNavigate?.('transactions-purchase')}
+            className="h-16 flex flex-col items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Plus className="h-5 w-5" />
+            <span className="text-sm font-medium">Purchase Stock</span>
+          </Button>
+          
+          <Button 
+            onClick={() => onNavigate?.('transactions-return')}
+            className="h-16 flex flex-col items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white"
+          >
+            <RotateCcw className="h-5 w-5" />
+            <span className="text-sm font-medium">Process Return</span>
+          </Button>
+          
+          <Button 
+            disabled
+            className="h-16 flex flex-col items-center justify-center gap-2 bg-gray-400 cursor-not-allowed text-white opacity-50"
+          >
+            <ScanLine className="h-5 w-5" />
+            <span className="text-sm font-medium">Scan Barcode</span>
+          </Button>
+        </div>
       </div>
 
       {/* Monthly Sales Chart */}
