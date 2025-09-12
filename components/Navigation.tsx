@@ -177,45 +177,7 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
 
           {/* Right side actions */}
           <div className="flex items-center space-x-3">
-            {/* User Icon */}
-            <div className="flex items-center space-x-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <div className="p-2 rounded-full bg-blue-100 cursor-pointer hover:bg-blue-200 transition-colors">
-                    <User className="h-5 w-5 text-blue-600" />
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent className="w-48" align="end">
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 rounded-full bg-blue-100">
-                        <User className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {user?.name}
-                        </p>
-                        <p className="text-xs text-gray-500">{user?.role}</p>
-                      </div>
-                    </div>
-                    <div className="border-t pt-3">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={logout}
-                        className="w-full justify-start flex items-center space-x-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <LogOut className="h-5 w-5" />
-                        <span>Logout</span>
-                      </Button>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Notifications */}
-            <div className="relative">
+          <div className="relative">
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="sm" className="relative p-2">
@@ -284,6 +246,45 @@ export function Navigation({ activeTab, setActiveTab }: NavigationProps) {
                 </PopoverContent>
               </Popover>
             </div>
+            {/* User Icon */}
+            <div className="flex items-center space-x-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <div className="p-2 rounded-full bg-blue-100 cursor-pointer hover:bg-blue-200 transition-colors">
+                    <User className="h-5 w-5 text-blue-600" />
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-48" align="end">
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-full bg-blue-100">
+                        <User className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {user?.name}
+                        </p>
+                        <p className="text-xs text-gray-500">{user?.role}</p>
+                      </div>
+                    </div>
+                    <div className="border-t pt-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={logout}
+                        className="w-full justify-start flex items-center space-x-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <LogOut className="h-5 w-5" />
+                        <span>Logout</span>
+                      </Button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Notifications */}
+            
 
 
 
